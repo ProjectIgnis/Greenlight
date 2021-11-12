@@ -58,7 +58,7 @@ function s.tgfilter(c,e,tp)
 	return c:IsRace(RACE_ZOMBIE)
 end
 function s.tgtarget(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_REMOVED) s.tgfilter(chkc) end
+	if chkc then return chkc:IsLocation(LOCATION_REMOVED) and s.tgfilter(chkc) end
 	if chk==0 then return Duel.IsExistingTarget(s.tgfilter,tp,LOCATION_REMOVED,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
 	local g = Duel.SelectTarget(tp,s.tgfilter,tp,LOCATION_REMOVED,0,1,1,nil,e,tp)
