@@ -51,6 +51,7 @@ end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsAbleToHand() end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,e:GetHandler(),1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,0,tp,LOCATION_DECK)
 end
 function s.spfilter(c,e,tp)
 	return c:IsSetCard(0x147) and not c:IsCode(id) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
