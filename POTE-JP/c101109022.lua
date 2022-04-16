@@ -1,4 +1,4 @@
---
+--メルフィー・ワラビィ
 --Melffy Wallaby
 --scripted by Naim
 local s,id=GetID()
@@ -32,7 +32,7 @@ function s.initial_effect(c)
 	e4:SetCode(EVENT_PHASE+PHASE_END)
 	e4:SetRange(LOCATION_HAND)
 	e4:SetCountLimit(1,{id,1})
-	e4:SetCondition(s.spcon)
+	e4:SetCondition(function(_,tp,...) return Duel.GetTurnPlayer()==tp end)
 	e4:SetTarget(s.sptg)
 	e4:SetOperation(s.spop)
 	c:RegisterEffect(e4)
@@ -70,9 +70,6 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 			end
 		end
 	end
-end
-function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetTurnPlayer()==tp
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
