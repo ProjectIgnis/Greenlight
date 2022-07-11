@@ -8,7 +8,7 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	--[[e1:SetCondition(s.condition)--]]
+	e1:SetCondition(s.condition)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
@@ -40,8 +40,8 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc and tc:IsRelateToEffect(e) then
 		Duel.Destroy(tc,REASON_EFFECT)
---[[		local dg=Duel.GetMatchingGroup(aux.FilterFaceupFunction(Card.IsCode,100429004),tp,LOCATION_ONFIELD,0,1,nil)
-		if #dg>0 then--]]
+		local dg=Duel.GetMatchingGroup(aux.FilterFaceupFunction(Card.IsCode,100429004),tp,LOCATION_ONFIELD,0,1,nil)
+		if #dg>0 then
 			local e1=Effect.CreateEffect(e:GetHandler())
 			e1:SetType(EFFECT_TYPE_SINGLE)
 			e1:SetCode(EFFECT_CANNOT_ACTIVATE)
@@ -61,11 +61,12 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	end
 
 
---Opponent Cannot Activate
+--Opponent Cannot Activate That Copy
 function s.aclimit(e,re,tp)
 	return re:IsActiveType(TYPE_MONSTER)
 end
---Opponent Cannot Activate
+
+--Opponent Cannot Activate With Same Original Name
 function s.aclimit2(e,re,tp)
 	return re:GetHandler():IsOriginalCode(e:GetLabel()) and re:IsActiveType(TYPE_MONSTER)
 end
