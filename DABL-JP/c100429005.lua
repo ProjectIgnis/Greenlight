@@ -1,4 +1,5 @@
 --Rescue-ACE Fire Attacker
+--Scripted by Zefile
 local s,id=GetID()
 function s.initial_effect(c)
 	--Special Summon itself
