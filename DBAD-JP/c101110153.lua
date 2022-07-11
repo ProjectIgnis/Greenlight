@@ -38,28 +38,25 @@ end
 --Destroy and Apply Limit
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc and tc:IsRelateToEffect(e) then
-		Duel.Destroy(tc,REASON_EFFECT)
-		local dg=Duel.GetMatchingGroup(aux.FilterFaceupFunction(Card.IsCode,100429004),tp,LOCATION_ONFIELD,0,1,nil)
-		if #dg>0 then
-			local e1=Effect.CreateEffect(e:GetHandler())
-			e1:SetType(EFFECT_TYPE_SINGLE)
-			e1:SetCode(EFFECT_CANNOT_ACTIVATE)
-			e1:SetValue(s.aclimit)
-			e1:SetReset(RESET_EVENT+RESET_TODECK+RESET_PHASE+PHASE_END)
-			tc:RegisterEffect(e1)
-			local e2=Effect.CreateEffect(e:GetHandler())
-			e2:SetType(EFFECT_TYPE_FIELD)
-			e2:SetCode(EFFECT_CANNOT_ACTIVATE)
-			e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-			e2:SetTargetRange(0,1)
-			e2:SetValue(s.aclimit2)
-			e2:SetLabel(tc:GetOriginalCode())
-			e2:SetReset(RESET_PHASE+PHASE_END)
-			Duel.RegisterEffect(e2,tp)
-		end
+	local dg=Duel.GetMatchingGroup(aux.FilterFaceupFunction(Card.IsCode,100429004),tp,LOCATION_ONFIELD,0,1,nil)
+	if tc and tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT)~=0 and #dg>0 then
+		local e1=Effect.CreateEffect(e:GetHandler())
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_CANNOT_ACTIVATE)
+		e1:SetValue(s.aclimit)
+		e1:SetReset(RESET_EVENT+RESET_TODECK+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e1)
+		local e2=Effect.CreateEffect(e:GetHandler())
+		e2:SetType(EFFECT_TYPE_FIELD)
+		e2:SetCode(EFFECT_CANNOT_ACTIVATE)
+		e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+		e2:SetTargetRange(0,1)
+		e2:SetValue(s.aclimit2)
+		e2:SetLabel(tc:GetOriginalCode())
+		e2:SetReset(RESET_PHASE+PHASE_END)
+		Duel.RegisterEffect(e2,tp)
 	end
-
+end
 
 --Opponent Cannot Activate That Copy
 function s.aclimit(e,re,tp)
