@@ -27,7 +27,7 @@ end
 s.listed_series={SET_MANADOME}
 s.listed_names={CARD_VISAS_STARFROST,id}
 function s.spfilter(c)
-	return c:IsFaceup() and (c:IsCode(CARD_VISAS_STARFROST) or c:IsAttackAbove(1500) and c:IsDefenseAbove(2100))
+	return c:IsFaceup() and (c:IsCode(CARD_VISAS_STARFROST) or c:IsAttack(1500) and c:IsDefense(2100))
 end
 function s.spcon(e,c)
 	if c==nil then return true end
@@ -43,13 +43,13 @@ end
 function s.sptg2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and Duel.IsExistingMatchingCard(s.spfilter2,tp,LOCATION_DECK,0,1,nil,e,tp) end
-    local e1=Effect.CreateEffect(e:GetHandler())
+        local e1=Effect.CreateEffect(e:GetHandler())
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetTargetRange(LOCATION_MZONE,0)
-  e1:SetCondition(s.atkcon)
-  e1:SetTarget(s.atktg)
-   e1:SetValue(500)
+        e1:SetCondition(s.atkcon)
+        e1:SetTarget(s.atktg)
+        e1:SetValue(500)
 	Duel.RegisterEffect(e1,tp)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
 end
