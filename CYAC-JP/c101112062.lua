@@ -32,13 +32,7 @@ function s.initial_effect(c)
 	e3:SetTarget(s.sptg)
 	e3:SetOperation(s.spop)
 	c:RegisterEffect(e3)
-	--Banish equip monster if it leaves the field
-	local e4=Effect.CreateEffect(c)
-	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e4:SetCode(EVENT_LEAVE_FIELD)
-	e4:SetOperation(s.rmop)
-	c:RegisterEffect(e4)
-end
+	
 s.listed_series={SET_MIKANKO}
 function s.thcon(e,tp,eg,ep,ev,re,r,rp)
 	local bt=Duel.GetBattleMonster(0)
@@ -92,11 +86,4 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 		tc:RegisterEffect(e2)
 	end
 	Duel.SpecialSummonComplete()
-end
-function s.rmop(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local tc=e:GetHandler():GetEquipTarget()
-	if tc then
-		Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
-	end
 end
