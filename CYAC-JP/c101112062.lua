@@ -4,14 +4,14 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	aux.AddEquipProcedure(c)
-	-- Prevent destruction by effects
+	--Prevent destruction by effects
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_EQUIP)
 	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e1:SetValue(1)
 	c:RegisterEffect(e1)
 	-- Return 1 card on the field to the hand
-  	local e2=Effect.CreateEffect(c)
+    local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_TOHAND)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
@@ -23,7 +23,7 @@ function s.initial_effect(c)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
 	-- Special Summon 1 "Mikanko" monster from the GY
-  	local e3=Effect.CreateEffect(c)
+    local e3=Effect.CreateEffect(c)
 	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetRange(LOCATION_GRAVE)
@@ -32,7 +32,7 @@ function s.initial_effect(c)
 	e3:SetTarget(s.sptg)
 	e3:SetOperation(s.spop)
 	c:RegisterEffect(e3)
-	
+end
 s.listed_series={SET_MIKANKO}
 function s.thcon(e,tp,eg,ep,ev,re,r,rp)
 	local bt=Duel.GetBattleMonster(0)
@@ -78,7 +78,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 		c:RegisterEffect(e1)
 		--Banish equip monster if it leaves the field
 		local e2=Effect.CreateEffect(c)
-    		e2:SetType(EFFECT_TYPE_SINGLE)
+        e2:SetType(EFFECT_TYPE_SINGLE)
 		e2:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
 		e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
 		e2:SetReset(RESET_EVENT+RESETS_REDIRECT)
