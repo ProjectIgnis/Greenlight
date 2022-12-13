@@ -42,7 +42,7 @@ end
 s.listed_series={SET_MIKANKO}
 function s.thcon(e,tp,eg,ep,ev,re,r,rp)
 	local bt=Duel.GetBattleMonster(0)
-	return bt and at:IsFaceup() and bt:IsSetCard(SET_MIKANKO) and bt:IsControler(tp)
+	return bt and bt:IsFaceup() and bt:IsSetCard(SET_MIKANKO) and bt:IsControler(tp)
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsOnField() and chkc:IsAbleToHand() end
