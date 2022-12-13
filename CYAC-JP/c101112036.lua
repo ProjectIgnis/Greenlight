@@ -5,7 +5,7 @@ local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--"Visas Starfrost" + 1 monster with 1500 ATK/2100 DEF
-	Fusion.AddProcMix(c,true,true,CARD_VISAS_STARFROST,aux.FilterBoolFunctionEx(s.matfilter))
+	Fusion.AddProcMix(c,true,true,CARD_VISAS_STARFROST,s.matfilter)
 	Fusion.AddContactProc(c,s.contactfil,s.contactop,true)
 	--Destroy 1 other monster
 	local e1=Effect.CreateEffect(c)
@@ -26,25 +26,22 @@ function s.initial_effect(c)
 end
 s.listed_names={CARD_VISAS_STARFROST}
 function s.matfilter(c)
-	return c:IsAttack(1500) and c:IsDefense(2100)
+	return c:IsMonster() and c:IsAttack(1500) and c:IsDefense(2100)
 end
 function s.contactfil(tp)
 	local loc=LOCATION_ONFIELD|LOCATION_GRAVE
-	if Duel.IsPlayerAffectedByEffect(tp,CARD_SPIRIT_ELIMINATION) then loc=LOCATION_GRAVE end
+	if Duel.IsPlayerAffectedByEffect(tp,CARD_SPIRIT_ELIMINATION) then loc=LOCATION_ONFIELD end
 	return Duel.GetMatchingGroup(Card.IsAbleToRemoveAsCost,tp,loc,0,nil)
 end
 function s.contactop(g)
 	Duel.Remove(g,POS_FACEUP,REASON_COST+REASON_MATERIAL)
 end
-function s.desfilter(c)
-	return c:GetTextAttack()>0 or c:GetTextDefense()>0
-end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc~=c end
-	if chk==0 then return Duel.IsExistingTarget(s.desfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,c) end
+	if chk==0 then return Duel.IsExistingTarget(nil,tp,LOCATION_MZONE,LOCATION_MZONE,1,c) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectTarget(tp,s.desfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c)
+	local g=Duel.SelectTarget(tp,nil,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
 end
 function s.desop(e,tp,eg,ep,ev,re,r,rp)

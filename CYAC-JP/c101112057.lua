@@ -6,7 +6,7 @@ function s.initial_effect(c)
 	--Destroy 1 monster and add 1 "Primal Planet Kalarium" or 1 "Manadome" Spell/Trap form Deck to the hand
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_DESTROY)
+	e1:SetCategory(CATEGORY_DESTROY+CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetCode(EVENT_FREE_CHAIN)
@@ -32,7 +32,7 @@ function s.thfilter(c,alt)
 	return c:IsAbleToHand() and (c:IsCode(101112058) or (alt and c:IsSetCard(SET_MANADOME) and c:IsSpellTrap() and not c:IsCode(id)))
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) end
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
 	local alt=Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,101112058),tp,LOCATION_ONFIELD,0,1,nil)
 	if chk==0 then return Duel.IsExistingTarget(nil,tp,LOCATION_MZONE,0,1,nil)
 		and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil,alt)
@@ -40,10 +40,11 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local g=Duel.SelectTarget(tp,nil,tp,LOCATION_MZONE,0,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsFaceup() and tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT)>0 then
+	if tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT)>0 then
 		local alt=Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,101112058),tp,LOCATION_ONFIELD,0,1,nil)
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 		local g=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil,alt)
@@ -54,7 +55,7 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.spfilter(c,e,tp)
-	return (c:IsCode(CARD_VISAS_STARFROST) or (c:GetAttack()==1500 and c:GetDefense()==2100))
+	return (c:IsCode(CARD_VISAS_STARFROST) or (c:IsAttack(1500) and c:IsDefense(2100)))
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)

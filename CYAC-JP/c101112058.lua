@@ -1,7 +1,6 @@
 --伍世壊＝カラリウム
 --Primal Planet Kalarium
 --scripted by Naim
-local SET_MANADOME=0x28e --to be removed
 local s,id=GetID()
 function s.initial_effect(c)
 	--Activate and add 1 "Manadome" monster or "Visas Starfrost" to the hand
@@ -40,8 +39,8 @@ function s.initial_effect(c)
 	--Register the destuction of monsters
 	local e3b=Effect.CreateEffect(c)
 	e3b:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e3b:SetCode(EVENT_DESTROYED)
 	e3b:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e3b:SetCode(EVENT_DESTROYED)
 	e3b:SetRange(LOCATION_FZONE)
 	e3b:SetLabelObject(e3a)
 	e3b:SetOperation(s.regop)
@@ -54,7 +53,7 @@ function s.thfilter(c)
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(s.thfilter,tp,LOCATION_DECK,0,nil)
-	if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+	if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,0)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 		local sg=g:Select(tp,1,1,nil)
 		Duel.SendtoHand(sg,nil,REASON_EFFECT)
@@ -62,15 +61,13 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.atkvalue(e)
-	local tp=e:GetHandlerPlayer()
-	return Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsType,TYPE_TUNER),tp,LOCATION_MZONE|LOCATION_GRAVE,0,nil)*100
+	return Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsType,TYPE_TUNER),e:GetHandlerPlayer(),LOCATION_MZONE|LOCATION_GRAVE,0,nil)*100
 end
 function s.tgfilter(c,tp,e)
-	return c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP)
+	return c:IsPreviousLocation(LOCATION_MZONE) and c:IsPreviousPosition(POS_FACEUP)
 		and c:IsLocation(LOCATION_GRAVE|LOCATION_REMOVED) and c:IsFaceup()
-		and (c:IsType(TYPE_TUNER) or (c:GetPreviousTypeOnField()&TYPE_TUNER)>0)
-		and c:IsPreviousControler(tp) and c:IsReason(REASON_BATTLE+REASON_EFFECT)
-		and c:IsCanBeEffectTarget(e)
+		and c:GetPreviousTypeOnField()&TYPE_TUNER>0 and c:IsPreviousControler(tp)
+		and c:IsReason(REASON_BATTLE|REASON_EFFECT) and c:IsCanBeEffectTarget(e)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)

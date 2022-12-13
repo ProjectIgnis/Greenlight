@@ -18,10 +18,11 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_TODECK)
-	e2:SetType(EFFECT_TYPE_IGNITION)
+	e2:SetType(EFFECT_TYPE_QUICK_O)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetRange(LOCATION_GRAVE)
-	e2:SetHintTiming(TIMING_MAIN_END+TIMING_END_PHASE)
+	e2:SetHintTiming(0,TIMING_MAIN_END+TIMING_END_PHASE)
 	e2:SetCountLimit(1,{id,1})
 	e2:SetCost(aux.bfgcost)
 	e2:SetTarget(s.tdtg)
@@ -31,16 +32,18 @@ end
 s.listed_names={CARD_VISAS_STARFROST}
 s.listed_series={SET_MANADOME}
 function s.negcon(e,tp,eg,ep,ev,re,r,rp)
-	return (re:IsHasType(EFFECT_TYPE_ACTIVATE) or re:IsActiveType(TYPE_MONSTER)) and Duel.IsChainNegatable(ev)
+	return (re:IsHasType(EFFECT_TYPE_ACTIVATE) or re:IsMonsterEffect()) and Duel.IsChainNegatable(ev)
 		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsType,TYPE_SYNCHRO),tp,LOCATION_MZONE,0,1,nil)
 end
 function s.negtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
+	if re:GetHandler():IsDestructable() and re:GetHandler():IsRelateToEffect(re) then
+		Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,eg,1,tp,0)
+	end
 end
 function s.vsfilter(c)
-	return c:IsFaceup() and (c:IsCode(CARD_VISAS_STARFROST)
-		or (c:IsMonster() and c:IsAttack(1500) and c:IsDefense(2100)))
+	return c:IsFaceup() and (c:IsCode(CARD_VISAS_STARFROST) or (c:IsMonster() and c:IsAttack(1500) and c:IsDefense(2100)))
 end
 function s.negop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.NegateActivation(ev) and re:GetHandler():IsRelateToEffect(re)
@@ -63,6 +66,6 @@ end
 function s.tdop(e,tp,eg,ep,ev,re,r,rp)
 	local tg=Duel.GetTargetCards(e)
 	if #tg>0 then
-		Duel.SendtoDeck(tg,nil,0,REASON_EFFECT)
+		Duel.SendtoDeck(tg,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
 	end
 end
