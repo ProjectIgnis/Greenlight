@@ -4,7 +4,7 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	aux.AddEquipProcedure(c)
-	--Prevent destruction by effects
+	-- Prevent destruction by effects
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_EQUIP)
 	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
@@ -24,7 +24,8 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 	-- Special Summon 1 "Mikanko" monster from the GY
     	local e3=Effect.CreateEffect(c)
-	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e3:SetDescription(aux.Stringid(id,1))
+     	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetRange(LOCATION_GRAVE)
 	e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
