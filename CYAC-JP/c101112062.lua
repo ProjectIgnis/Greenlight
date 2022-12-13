@@ -34,9 +34,9 @@ function s.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 s.listed_series={SET_MIKANKO}
-function s.thcon(e,tp,eg,ep,ev,re,r,rp)
-	local bt=Duel.GetBattleMonster(0)
-	return bt and bt:IsFaceup() and bt:IsSetCard(SET_MIKANKO) and bt:IsControler(tp)
+function s.thcon(e)
+	local bc=Duel.GetBattleMonster(e:GetHandlerPlayer())
+	return bc and bc:IsFaceup() and bc:IsSetCard(SET_MIKANKO)
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsOnField() and chkc:IsAbleToHand() end
