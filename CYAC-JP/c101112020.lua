@@ -4,8 +4,8 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	-- Destroy cards on the field
-    local e1=Effect.CreateEffect(c)
-    e1:SetDescription(aux.Stringid(id,0))
+     	local e1=Effect.CreateEffect(c)
+    	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_DESTROY)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP)
@@ -69,7 +69,7 @@ end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) then
-		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
+	Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_CANNOT_ATTACK_ANNOUNCE)
