@@ -2,7 +2,7 @@
 -- Tellarknight Constellar
 local s,id=GetID()
 function s.initial_effect(c)
-     	--Activate and (you can) Special Summon from the hand or GY
+	--Activate and (you can) Special Summon from the hand or GY
 	local e1=Effect.CreateEffect(c)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
@@ -15,21 +15,21 @@ function s.initial_effect(c)
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e2:SetCountLimit(1,id)
 	e2:SetRange(LOCATION_SZONE)
+	e2:SetCountLimit(1,id)
 	e2:SetTarget(s.xyztg)
 	e2:SetOperation(s.xyzop)
 	c:RegisterEffect(e2)
 end
 s.listed_series={SET_TELLARKNIGHT,SET_CONSTELLAR}
 function s.spfilter(c,e,tp)
-	return (c:IsSetCard(SET_TELLARKNIGHT) or c:IsSetCard(SET_CONSTELLAR)) and c:IsLocation(LOCATION_HAND|LOCATION_GRAVE)
+	return c:IsSetCard({SET_TELLARKNIGHT,SET_CONSTELLAR}) and c:IsLocation(LOCATION_HAND|LOCATION_GRAVE)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	if not e:GetHandler():IsRelateToEffect(e) then return end
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
-	local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.spfilter),tp,LOCATION_HAND+LOCATION_GRAVE,0,nil,e,tp)
+	local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.spfilter),tp,LOCATION_HAND|LOCATION_GRAVE,0,nil,e,tp)
 	if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,0)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local sg=g:Select(tp,1,1,nil)
