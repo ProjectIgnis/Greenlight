@@ -3,7 +3,7 @@
 -- Scripted by Satella
 local s,id=GetID()
 function s.initial_effect(c)
-    -- Special Summon itself from the hand
+    	-- Special Summon itself from the hand
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetProperty(EFFECT_FLAG_UNCOPYABLE)
