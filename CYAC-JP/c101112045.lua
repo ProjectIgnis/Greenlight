@@ -6,13 +6,13 @@ function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Xyz Summon procedure
 	Xyz.AddProcedure(c,nil,4,2,nil,nil,99)
-	--Add 1 "tellarknight" and/or 1 "Constellar" card from the Gy to the hand
+	--Add 1 "tellarknight" and/or 1 "Constellar" card from the GY to the hand
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_TOHAND)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
+	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetCountLimit(1,id)
 	e1:SetCondition(function(e) return e:GetHandler():IsSummonType(SUMMON_TYPE_XYZ) end)
 	e1:SetTarget(s.thtg)
@@ -34,7 +34,7 @@ function s.thfilter(c,e)
 	return c:IsSetCard({SET_TELLARKNIGHT,SET_CONSTELLAR}) and c:IsAbleToHand() and c:IsCanBeEffectTarget(e)
 end
 function s.rescon(sg)
-	return sg:FilterCount(Card.IsSetCard,nil,SET_TELLARKNIGHT)==1 or sg:FilterCount(Card.IsSetCard,nil,SET_CONSTELLAR)==1
+	return #sg==1 or (sg:IsExists(Card.IsSetCard,1,nil,SET_TELLARKNIGHT) and sg:IsExists(Card.IsSetCard,1,nil,SET_CONSTELLAR))
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local g=Duel.GetMatchingGroup(s.thfilter,tp,LOCATION_GRAVE,0,nil,e)
@@ -54,72 +54,56 @@ function s.rmvfilter(c,tp)
 		and c:IsHasEffect(id)) then 
 		return false
 	end
-	local eff={c:GetCardEffect(id)}
-	for _,teh in ipairs(eff) do
-		local te=teh:GetLabelObject()
-		local tg=te:GetTarget()
-		if (not con or con(te,tp,Group.CreateGroup(),PLAYER_NONE,0,teh,REASON_EFFECT,PLAYER_NONE,0)) 
-			and (not tg or tg(te,tp,Group.CreateGroup(),PLAYER_NONE,0,teh,REASON_EFFECT,PLAYER_NONE,0)) then return true end
+	local eff=c:GetCardEffect(id)
+	local te=eff:GetLabelObject()
+	local con=te:GetCondition()
+	local tg=te:GetTarget()
+	if (not con or con(te,tp,Group.CreateGroup(),PLAYER_NONE,0,eff,REASON_EFFECT,PLAYER_NONE,0)) 
+		and (not tg or tg(te,tp,Group.CreateGroup(),PLAYER_NONE,0,eff,REASON_EFFECT,PLAYER_NONE,0)) then
+		return true
 	end
 	return false
 end
 function s.applycost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	Debug.Message(Duel.GetMatchingGroupCount(s.rmvfilter,tp,LOCATION_HAND|LOCATION_DECK,0,nil,tp))
-	if chk==0 then return c:CheckRemoveOverlayCard(tp,1,REASON_COST) and
-		Duel.IsExistingMatchingCard(s.rmvfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,nil,tp)
-	end
+	if chk==0 then return c:CheckRemoveOverlayCard(tp,1,REASON_COST)
+		and Duel.IsExistingMatchingCard(s.rmvfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,nil,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectMatchingCard(tp,s.rmvfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,1,nil,tp)
-	Duel.Remove(g,POS_FACEUP,REASON_COST)
-	e:SetLabelObject(g:GetFirst())
+	local sc=Duel.SelectMatchingCard(tp,s.rmvfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,1,nil,tp):GetFirst()
+	Duel.Remove(sc,POS_FACEUP,REASON_COST)
+	sc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD+RESET_CHAIN,0,1)
+	e:SetLabelObject(sc:GetCardEffect(id):GetLabelObject())
 	c:RemoveOverlayCard(tp,1,1,REASON_COST)
 end
-function s.applytg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.applytg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	local te=e:GetLabelObject()
+	local tg=te and te:GetTarget() or nil
+	if chkc then return tg and tg(e,tp,eg,ep,ev,re,r,rp,0,chkc) end
 	if chk==0 then return true end
+	e:SetLabel(te:GetLabel())
+	e:SetLabelObject(te:GetLabelObject())
+	e:SetProperty(te:IsHasProperty(EFFECT_FLAG_CARD_TARGET) and EFFECT_FLAG_CARD_TARGET or 0)
+	if tg then
+		tg(e,tp,eg,ep,ev,re,r,rp,1)
+	end
+	e:SetLabelObject(te)
+	Duel.ClearOperationInfo(0)
 end
 function s.applyop(e,tp,eg,ep,ev,re,r,rp)
-	local tc=e:GetLabelObject()
-	if tc then
-		Debug.Message("Card to apply is: "..tostring(tc:GetCode()))
-		local eff={tc:GetCardEffect(id)}
-		local te=nil
-		local acd={}
-		local ac={}
-		for _,teh in ipairs(eff) do
-			local temp=teh:GetLabelObject()
-			local con=temp:GetCondition()
-			local tg=temp:GetTarget()
-			if (not con or con(temp,tp,Group.CreateGroup(),PLAYER_NONE,0,teh,REASON_EFFECT,PLAYER_NONE,0)) 
-				and (not tg or tg(temp,tp,Group.CreateGroup(),PLAYER_NONE,0,teh,REASON_EFFECT,PLAYER_NONE,0)) then
-				table.insert(ac,teh)
-				table.insert(acd,temp:GetDescription())
-			end
-		end
-		if #ac==1 then te=ac[1] elseif #ac>1 then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EFFECT)
-			op=Duel.SelectOption(tp,table.unpack(acd))
-			op=op+1
-			te=ac[op]
-		end
-		if not te then return end
-		Duel.ClearTargetCard()
-		local teh=te
-		te=teh:GetLabelObject()
-		local tg=te:GetTarget()
-		local op=te:GetOperation()
-		if tg then tg(te,tp,Group.CreateGroup(),PLAYER_NONE,0,teh,REASON_EFFECT,PLAYER_NONE,1) end
-		Duel.BreakEffect()
-		tc:CreateEffectRelation(te)
-		Duel.BreakEffect()
-		local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
-		for etc in g:Iter() do
-			etc:CreateEffectRelation(te)
-		end
-		if op then op(te,tp,Group.CreateGroup(),PLAYER_NONE,0,teh,REASON_EFFECT,PLAYER_NONE,1) end
-		tc:ReleaseEffectRelation(te)
-		for etc in g:Iter() do
-			etc:ReleaseEffectRelation(te)
-		end
+	local te=e:GetLabelObject()
+	if not te then return end
+	local sc=te:GetHandler()
+	if sc:GetFlagEffect(id)==0 then
+		e:SetLabel(0)
+		e:SetLabelObject(nil)
+		return
 	end
+	e:SetLabel(te:GetLabel())
+	e:SetLabelObject(te:GetLabelObject())
+	local op=te:GetOperation()
+	if op then
+		op(e,tp,Group.CreateGroup(),PLAYER_NONE,0,e,REASON_EFFECT,PLAYER_NONE)
+	end
+	e:SetLabel(0)
+	e:SetLabelObject(nil)
 end

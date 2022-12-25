@@ -63,7 +63,7 @@ function s.checkop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-	return rp==1-tp and Duel.IsChainDisablable(ev)
+	return rp==1-tp and Duel.IsChainNegatable(ev)
 end
 function s.spfilter(c,e,tp,zone)
 	return c:IsSetCard(SET_SOLFACHORD) and c:IsOddScale() 
