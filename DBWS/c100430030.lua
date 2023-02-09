@@ -7,7 +7,7 @@ function s.initial_effect(c)
 	-- Destroy 1 Spell/Trap on the field
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_TOHAND)
+	e1:SetCategory(CATEGORY_DESTROY)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
@@ -32,7 +32,7 @@ function s.initial_effect(c)
 	e3:SetCondition(s.spcon)
 	c:RegisterEffect(e3)
 end
-s.listed_series={SET_NOUVELLEZ,0x193}
+s.listed_series={SET_NOUVELLEZ,SET_RECIPE}
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsOnField() and chkc:IsSpellTrap()  end
 	if chk==0 then return Duel.IsExistingTarget(Card.IsSpellTrap,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
@@ -57,12 +57,11 @@ function s.cfilter(c,tp)
 	return c:IsReleasableByEffect() and c:IsAttackPos()
 end
 function s.rescon(sg,e,tp,mg)
-    return aux.ChkfMMZ(1)(sg,e,tp,mg)
-        and sg:IsContains(e:GetHandler())
+    return aux.ChkfMMZ(1)(sg,e,tp,mg) and sg:IsContains(e:GetHandler())
         and sg:IsExists(Card.IsAttackPos,1,e:GetHandler())
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-    local g=Duel.GetMatchingGroup(s.cfilter,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler(),tp)
+    local g=Duel.GetMatchingGroup(s.cfilter,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler())
     g:AddCard(e:GetHandler())
     if chk==0 then return #g>=2 and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,nil,e,tp)
         and aux.SelectUnselectGroup(g,e,tp,2,2,s.rescon,0) end
@@ -71,6 +70,7 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(s.cfilter,tp,LOCATION_MZONE,LOCATION_MZONE,nil,tp)
+	g:AddCard(e:GetHandler())
 	if #g<2 then return end
 	local rg=aux.SelectUnselectGroup(g,e,tp,2,2,s.rescon,1,tp,HINTMSG_RELEASE)
 	if Duel.Release(rg,REASON_EFFECT)==2 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
