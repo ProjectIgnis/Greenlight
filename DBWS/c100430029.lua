@@ -61,24 +61,24 @@ function s.spfilter(c,e,tp)
 	return c:IsSetCard(SET_NOUVELLEZ) and c:IsRitualMonster() and (c:IsLevel(2) or c:IsLevel(3))
 		and c:IsCanBeSpecialSummoned(e,SUMMON_BY_NOUVELLEZ,tp,false,true)
 end
-function s.cfilter(c,tp)
+function s.cfilter(c)
 	return c:IsReleasableByEffect() and c:IsAttackPos()
 end
 function s.rescon(sg,e,tp,mg)
-    return aux.ChkfMMZ(1)(sg,e,tp,mg)
-        and sg:IsContains(e:GetHandler())
-        and sg:IsExists(Card.IsAttackPos,1,e:GetHandler())
+	return aux.ChkfMMZ(1)(sg,e,tp,mg) and sg:IsContains(e:GetHandler())
+		and sg:IsExists(Card.IsAttackPos,1,e:GetHandler())
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-    local g=Duel.GetMatchingGroup(s.cfilter,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler(),tp)
-    g:AddCard(e:GetHandler())
-    if chk==0 then return #g>=2 and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,nil,e,tp)
-        and aux.SelectUnselectGroup(g,e,tp,2,2,s.rescon,0) end
-    Duel.SetOperationInfo(0,CATEGORY_RELEASE,g,2,0,0)
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND|LOCATION_DECK)
+	local g=Duel.GetMatchingGroup(s.cfilter,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler())
+	g:AddCard(e:GetHandler())
+	if chk==0 then return #g>=2 and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,nil,e,tp)
+	and aux.SelectUnselectGroup(g,e,tp,2,2,s.rescon,0) end
+	Duel.SetOperationInfo(0,CATEGORY_RELEASE,g,2,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND|LOCATION_DECK)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetMatchingGroup(s.cfilter,tp,LOCATION_MZONE,LOCATION_MZONE,nil,tp)
+	local g=Duel.GetMatchingGroup(s.cfilter,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler())
+	g:AddCard(e:GetHandler())
 	if #g<2 then return end
 	local rg=aux.SelectUnselectGroup(g,e,tp,2,2,s.rescon,1,tp,HINTMSG_RELEASE)
 	if Duel.Release(rg,REASON_EFFECT)==2 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
