@@ -88,7 +88,7 @@ end
 function s.tdop(e,tp,eg,ep,ev,re,r,rp)
 	local tg=Duel.GetTargetCards(e)
 	if #tg==0 then return end
-	if Duel.SendtoDeck(tc,nil,SEQ_DECKBOTTOM,REASON_EFFECT)>0 then
+	if Duel.SendtoDeck(tg,nil,SEQ_DECKBOTTOM,REASON_EFFECT)>0 then
 		local ct=Duel.GetOperatedGroup():FilterCount(Card.IsLocation,1,nil,LOCATION_DECK)
 		if ct>0 then
 			Duel.SortDeckbottom(tp,tp,ct)
