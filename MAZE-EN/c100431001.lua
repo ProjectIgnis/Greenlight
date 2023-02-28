@@ -26,7 +26,7 @@ function s.initial_effect(c)
 	e3:SetOperation(s.placeop)
 	c:RegisterEffect(e3)
 end
-s.listed_names={CARD_SANGA,CARD_KAZEJIN,CARD_SUIJIN}
+s.listed_names={CARDS_SANGA_KAJEZIN_SUIJIN}
 s.listed_series={SET_LABYRINTH_WALL}
 function s.ntcon(e,c,minc)
 	if c==nil then return true end
@@ -41,7 +41,7 @@ function s.disatt(e,tp,eg,ep,ev,re,r,rp)
 	c:RegisterEffect(e1)
 end
 function s.cfilter(c)
-	return c:IsCode(CARD_SANGA,CARD_KAZEJIN,CARD_SUIJIN) and not c:IsForbidden() and (c:IsFaceup() or not c:IsLocation(LOCATION_REMOVED)
+	return c:IsCode(CARDS_SANGA_KAJEZIN_SUIJIN) and not c:IsForbidden() and (c:IsFaceup() or not c:IsLocation(LOCATION_REMOVED))
 end
 function s.placetg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_REMOVED|LOCATION_HAND|LOCATION_DECK,0,1,nil)
