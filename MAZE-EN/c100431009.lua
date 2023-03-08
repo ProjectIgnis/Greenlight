@@ -3,13 +3,13 @@
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
-	--Halve the opponent's Lp and increase the ATK of a "Gate Guardian" monster
+	--Halve the opponent's LP and increase the ATK of a "Gate Guardian" monster
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_ATKCHANGE)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
-	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetCondition(function(e,tp) return Duel.GetLP(tp)<Duel.GetLP(1-tp) end)
 	e1:SetCountLimit(1,id)
 	e1:SetTarget(s.atktg)
@@ -27,22 +27,23 @@ function s.initial_effect(c)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
 end
-s.listed_names={CARD_KAZEJIN,CARD_SANGA,CARD_SUIJIN}
+s.listed_names=CARDS_SANGA_KAZEJIN_SUIJIN
 function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and chkc:IsFaceup() and chkc:IsOriginalSetCard(SET_GATE_GUARDIAN) end
 	if chk==0 then return Duel.IsExistingTarget(aux.FaceupFilter(Card.IsOriginalSetCard,SET_GATE_GUARDIAN),tp,LOCATION_MZONE,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATKDEF)
-	Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsOriginalSetCard,SET_GATE_GUARDIAN),tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+	Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsOriginalSetCard,SET_GATE_GUARDIAN),tp,LOCATION_MZONE,0,1,1,nil)
 end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.SetLP(1-tp,Duel.GetLP(1-tp)/2)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
+		Duel.BreakEffect()
 		tc:UpdateAttack(Duel.GetLP(1-tp),RESET_EVENT|RESETS_STANDARD,e:GetHandler())
 	end
 end
 function s.thfilter(c)
-	return c:IsCode(CARDS_GATE_GUARDIAN) and c:IsAbleToHand() and (c:IsLocation(LOCATION_DECK) or c:IsFaceup())
+	return c:IsCode(CARDS_SANGA_KAZEJIN_SUIJIN) and c:IsAbleToHand() and (c:IsLocation(LOCATION_DECK) or c:IsFaceup())
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK|LOCATION_REMOVED,0,1,nil) end

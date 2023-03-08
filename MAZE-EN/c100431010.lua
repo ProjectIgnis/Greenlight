@@ -6,7 +6,7 @@ function s.initial_effect(c)
 	--Special Summon itself
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DESTROY)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
@@ -17,7 +17,7 @@ function s.initial_effect(c)
 	--Add 1 "Sanga of the Thunder", "Kazejin", or "Suijin" to the hand
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
-	e2:SetCategory(CATEGORY_TOHAND)
+	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e2:SetType(EFFECT_TYPE_QUICK_O)
 	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetRange(LOCATION_GRAVE)
@@ -28,25 +28,26 @@ function s.initial_effect(c)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
 end
-s.listed_names={CARD_KAZEJIN,CARD_SANGA,CARD_SUIJIN}
+s.listed_names=CARDS_SANGA_KAZEJIN_SUIJIN
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local zone=e:GetHandler():GetColumnZone(LOCATION_MZONE)&ZONES_MMZ
+	local c=e:GetHandler()
+	local zone=c:GetColumnZone(LOCATION_MZONE)&ZONES_MMZ
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and e:IsHasType(EFFECT_TYPE_ACTIVATE)
 		and zone>0 and not Duel.IsExistingMatchingCard(Card.IsZone,tp,LOCATION_MZONE,0,1,nil,zone,tp)
 		and Duel.IsPlayerCanSpecialSummonMonster(tp,id,0,TYPE_MONSTER|TYPE_NORMAL,2100,100,5,RACE_INSECT,ATTRIBUTE_EARTH) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,e:GetHandler(),1,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,1-tp,LOCATION_MZONE)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
 	local c=e:GetHandler()
-	if not (c:IsRelateToEffect(e) and Duel.IsPlayerCanSpecialSummonMonster(tp,id,0,TYPE_MONSTER|TYPE_NORMAL,2100,100,5,RACE_INSECT,ATTRIBUTE_EARTH)) then return end
+	local zone=c:GetColumnZone(LOCATION_MZONE)&ZONES_MMZ
+	if not (c:IsRelateToEffect(e) and zone>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id,0,TYPE_MONSTER|TYPE_NORMAL,2100,100,5,RACE_INSECT,ATTRIBUTE_EARTH)) then return end
 	c:AddMonsterAttribute(TYPE_NORMAL+TYPE_TRAP)
-	local zone=e:GetHandler():GetColumnZone(LOCATION_MZONE)&ZONES_MMZ
 	Duel.SpecialSummonStep(c,0,tp,tp,true,false,POS_FACEUP,zone)
 	c:AddMonsterAttributeComplete()
 	Duel.SpecialSummonComplete()
-	local g=c:GetColumnGroup(0,0)
-	g=g:Filter(Card.IsControler,nil,1-tp)
+	local g=c:GetColumnGroup():Match(Card.IsControler,nil,1-tp)
 	if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 		local dg=g:Select(tp,1,1,nil)
@@ -57,7 +58,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.thfilter(c)
-	return c:IsCode(CARDS_GATE_GUARDIAN) and c:IsAbleToHand() and (c:IsLocation(LOCATION_DECK) or c:IsFaceup())
+	return c:IsCode(CARDS_SANGA_KAZEJIN_SUIJIN) and c:IsAbleToHand() and (c:IsLocation(LOCATION_DECK) or c:IsFaceup())
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK|LOCATION_REMOVED,0,1,nil) end
