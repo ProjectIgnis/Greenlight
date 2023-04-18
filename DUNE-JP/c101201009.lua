@@ -1,4 +1,4 @@
---Japanese name
+--オルターガイスト・マルウィスプ
 --Altergeist Malwisp
 --scripted by Naim
 local s,id=GetID()

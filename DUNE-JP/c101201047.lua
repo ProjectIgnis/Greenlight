@@ -1,4 +1,4 @@
---Japanese name
+--オルターガイスト・アドミニア
 --Altergeist Adminia
 --scripted by Naim
 local s,id=GetID()

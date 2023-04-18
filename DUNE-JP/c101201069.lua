@@ -1,4 +1,4 @@
---Japanese name
+--オルターガイスト・リバイタリゼーション
 --Altergeist Revitalization
 --scripted by Naim
 local s,id=GetID()

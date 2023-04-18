@@ -1,4 +1,4 @@
---Japanese name
+--オルターガイスト・ペリネトレータ
 --Altergeist Pelinetrator
 --scripted by Naim
 local s,id=GetID()
