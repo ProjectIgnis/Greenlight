@@ -3,7 +3,7 @@
 --Scripted by Marbele
 local s,id=GetID()
 function s.initial_effect(c)
-	--Change ATK to 0
+	--Neither monster can be destroyed by battle 
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_QUICK_O)
@@ -15,7 +15,7 @@ function s.initial_effect(c)
 	e1:SetTarget(s.battg)
 	e1:SetOperation(s.battop)
 	c:RegisterEffect(e1)
-		--Add 1 monster that Mention "Chimera Fusion"
+	--Add 1 monster that Mention "Chimera Fusion"
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
