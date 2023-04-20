@@ -36,9 +36,8 @@ function s.initial_effect(c)
 end
 
 function s.cfilter(c)
-	return c:IsPreviousLocation(LOCATION_MZONE) and
-	c:IsPreviousPosition(POS_FACEUP) and c:IsPreviousSetCard(SET_GOLD_PRIDE) and
-	(c:IsReason(REASON_BATTLE) or c:IsReason(REASON_EFFECT))
+	return c:IsPreviousLocation(LOCATION_MZONE) and c:IsPreviousPosition(POS_FACEUP) and c:IsPreviousSetCard(SET_GOLD_PRIDE)
+		and c:IsReason(REASON_BATTLE|REASON_EFFECT)
 end
 
 function s.checkop(e,tp,eg,ep,ev,re,r,rp)
