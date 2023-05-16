@@ -42,7 +42,7 @@ function s.tgcon(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetMatchingGroupCount(Card.IsSpell,tp,LOCATION_GRAVE,0,nil)<=3
 end
 function s.tgfilter(c)
-	return c:IsSpell() and c:IsSetCard(SET_SKY_STRIKER) and c:IsAbleToGrave()
+	return c:IsSetCard(SET_SKY_STRIKER) and c:IsAbleToGrave()
 end
 function s.tgtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.tgfilter,tp,LOCATION_DECK,0,1,nil) end
