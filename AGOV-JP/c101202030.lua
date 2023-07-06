@@ -3,7 +3,7 @@
 --Scripted by Hatter
 local s,id=GetID()
 function s.initial_effect(c)
-	Pendulum.AddProcedure(c)
+	Pendulum.AddProcedure(c,false)
 	c:EnableReviveLimit()
 	--4 Dragon monsters (1 Fusion, 1 Synchro, 1 Xyz, and 1 Pendulum)
 	Fusion.AddProcMix(c,true,true,s.matfilter(TYPE_FUSION),s.matfilter(TYPE_SYNCHRO),s.matfilter(TYPE_XYZ),s.matfilter(TYPE_PENDULUM))
@@ -17,7 +17,7 @@ function s.initial_effect(c)
 	--Alternate Special Summon procedure
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetProperty(EFFECT_FLAG_UNCOPYABLE)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
 	e1:SetCode(EFFECT_SPSUMMON_PROC)
 	e1:SetRange(LOCATION_EXTRA)
 	e1:SetCondition(s.hspcon)
@@ -59,7 +59,7 @@ end
 s.listed_names={CARD_ZARC}
 function s.matfilter(typ)
 	return function(c,fc,sumtype,tp)
-		return c:IsRace(RACE_DRAGON,fc,sumtype,tp) and c:IsType(typ,sc,st,tp)
+		return c:IsRace(RACE_DRAGON,fc,sumtype,tp) and c:IsType(typ,fc,sumtype,tp)
 	end
 end
 function s.splimit(e,se,sp,st)
@@ -92,7 +92,8 @@ function s.spcon(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_PZONE)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
@@ -108,7 +109,8 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.BreakEffect()
 	if Duel.SendtoDeck(sc,nil,1,REASON_EFFECT)>0 and sc:IsLocation(LOCATION_EXTRA)
 		and sc:IsCanBeSpecialSummoned(e,0,tp,true,false)
-		and Duel.GetLocationCountFromEx(tp,tp,nil,sc)>0 then
+		and Duel.GetLocationCountFromEx(tp,tp,nil,sc)>0
+		and Duel.SelectYesNo(tp,aux.Stringid(id,4)) then
 		Duel.BreakEffect()
 		Duel.SpecialSummon(sc,0,tp,tp,true,false,POS_FACEUP)
 	end

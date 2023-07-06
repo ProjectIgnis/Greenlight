@@ -3,23 +3,23 @@
 --Scripted by Eerie Code
 local s,id=GetID()
 function s.initial_effect(c)
-	--activate
+	--Activate
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_TOHAND|CATEGORY_SEARCH|CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
 	e1:SetHintTiming(0,TIMING_MAIN_END)
-	e1:SetCondition(function(e) return Duel.IsMainPhase() end)
+	e1:SetCondition(function() return Duel.IsMainPhase() end)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
 end
-s.listed_names={CARD_ZARC }
-s.listed_series={SET_SUPREME_KING_DRAGON,SET_SUPREME_KING_GATE }
+s.listed_names={CARD_ZARC}
+s.listed_series={SET_SUPREME_KING_DRAGON,SET_SUPREME_KING_GATE}
 function s.filter(c,e,tp,zarc_chk)
-	return c:IsType(TYPE_PENDULUM) and c:IsMonster()
-		and (c:IsSetCard(SET_SUPREME_KING_DRAGON) or c:IsSetCard(SET_SUPREME_KING_GATE))
+	return c:IsType(TYPE_PENDULUM) and c:IsMonster() and c:IsSetCard({SET_SUPREME_KING_DRAGON,SET_SUPREME_KING_GATE})
 		and (c:IsAbleToHand() or (zarc_chk and c:IsCanBeSpecialSummoned(e,0,tp,false,false)))
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)

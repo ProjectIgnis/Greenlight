@@ -41,18 +41,18 @@ artworks.
 
 Release date | Set | Prefix | Prerelease passcode
 --- | --- | --- | ---
-14-Jan-2023 | [Cyberstorm Access][CYAC]                                | CYAC-JP    | 101112XXX
-22-Apr-2023 | [Duelist Nexus][DUNE]                                    | DUNE-JP    | 101201XXX
-10-Jun-2023 | [Animation Chronicle 2023][ACO03]                        | ACO03-JP   | 100299XXX
-22-Jul-2023 | [Structure Deck: Pulse of the King][SD46-JP]             | SD46-JP    | 100346XXX
+27-May-2023 | [Duelist Pack: Duelists of Explosion][DP28]              | DP28-JP    | 100432XXX
+10-Jun-2023 | [Animation Chronicle 2023][AC03]                         | AC03-JP    | 100299XXX
+24-Jun-2023 | [Structure Deck: Pulse of the King][SD46]                | SD46-JP    | 100346XXX
 22-Jul-2023 | [Age of Overlord][AGOV]                                  | AGOV-JP    | 101202XXX
-13-May-2023 | [Oblivion of the Flash][RD/KP13-JP]                      | RD/KP13-JP | 160013XXX
-??-???-???? | [Saikyō Jump Promos][RD/KP13-JP]                         | SJMP-JP    | 160402XXX
+28-Jul-2023 | [Duelist Nexus][DUNE]                                    | DUNE-EN    | 101201XXX
+24-Jun-2023 | [Triple Build Pack: Godbreath Wing][RD/TB01]             | RD/TB01-JP | 160208XXX
+??-???-???? | [Saikyō Jump Promos][RD/SJMP]                            | RD/SJMP-JP | 160402XXX
 
+[DP28]: https://yugipedia.com/wiki/Duelist_Pack:_Duelists_of_Explosion
+[AC03]: https://yugipedia.com/wiki/Animation_Chronicle_2023
+[SD46]: https://yugipedia.com/wiki/Structure_Deck:_Pulse_of_the_King
 [AGOV]: https://yugipedia.com/wiki/Age_of_Overlord
 [DUNE]: https://yugipedia.com/wiki/Duelist_Nexus
-[ACO03]: https://yugipedia.com/wiki/Animation_Chronicle_2023
-[SD46-JP]: https://yugipedia.com/wiki/Structure_Deck:_Pulse_of_the_King
-[CYAC]: https://yugipedia.com/wiki/Cyberstorm_Access
-[RD/KP13-JP]: https://yugipedia.com/wiki/Oblivion_of_the_Flash
-[SJMP-JP]: https://yugipedia.com/wiki/Saikyō_Jump_promotional_cards
+[RD/TB01]: https://yugipedia.com/wiki/Triple_Build_Pack:_Godbreath_Wing
+[RD/SJMP]: https://yugipedia.com/wiki/Saikyō_Jump_promotional_cards
