@@ -26,7 +26,7 @@ function s.initial_effect(c)
 	e2:SetOperation(s.desop)
 	c:RegisterEffect(e2)
 end
-s.listed_series={SET_MOMENTO}
+s.listed_series={SET_MEMENTO}
 function s.spcon(e,c)
 	if c==nil then return true end
 	local g=Duel.GetMatchingGroup(aux.AND(Card.IsMonster,Card.IsSetCard),e:GetHandlerPlayer(),LOCATION_GRAVE,0,nil,SET_MEMENTO)
