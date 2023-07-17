@@ -1,6 +1,6 @@
 --ＦＡ－ダーク・ナイト・ランサー
 --Full Armored DARK Lancer
---Sripted by Larry
+--Sripted by Larry126
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()

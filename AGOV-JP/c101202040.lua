@@ -1,6 +1,6 @@
 --エクシーズ・アーマー・フォートレス
 --Xyz Armor Fortress
---Sripted by Larry
+--Sripted by Larry126
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()

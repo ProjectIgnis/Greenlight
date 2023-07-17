@@ -19,8 +19,9 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_TODECK+CATEGORY_TOHAND)
 	e2:SetType(EFFECT_TYPE_IGNITION)
-	e2:SetRange(LOCATION_GRAVE)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetRange(LOCATION_GRAVE)
+	e2:SetCountLimit(1,id)
 	e2:SetCost(aux.bfgcost)
 	e2:SetTarget(s.tdtg)
 	e2:SetOperation(s.tdop)
@@ -29,14 +30,14 @@ end
 s.listed_series={SET_TG}
 function s.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil) end
-	Duel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST+REASON_DISCARD)
+	Duel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST|REASON_DISCARD)
 end
 function s.thfilter(c)
 	return c:IsSetCard(SET_TG) and c:IsMonster() and c:IsAbleToHand()
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetMatchingGroup(s.thfilter,tp,LOCATION_DECK,0,nil)
-	if chk==0 then return #g>1 and aux.SelectUnselectGroup(g,e,tp,2,2,aux.dncheck,0) end
+	if chk==0 then return #g>=2 and aux.SelectUnselectGroup(g,e,tp,2,2,aux.dncheck,0) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,2,tp,LOCATION_DECK)
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
@@ -48,11 +49,11 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 		Duel.ConfirmCards(1-tp,thg)
 	end
 end
-function s.tdfilter(c,tohand)
-	return c:IsSetCard(SET_TG) and c:IsMonster() and (c:IsAbleToDeck() or (tohand and c:IsAbleToHand()))
-end
 function s.tohandfilter(c)
 	return c:IsFaceup() and c:IsSetCard(SET_TG) and c:IsRace(RACE_MACHINE)
+end
+function s.tdfilter(c,tohand)
+	return c:IsSetCard(SET_TG) and c:IsMonster() and (c:IsAbleToDeck() or (tohand and c:IsAbleToHand()))
 end
 function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local tohand=Duel.IsExistingMatchingCard(s.tohandfilter,tp,LOCATION_MZONE,0,1,nil)
