@@ -48,7 +48,7 @@ function s.settarget(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	local b1=Duel.GetMZoneCount(tp,c)>0 and Duel.IsExistingMatchingCard(s.ssfilter,tp,LOCATION_HAND,0,1,nil,e,tp)
 	local b2=Duel.IsExistingMatchingCard(s.setfilter,tp,LOCATION_HAND,0,1,nil)
-    if chk==0 then return b1 or b2 end
+    	if chk==0 then return b1 or b2 end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
 end
 function s.setop(e,tp,eg,ep,ev,re,r,rp)
@@ -69,16 +69,16 @@ function s.setop(e,tp,eg,ep,ev,re,r,rp)
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SET)
 			local g=Duel.SelectMatchingCard(tp,s.setfilter,tp,LOCATION_HAND,0,1,1,nil,e,tp)
 			if #g>0 then
-                local c=e:GetHandler()
-                local sc=Duel.SelectMatchingCard(tp,s.setfilter,tp,LOCATION_HAND,0,1,1,nil,e,tp):GetFirst()
+                		local c=e:GetHandler()
+                		local sc=Duel.SelectMatchingCard(tp,s.setfilter,tp,LOCATION_HAND,0,1,1,nil,e,tp):GetFirst()
 				if sc and Duel.SSet(tp,g,tp,false)>0 then
-                	--can be activate this turn
-                	local g1=Effect.CreateEffect(c)
-                	g1:SetType(EFFECT_TYPE_SINGLE)
-                	g1:SetCode(EFFECT_TRAP_ACT_IN_SET_TURN)
-                	g1:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
-                	g1:SetReset(RESET_EVENT|RESETS_STANDARD)
-                	sc:RegisterEffect(g1)
+                			--can be activate this turn
+                			local g1=Effect.CreateEffect(c)
+                			g1:SetType(EFFECT_TYPE_SINGLE)
+                			g1:SetCode(EFFECT_TRAP_ACT_IN_SET_TURN)
+                			g1:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
+                			g1:SetReset(RESET_EVENT|RESETS_STANDARD)
+                			sc:RegisterEffect(g1)
 				end
 			end
 		end
@@ -86,7 +86,7 @@ function s.setop(e,tp,eg,ep,ev,re,r,rp)
 end
 			
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-    local ch=ev-1
+	local ch=ev-1
 	if ch==0 or not (ep==1-tp and Duel.IsChainDisablable(ev)) or re:GetHandler():IsDisabled() then return false end
 	local ch_player,ch_eff=Duel.GetChainInfo(ch,CHAININFO_TRIGGERING_PLAYER,CHAININFO_TRIGGERING_EFFECT)
 	local ch_c=ch_eff:GetHandler()
