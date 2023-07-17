@@ -31,16 +31,13 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_LABRYNTH}
 function s.setcon()
-	return Duel.GetCurrentPhase()==PHASE_MAIN1 or Duel.GetCurrentPhase()==PHASE_MAIN2
+	return Duel.IsMainPhase()
 end
 function s.ssfilter(c,e,tp)
 	return c:IsSetCard(SET_LABRYNTH) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.setfilter(c)
-	return c:GetType()==(TYPE_TRAP) and c:IsSSetable()
-end
-function s.setcostfilter(c,e,tp)
-	return c:IsDiscardable() and (Duel.IsExistingMatchingCard(s.setfilter,tp,LOCATION_HAND,0,1,c) or Duel.IsExistingMatchingCard(s.ssfilter,tp,LOCATION_HAND,0,1,nil,e,tp))
+	return c:IsNormalTrap() and c:IsSSetable()
 end
 function s.setcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
@@ -48,23 +45,20 @@ function s.setcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SendtoGrave(c,REASON_COST)
 end
 function s.settarget(e,tp,eg,ep,ev,re,r,rp,chk)
-  local b1=Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.ssfilter,tp,LOCATION_HAND,0,1,e:GetHandler(),e,tp)
+	local c=e:GetHandler()
+	local b1=Duel.GetMZoneCount(tp,c)>0 and Duel.IsExistingMatchingCard(s.ssfilter,tp,LOCATION_HAND,0,1,nil,e,tp)
 	local b2=Duel.IsExistingMatchingCard(s.setfilter,tp,LOCATION_HAND,0,1,nil)
-    if chk == 0 and b1 then 
-        if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-            and Duel.IsExistingMatchingCard(s.ssfilter,tp,LOCATION_HAND,0,1,e:GetHandler(),e,tp) end
-        Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND) 
-    elseif b2 then
-        if chk==0 then return Duel.IsExistingMatchingCard(s.setfilter,tp,LOCATION_HAND,0,1,nil) end
-    end 
+    if chk==0 then return b1 or b2 end
+	Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
 end
 function s.setop(e,tp,eg,ep,ev,re,r,rp)
-	local b1=Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.ssfilter,tp,LOCATION_HAND,0,1,nil,e,tp)
+	local c=e:GetHandler()
+	local b1=Duel.GetMZoneCount(tp,c)>0 and Duel.IsExistingMatchingCard(s.ssfilter,tp,LOCATION_HAND,0,1,nil,e,tp)
 	local b2=Duel.IsExistingMatchingCard(s.setfilter,tp,LOCATION_HAND,0,1,nil)
 	if (b1 or b2) then
 		local op=Duel.SelectEffect(tp,
-			{b1,aux.Stringid(id,3)},
-			{b2,aux.Stringid(id,4)})
+			{b1,aux.Stringid(id,2)},
+			{b2,aux.Stringid(id,3)})
 		if op==1 then
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 			local g=Duel.SelectMatchingCard(tp,s.ssfilter,tp,LOCATION_HAND,0,1,1,nil,e,tp)
@@ -78,13 +72,13 @@ function s.setop(e,tp,eg,ep,ev,re,r,rp)
                 local c=e:GetHandler()
                 local sc=Duel.SelectMatchingCard(tp,s.setfilter,tp,LOCATION_HAND,0,1,1,nil,e,tp):GetFirst()
 				if sc and Duel.SSet(tp,g,tp,false)>0 then
-                --can be activate this turn
-                local g1=Effect.CreateEffect(c)
-                g1:SetType(EFFECT_TYPE_SINGLE)
-                g1:SetCode(EFFECT_TRAP_ACT_IN_SET_TURN)
-                g1:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
-                g1:SetReset(RESET_EVENT|RESETS_STANDARD)
-                sc:RegisterEffect(g1)
+                	--can be activate this turn
+                	local g1=Effect.CreateEffect(c)
+                	g1:SetType(EFFECT_TYPE_SINGLE)
+                	g1:SetCode(EFFECT_TRAP_ACT_IN_SET_TURN)
+                	g1:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
+                	g1:SetReset(RESET_EVENT|RESETS_STANDARD)
+                	sc:RegisterEffect(g1)
 				end
 			end
 		end
