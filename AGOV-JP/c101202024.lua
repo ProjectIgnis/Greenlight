@@ -3,8 +3,8 @@
 --Ashaki
 local s,id=GetID()
 function s.initial_effect(c)
-    --Special Summon
-    local e1=Effect.CreateEffect(c)
+    	--Special Summon
+    	local e1=Effect.CreateEffect(c)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DESTROY)
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
@@ -13,8 +13,8 @@ function s.initial_effect(c)
 	e1:SetTarget(s.sptg)
 	e1:SetOperation(s.spop)
 	c:RegisterEffect(e1)
-    --Register a flag on monster that activate effects on the field
-    aux.GlobalCheck(s,function()
+    	--Register a flag on monster that activate effects on the field
+    	aux.GlobalCheck(s,function()
 		local ge1=Effect.CreateEffect(c)
 		ge1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 		ge1:SetCode(EVENT_CHAIN_SOLVED)
