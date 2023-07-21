@@ -50,7 +50,7 @@ function s.discon(e,tp,eg,ep,ev,re,r,rp)
 	return rp==1-rp and Duel.GetCurrentChain()==0
 end
 function s.discost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return `Duel.CheckReleaseGroupCost(tp,Card.IsType,1,false,nil,nil,TYPE_NORMAL) end
+	if chk==0 then return Duel.CheckReleaseGroupCost(tp,Card.IsType,1,false,nil,nil,TYPE_NORMAL) end
 	local g=Duel.SelectReleaseGroupCost(tp,Card.IsType,1,1,false,nil,nil,TYPE_NORMAL)
 	Duel.Release(g,REASON_COST)
 end
