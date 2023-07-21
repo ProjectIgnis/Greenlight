@@ -32,6 +32,7 @@ function s.initial_effect(c)
 	e3:SetOperation(s.disop)
 	c:RegisterEffect(e3)
 end
+s.listed_names={id+1} --Oyatsu Token
 function s.tgtg(e,tp,eg,ep,ev,re,r,rp,chk)
         if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and Duel.IsPlayerCanSpecialSummonMonster(tp,id+1,TYPES_TOKEN,800,800,1,RACE_PLANT,ATTRIBUTE_LIGHT,POS_FACEUP) end
@@ -46,14 +47,11 @@ function s.tgop(e,tp,eg,ep,ev,re,r,rp)
 end
 
 function s.discon(e,tp,eg,ep,ev,re,r,rp)
-	return tp~=ep and Duel.GetCurrentChain()==0
-end
-function s.cfilter(c)
-	return c:IsType(TYPE_NORMAL)
+	return rp==1-rp and Duel.GetCurrentChain()==0
 end
 function s.discost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.CheckReleaseGroupCost(tp,c:IsType(TYPE_NORMAL),1,false,nil,nil) end
-	local g=Duel.SelectReleaseGroupCost(tp,s.cfilter,1,1,false,nil,nil)
+	if chk==0 then return `Duel.CheckReleaseGroupCost(tp,Card.IsType,1,false,nil,nil,TYPE_NORMAL) end
+	local g=Duel.SelectReleaseGroupCost(tp,Card.IsType,1,1,false,nil,nil,TYPE_NORMAL)
 	Duel.Release(g,REASON_COST)
 end
 function s.distg(e,tp,eg,ep,ev,re,r,rp,chk)
