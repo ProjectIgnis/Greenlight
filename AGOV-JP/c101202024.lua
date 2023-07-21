@@ -3,9 +3,9 @@
 --Ashaki
 local s,id=GetID()
 function s.initial_effect(c)
-    	--Special Summon
+    	--Destroy a monster and Special Summon tself from the hand
     	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DESTROY)
+	e1:SetCategory(CATEGORY_DESTROY+CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetRange(LOCATION_HAND)
@@ -30,18 +30,18 @@ function s.checkop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.tfilter(c)
-	return c:IsFaceup() and c:GetFlagEffect(id)>0
+	return c:IsFaceup() and c:HasFlagEffect(id)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsLocation(LOCATION_MMZONE) and chkc:IsFaceup() end
 	local c=e:GetHandler()
 	local tg=Duel.GetMatchingGroup(s.tfilter,tp,LOCATION_MMZONE,LOCATION_MMZONE,nil)
-	if chkc and chkc:IsFaceup() then return chkc:IsLocation(LOCATION_MMZONE) end
 	if chk==0 then return Duel.IsExistingTarget(s.tfilter,tp,LOCATION_MMZONE,LOCATION_MMZONE,1,nil)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and (Duel.GetMZoneCount(tp,tg)>0 or Duel.GetMZoneCount(1-tp,tg)>0) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local g=Duel.SelectTarget(tp,s.tfilter,tp,LOCATION_MMZONE,LOCATION_MMZONE,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
