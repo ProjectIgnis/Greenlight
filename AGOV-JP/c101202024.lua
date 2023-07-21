@@ -25,8 +25,8 @@ end
 function s.checkop(e,tp,eg,ep,ev,re,r,rp)
 	local loc=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION,CHAININFO_TRIGGERING_CONTROLER)
 	local tc=re:GetHandler()
-	if re:IsActiveType(TYPE_MONSTER) and tc:IsRelateToEffect(re) and loc==LOCATION_MZONE then
-		tc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,0,1)
+	if re:IsMonsterEffect() and tc:IsRelateToEffect(re) and loc==LOCATION_MZONE then
+		tc:RegisterFlagEffect(id,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,0,1)
 	end
 end
 function s.tfilter(c)
@@ -35,11 +35,11 @@ end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
 	local tg=Duel.GetMatchingGroup(s.tfilter,tp,LOCATION_MMZONE,LOCATION_MMZONE,nil)
-	if chkc then return chkc:IsLocation(LOCATION_MMZONE) end
-	if chk==0 then return Duel.IsExistingTarget(s.tfilter,tp,LOCATION_MMZONE,LOCATION_MMZONE,1,nil,c,tp)
+	if chkc and chkc:IsFaceup() then return chkc:IsLocation(LOCATION_MMZONE) end
+	if chk==0 then return Duel.IsExistingTarget(s.tfilter,tp,LOCATION_MMZONE,LOCATION_MMZONE,1,nil)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and (Duel.GetMZoneCount(tp,tg)>0 or Duel.GetMZoneCount(1-tp,tg)>0) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectTarget(tp,s.tfilter,tp,LOCATION_MMZONE,LOCATION_MMZONE,1,1,nil,c,tp)
+	local g=Duel.SelectTarget(tp,s.tfilter,tp,LOCATION_MMZONE,LOCATION_MMZONE,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
 end
