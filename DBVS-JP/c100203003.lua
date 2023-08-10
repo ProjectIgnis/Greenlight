@@ -3,9 +3,9 @@
 --Ashaki
 local s,id=GetID()
 function s.initial_effect(c)
-    --Special Summon 1 "Yubel" monster from your Deck
+    	--Special Summon 1 "Yubel" monster from your Deck
 	local e1=Effect.CreateEffect(c)
-    e1:SetDescription(aux.Stringid(id,0))
+    	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_MZONE)
@@ -14,8 +14,8 @@ function s.initial_effect(c)
 	e1:SetTarget(s.sptg)
 	e1:SetOperation(s.spop)
 	c:RegisterEffect(e1)
-    --that effect becomes "Destroy 1 "Yubel" monster on the field".
-    local e2=Effect.CreateEffect(c)
+    	--that effect becomes "Destroy 1 "Yubel" monster on the field".
+    	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_QUICK_O)
 	e2:SetCode(EVENT_CHAINING)
@@ -26,8 +26,8 @@ function s.initial_effect(c)
 	e2:SetTarget(s.chtg)
 	e2:SetOperation(s.chop)
 	c:RegisterEffect(e2)
-    --You can either add this card to your hand or Special Summon it.
-    local e3=Effect.CreateEffect(c)
+    	--You can either add this card to your hand or Special Summon it.
+    	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,2))
 	e3:SetType(EFFECT_TYPE_TRIGGER_O+EFFECT_TYPE_FIELD)
 	e3:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_TOHAND)
@@ -46,7 +46,7 @@ function s.spfilter(c,e,tp)
 	return c:IsSetCard(SET_YUBEL) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.GetMZoneCount(tp,e:GetHandler())>0
+    	if chk==0 then return Duel.GetMZoneCount(tp,e:GetHandler())>0
 		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_DECK,0,1,nil,e,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
 end
@@ -85,13 +85,13 @@ function s.thcon(e,tp,eg,ep,ev,re,r,rp)
 	return tp==Duel.GetTurnPlayer() and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_YUBEL),tp,LOCATION_ONFIELD,0,1,nil)
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
-    local c=e:GetHandler()
+    	local c=e:GetHandler()
 	if chk==0 then return (Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)) or c:IsAbleToHand() end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
-    Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,c,1,tp,0)
+    	Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,c,1,tp,0)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp) 
-    local c=e:GetHandler()
+    	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
 	aux.ToHandOrElse(c,tp,
 		function(sc) return sc:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end,
