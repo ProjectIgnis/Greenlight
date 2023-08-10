@@ -8,8 +8,8 @@ function s.initial_effect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
-    --destroy 1 DARK monster in your hand or face-up field, and if you do, add 1 "Yubel", or 1 card that mentions it except "Nightmare Pain", from your Deck to your hand.
-    local e1=Effect.CreateEffect(c)
+    	--destroy 1 DARK monster in your hand or face-up field, and if you do, add 1 "Yubel", or 1 card that mentions it except "Nightmare Pain", from your Deck to your hand.
+    	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_DESTROY+CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e1:SetType(EFFECT_TYPE_IGNITION)
