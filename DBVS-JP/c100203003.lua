@@ -39,7 +39,7 @@ function s.initial_effect(c)
 	e3:SetOperation(s.thop)
 	c:RegisterEffect(e3)
 end
-s.listed_names={78371393}
+s.listed_names={CARD_YUBEL}
 s.listed_series={SET_YUBEL}
 
 function s.spfilter(c,e,tp)
@@ -82,7 +82,7 @@ function s.repop(e,tp,eg,ep,ev,re,r,rp)
 end
 
 function s.thcon(e,tp,eg,ep,ev,re,r,rp)
-	return tp==Duel.GetTurnPlayer() and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,78371393),tp,LOCATION_ONFIELD,0,1,nil)
+	return tp==Duel.GetTurnPlayer() and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_YUBEL),tp,LOCATION_ONFIELD,0,1,nil)
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
