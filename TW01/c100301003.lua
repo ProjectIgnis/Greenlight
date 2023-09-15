@@ -39,13 +39,14 @@ function s.tkcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.Release(g,REASON_COST)
 end
 function s.tktg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsPlayerCanSpecialSummonMonster(tp,TOKEN_ICE_BARRIER,0,TYPES_TOKEN,0,0,1,RACE_AQUA,ATTRIBUTE_WATER,POS_FACEUP) end
+	if chk==0 then return e:GetHandler():HasLevel()
+		and Duel.IsPlayerCanSpecialSummonMonster(tp,TOKEN_ICE_BARRIER,SET_ICE_BARRIER,TYPES_TOKEN,0,0,1,RACE_AQUA,ATTRIBUTE_WATER,POS_FACEUP) end
 	Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
 end
 function s.tkop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	--Cannot Special Summon from the Extra Deck, except Xyz Monsters
+	--Cannot Special Summon from the Extra Deck, except WATER Synchro Monsters
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,2))
 	e1:SetType(EFFECT_TYPE_FIELD)
@@ -58,12 +59,12 @@ function s.tkop(e,tp,eg,ep,ev,re,r,rp)
 	--Clock Lizard check
 	aux.addTempLizardCheck(c,tp,function(_,c) return not c:IsOriginalType(TYPE_SYNCHRO) or not c:IsOriginalAttribute(ATTRIBUTE_WATER) end)
 	local ft=math.min(3,Duel.GetLocationCount(tp,LOCATION_MZONE))
-	if ft==0 or not Duel.IsPlayerCanSpecialSummonMonster(tp,TOKEN_ICE_BARRIER,0,TYPES_TOKEN,0,0,1,RACE_AQUA,ATTRIBUTE_WATER,POS_FACEUP) then return end
+	if ft==0 or not Duel.IsPlayerCanSpecialSummonMonster(tp,TOKEN_ICE_BARRIER,SET_ICE_BARRIER,TYPES_TOKEN,0,0,1,RACE_AQUA,ATTRIBUTE_WATER,POS_FACEUP) then return end
 	if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
 	local ct=Duel.AnnounceNumberRange(tp,1,ft)
 	for i=1,ct do
 		local token=Duel.CreateToken(tp,TOKEN_ICE_BARRIER)
-		Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
+		Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP)
 	end
 	ct=Duel.SpecialSummonComplete()
 	if ct and ct>0 and c:IsFaceup() and c:IsRelateToEffect(e) then
@@ -71,7 +72,8 @@ function s.tkop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.thfilter(c)
-	return c:IsSetCard(SET_ICE_BARRIER) and c:IsAbleToHand() and not c:IsCode(id)
+	return c:IsSetCard(SET_ICE_BARRIER) and c:IsAbleToHand() and (c:IsLocation(LOCATION_DECK) or c:IsFaceup())
+		and not c:IsCode(id)
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK|LOCATION_REMOVED,0,1,nil) end

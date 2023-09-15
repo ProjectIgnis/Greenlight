@@ -29,22 +29,25 @@ function s.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 s.listed_series={SET_INFERNOID}
+function s.atkfilter(c)
+	return c:IsSetCard(SET_INFERNOID) and c:IsMonster() and c:IsFaceup()
+end
 function s.atkval(e,c)
-	return 100*Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,SET_INFERNOID),e:GetHandlerPlayer(),LOCATION_REMOVED,0,nil)
+	return 100*Duel.GetMatchingGroupCount(s.atkfilter,e:GetHandlerPlayer(),LOCATION_REMOVED,0,nil)
 end
 function s.condition(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetMatchingGroupCount(aux.NOT(aux.FaceupFilter(Card.IsRace,RACE_FIEND)),tp,LOCATION_MZONE,0,nil)==0
 end
 function s.spfilter(c,e,tp)
-	return c:IsMonster() and c:IsSetCard(SET_INFERNOID)	and c:IsCanBeSpecialSummoned(e,0,tp,true,false)
+	return c:IsMonster() and c:IsSetCard(SET_INFERNOID) and c:IsCanBeSpecialSummoned(e,0,tp,true,false)
 end
 function s.tohafilter(c)
-	return c:IsMonster() and c:IsSetCard(SET_INFERNOID) and c:IsAbleToHand()
+	return c:IsMonster() and c:IsSetCard(SET_INFERNOID) and c:IsFaceup() and c:IsAbleToHand()
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	--Add 1 of your banished "Infernoid" monsters to your hand
 	local b1=Duel.IsExistingMatchingCard(s.tohafilter,tp,LOCATION_REMOVED,0,1,nil)
-	--Special Summon 1 "Infernoid" monster from your Hand ignoring its summoning conditions
+	--Special Summon 1 "Infernoid" monster from your hand ignoring its Summoning conditions
 	local b2=Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND,0,1,nil,e,tp)
 	if chk==0 then return b1 or b2 end
@@ -71,13 +74,12 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 			Duel.ConfirmCards(1-tp,g)
 		end
 	elseif op==2 then
-		--Special Summon 1 "Infernoid" monster from your Hand ignoring its summoning conditions
+		--Special Summon 1 "Infernoid" monster from your hand ignoring its Summoning conditions
 		if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
-		local c=e:GetHandler()
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local g=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_HAND,0,1,1,nil,e,tp)
 		if #g>0 then
-			Duel.SpecialSummonStep(g,0,tp,tp,true,false,POS_FACEUP)
+			Duel.SpecialSummon(g,0,tp,tp,true,false,POS_FACEUP)
 		end
 	end
 end

@@ -31,7 +31,7 @@ s.listed_series={SET_INFERNOID,SET_VOID}
 function s.dccostfilter(c)
 	return not c:IsPublic()
 		and ((c:IsSetCard(SET_INFERNOID) and c:IsMonster())
-		or (c:IsSetCard(SET_VOID) and c:IsSpellTrap())) 
+		or (c:IsSetCard(SET_VOID) and c:IsSpellTrap()))
 end
 function s.dccost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
@@ -43,15 +43,16 @@ function s.dccost(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.dctg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)-e:GetHandler()
-	if chk==0 then return #g>0 and Duel.IsPlayerCanDraw(tp,#g) end
-	Duel.SetOperationInfo(0,CATEGORY_HANDES,g,#g,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,g,#g,0,0)
+	local ct=#g
+	if chk==0 then return ct>0 and Duel.IsPlayerCanDraw(tp,ct) end
+	Duel.SetOperationInfo(0,CATEGORY_HANDES,g,ct,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,ct)
 end
 function s.dcop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
 	if #g==0 then return end
-	local ct=Duel.SendtoGrave(g,REASON_EFFECT+REASON_DISCARD)
-	if ct>0 then
+	local ct=Duel.SendtoGrave(g,REASON_EFFECT|REASON_DISCARD)
+	if ct>0 and Duel.IsPlayerCanDraw(tp) then
 		Duel.BreakEffect()
 		Duel.Draw(tp,ct,REASON_EFFECT)
 	end
@@ -74,6 +75,6 @@ end
 function s.tgop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetTargetCards(e)
 	if #g>0 then
-		Duel.SendtoGrave(g,REASON_EFFECT+REASON_RETURN)
+		Duel.SendtoGrave(g,REASON_EFFECT|REASON_RETURN)
 	end
 end
