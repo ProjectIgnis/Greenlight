@@ -23,7 +23,7 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,{id,1})
 	e2:SetCondition(s.atkcond)
 	e2:SetCost(aux.bfgcost)
-	e2:SetTarget(s.atktg)
+	e2:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return Duel.GetAttacker():IsRelateToBattle() end end)
 	e2:SetOperation(s.atkop)
 	c:RegisterEffect(e2)
 end
@@ -37,13 +37,10 @@ function s.atkcond(e,tp,eg,ep,ev,re,r,rp)
 	local at=Duel.GetAttacker()
 	return at:IsControler(tp) and at:IsType(TYPE_SYNCHRO)
 end
-function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local at=Duel.GetAttacker()
-	if chk==0 then return at:IsRelateToBattle() end
-end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local at=Duel.GetAttacker()
-	if at and at:IsFaceup() and at:IsControler(tp) and at:IsRelateToBattle() then
+	if at:IsFaceup() and at:IsControler(tp) and at:IsRelateToBattle() then
+		--Gains 800 ATK
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_UPDATE_ATTACK)
