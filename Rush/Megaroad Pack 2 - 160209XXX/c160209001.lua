@@ -22,6 +22,7 @@ function s.initial_effect(c)
 	e1:SetOperation(s.atkop)
 	c:RegisterEffect(e1)
 end
+s.listed_names={160002017}
 function s.filter(c)
 	return c:IsFaceup() and c:IsLevel(7) and c:IsAttribute(ATTRIBUTE_LIGHT) and  c:IsRace(RACE_WINGEDBEAST)
 end
