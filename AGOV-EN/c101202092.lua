@@ -31,7 +31,7 @@ s.listed_series={SET_TISTINA}
 function s.rmtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local rg=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,nil,tp,POS_FACEDOWN)
 	if #rg==0 then return false end
-	local fg=Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsSetCard,SET_KNIGHTMARE),tp,LOCATION_MZONE,0,nil)
+	local fg=Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsSetCard,SET_TISTINA),tp,LOCATION_MZONE,0,nil)
 	if chk==0 then return #fg>0 end
 	local b2=fg:IsExists(Card.IsSummonLocation,1,nil,LOCATION_EXTRA)
 	local op=Duel.SelectEffect(tp,
