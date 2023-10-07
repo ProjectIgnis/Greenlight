@@ -9,6 +9,7 @@ function s.initial_effect(c)
 	e1:SetCategory(CATEGORY_REMOVE)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
 	e1:SetCountLimit(1,id)
 	e1:SetTarget(s.rmtg)
 	e1:SetOperation(s.rmop)
@@ -21,6 +22,7 @@ function s.initial_effect(c)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetRange(LOCATION_GRAVE)
+	e2:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
 	e2:SetCountLimit(1,id)
 	e2:SetCost(aux.selfbanishcost)
 	e2:SetTarget(s.thtg)
@@ -30,22 +32,24 @@ end
 s.listed_series={SET_TISTINA}
 function s.rmtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local rg=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,nil,tp,POS_FACEDOWN)
-	if #rg==0 then return false end
 	local fg=Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsSetCard,SET_TISTINA),tp,LOCATION_MZONE,0,nil)
-	if chk==0 then return #fg>0 end
-	local b2=fg:IsExists(Card.IsSummonLocation,1,nil,LOCATION_EXTRA)
+	local b1=#fg>0 and #rg>0
+	local b2=b1 and fg:IsExists(Card.IsSummonLocation,1,nil,LOCATION_EXTRA)
+	if chk==0 then return b1 or b2 end
 	local op=Duel.SelectEffect(tp,
-		{true,aux.Stringid(id,0)},
-		{b2,aux.Stringid(id,1)})
-	Duel.SetTargetParam(op)
+		{b1,aux.Stringid(id,2)},
+		{b2,aux.Stringid(id,3)})
+	e:SetLabel(op)
 	Duel.SetOperationInfo(0,CATEGORY_REMOVE,rg,(op==1 and 1 or #rg),0,0)
 end
 function s.rmop(e,tp,eg,ep,ev,re,r,rp)
 	local rg=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,nil,tp,POS_FACEDOWN)
-	local op=Duel.GetChainInfo(0,CHAININFO_TARGET_PARAM)
+	if #rg==0 then return end
+	local op=e:GetLabel()
 	if op==1 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
 		rg=rg:Select(tp,1,1,nil)
+		Duel.HintSelection(rg,true)
 	end
 	if op and #rg>0 then
 		Duel.Remove(rg,POS_FACEDOWN,REASON_EFFECT)

@@ -53,8 +53,8 @@ function s.plop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.MoveToField(tc,tp,tp,LOCATION_FZONE,POS_FACEUP,true)
 end
 function s.spconfilter(c,tp)
-	return c:GetPreviousTypeOnField()&(TYPE_SPELL|TYPE_TRAP)>0
-		and c:IsPreviousPosition(POS_FACEUP) and c:IsPreviousControler(tp)
+	return c:GetPreviousTypeOnField()&(TYPE_SPELL|TYPE_TRAP)>0 and c:IsPreviousSetCard(SET_TISTINA)
+		and c:IsPreviousPosition(POS_FACEUP) and c:IsPreviousControler(tp) and c:IsPreviousLocation(LOCATION_ONFIELD)
 		and c:IsReason(REASON_EFFECT) and c:GetReasonPlayer()==1-tp
 end
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)

@@ -27,10 +27,9 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetProperty(EFFECT_FLAG_DELAY)
+	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e2:SetCode(EVENT_TO_GRAVE)
-	e2:SetCountLimit(1,id)
-	e2:SetCondition(function(e) return not e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD) end)
+	e2:SetCondition(function(e) return Duel.IsAbleToEnterBP() and not e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD) end)
 	e2:SetTarget(s.atktg)
 	e2:SetOperation(s.atkop)
 	c:RegisterEffect(e2)
@@ -40,26 +39,24 @@ function s.sumcon(e,c,minc,zone,relzone,exeff)
 	if c==nil then return true end
 	local tp=c:GetControler()
 	if minc>1 or c:IsLevelBelow(4) or Duel.GetLocationCount(tp,LOCATION_MZONE)==0 then return false end
-	local g=Duel.GetMatchingGroup(Card.IsFacedown,tp,0,LOCATION_MZONE,nil)
+	local g=Duel.GetMatchingGroup(aux.AND(Card.IsFacedown,Card.IsReleasable),tp,0,LOCATION_MZONE,nil)
 	local must_g=Duel.GetMatchingGroup(Card.IsHasEffect,tp,LOCATION_MZONE,LOCATION_MZONE,nil,EFFECT_EXTRA_RELEASE)
 	return #g>0 and (#must_g==0 or #(g&must_g)>0) 
 end
 function s.sumtg(e,tp,eg,ep,ev,re,r,rp,chk,c,minc,zone,relzone,exeff)
-	local g=Duel.GetMatchingGroup(Card.IsFacedown,tp,0,LOCATION_MZONE,nil)
+	local g=Duel.GetMatchingGroup(aux.AND(Card.IsFacedown,Card.IsReleasable),tp,0,LOCATION_MZONE,nil)
 	local must_g=Duel.GetMatchingGroup(Card.IsHasEffect,tp,LOCATION_MZONE,LOCATION_MZONE,nil,EFFECT_EXTRA_RELEASE)
 	if #must_g>0 then g=g&must_g end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
-	local mg=g:Select(tp,1,1,nil)
-	if #mg==0 then return false end
-	mg:KeepAlive()
-	e:SetLabelObject(mg)
+	local mc=g:Select(tp,1,1,nil):GetFirst()
+	if not mc then return false end
+	e:SetLabelObject(mc)
 	return true
 end
 function s.sumop(e,tp,eg,ep,ev,re,r,rp,c,minc,zone,relzone,exeff)
-	local mg=e:GetLabelObject()
-	c:SetMaterial(mg)
-	Duel.Release(mg,REASON_SUMMON|REASON_MATERIAL)
-	mg:DeleteGroup()
+	local mc=e:GetLabelObject()
+	c:SetMaterial(mc)
+	Duel.Release(mc,REASON_SUMMON|REASON_MATERIAL)
 end
 function s.atkfilter(c)
 	return c:IsFaceup() and c:IsSetCard(SET_TISTINA) and not c:IsHasEffect(EFFECT_EXTRA_ATTACK)

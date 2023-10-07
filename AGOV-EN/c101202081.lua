@@ -75,7 +75,7 @@ function s.drwtg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.drwop(e,tp,eg,ep,ev,re,r,rp)
 	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
-	if Duel.Draw(p,2,REASON_EFFECT)==2 then
+	if Duel.Draw(p,d,REASON_EFFECT)>0 then
 		Duel.ShuffleHand(p)
 		Duel.BreakEffect()
 		Duel.DiscardHand(p,nil,1,1,REASON_EFFECT|REASON_DISCARD)
