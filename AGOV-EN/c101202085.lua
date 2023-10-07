@@ -9,7 +9,8 @@ function s.initial_effect(c)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetCountLimit(1,id)
+	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
+	e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
 	e1:SetTarget(s.sptg)
 	e1:SetOperation(s.spop)
 	c:RegisterEffect(e1)
@@ -32,25 +33,23 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 		local typ=g:GetClassCount(Card.GetOriginalRace)==1
 		local lv=g:GetClassCount(Card.GetOriginalLevel)==1
 		local c=e:GetHandler()
-		if typ then
-			for tc in g:Iter() do
+		for tc in g:Iter() do
+			if typ then
 				--Can attack directly this turn
 				local e1=Effect.CreateEffect(c)
 				e1:SetDescription(3205)
-				e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
 				e1:SetType(EFFECT_TYPE_SINGLE)
+				e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
 				e1:SetCode(EFFECT_DIRECT_ATTACK)
 				e1:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END)
 				tc:RegisterEffect(e1)
 			end
-		end
-		if lv then
-			for tc in g:Iter() do
+			if lv then
 				--Cannot be destroyed by battle this turn
 				local e2=Effect.CreateEffect(c)
 				e2:SetDescription(3000)
-				e2:SetProperty(EFFECT_FLAG_CLIENT_HINT)
 				e2:SetType(EFFECT_TYPE_SINGLE)
+				e2:SetProperty(EFFECT_FLAG_CLIENT_HINT)
 				e2:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
 				e2:SetValue(1)
 				e2:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END)
