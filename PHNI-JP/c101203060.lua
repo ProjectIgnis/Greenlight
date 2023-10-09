@@ -61,7 +61,7 @@ function s.lvtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 		{b1,aux.Stringid(id,2)},
 		{b2,aux.Stringid(id,3)})
 	e:SetLabel(op)
-	Duel.SetOperationInfo(0,CATEGORY_LVCHANGE,g,2,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_LVCHANGE,sg,2,tp,0)
 end
 function s.lvop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetTargetCards(e):Filter(Card.IsFaceup,nil)
