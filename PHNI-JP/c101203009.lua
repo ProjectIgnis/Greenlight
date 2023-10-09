@@ -58,7 +58,6 @@ end
 function s.spgyop(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) and Duel.RemoveOverlayCard(tp,1,1,1,1,REASON_EFFECT)>0
-		and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
 		-- Banish it if it leaves the field
 		local e1=Effect.CreateEffect(c)
