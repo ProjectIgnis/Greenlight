@@ -20,8 +20,8 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetCode(EVENT_SUMMON_SUCCESS)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
+	e2:SetCode(EVENT_SUMMON_SUCCESS)
 	e2:SetCountLimit(1,{id,1})
 	e2:SetTarget(s.thtg)
 	e2:SetOperation(s.thop)
@@ -44,7 +44,8 @@ end
 s.listed_series={SET_SNAKE_EYE}
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
@@ -70,9 +71,7 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.plfilter(c)
 	local p=c:GetOwner()
-	return c:IsMonster() and c:IsAttribute(ATTRIBUTE_FIRE)
-		and Duel.GetLocationCount(p,LOCATION_SZONE)>0
-		and c:CheckUniqueOnField(p,LOCATION_SZONE)
+	return c:IsAttribute(ATTRIBUTE_FIRE) and Duel.GetLocationCount(p,LOCATION_SZONE)>0 and c:CheckUniqueOnField(p)
 		and not c:IsForbidden()
 end
 function s.pltg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
@@ -84,11 +83,9 @@ function s.pltg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 end
 function s.plop(e,tp,eg,ep,ev,re,r,rp,chk)
 	local tc=Duel.GetFirstTarget()
-	local owner=tc:GetOwner()
-	if not tc:IsForbidden() and tc:IsRelateToEffect(e)
-		and Duel.GetLocationCount(owner,LOCATION_SZONE)>0
-		and Duel.MoveToField(tc,tp,owner,LOCATION_SZONE,POS_FACEUP,true) then
-		-- Treat it as a Continuous Spell
+	if tc:IsRelateToEffect(e) and not tc:IsImmuneToEffect(e)
+		and Duel.MoveToField(tc,tp,tc:GetOwner(),LOCATION_SZONE,POS_FACEUP,true) then
+		--Treated as a Continuous Spell
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
