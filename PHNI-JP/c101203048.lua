@@ -13,6 +13,7 @@ function s.initial_effect(c)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetRange(LOCATION_MZONE)
+	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
 	e1:SetCountLimit(1)
 	e1:SetTarget(s.dttg)
 	e1:SetOperation(s.dtop)
@@ -42,8 +43,8 @@ function s.stfilter(c,xc,tp)
 	return c:IsSpellTrap() and c:IsCanBeXyzMaterial(xc,tp,REASON_EFFECT)
 end
 function s.dttg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsOnField() and chkc:IsSpellTrap() end
 	local c=e:GetHandler()
+	if chkc then return chkc:IsOnField() and chkc:IsSpellTrap() and chkc:IsCanBeXyzMaterial(c,tp,REASON_EFFECT) end
 	if chk==0 then return Duel.CheckRemoveOverlayCard(tp,1,1,2,REASON_EFFECT)
 		and Duel.IsExistingTarget(s.stfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil,c,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATTACH)
@@ -53,14 +54,14 @@ function s.dtop(e,tp,eg,ep,ev,re,r,rp)
 	if not Duel.RemoveOverlayCard(tp,1,1,2,2,REASON_EFFECT) then return end
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e)
+	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and not tc:IsImmuneToEffect(e)
 		and tc:IsCanBeXyzMaterial(c,tp,REASON_EFFECT) then
 		Duel.Overlay(c,tc)
 	end
 end
 function s.repfilter(c,tp)
-	return c:IsLocation(LOCATION_MZONE) and c:IsControler(tp)
-		and c:IsReason(REASON_EFFECT) and not c:IsReason(REASON_REPLACE)
+	return c:IsLocation(LOCATION_MZONE) and c:IsControler(tp) and c:IsReason(REASON_EFFECT)
+		and not c:IsReason(REASON_REPLACE)
 end
 function s.reptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
@@ -80,7 +81,7 @@ end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0
-		and Duel.IsExistingMatchingCard(s.gfilter,tp,LOCATION_GRAVE,0,1,nil,c,tp,e)
+		and Duel.IsExistingMatchingCard(s.gfilter,tp,LOCATION_GRAVE,0,1,nil,c,tp)
 		and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATTACH)
 		local g=Duel.SelectMatchingCard(tp,s.gfilter,tp,LOCATION_GRAVE,0,1,1,nil,c,tp)

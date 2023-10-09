@@ -16,7 +16,7 @@ function s.initial_effect(c)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetRange(LOCATION_SZONE)
 	e1:SetCountLimit(1,id)
-	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E+TIMING_MAIN_END)
+	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER+TIMING_MAIN_END)
 	e1:SetCondition(function() return Duel.IsMainPhase() end)
 	e1:SetTarget(s.xyztg)
 	e1:SetOperation(s.xyzop)
@@ -38,7 +38,7 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_GOBLIN}
 function s.matfilter(c)
-	return c:IsFaceup() and c:IsSetCard(SET_GOBLIN) and not c:IsType(TYPE_TOKEN)
+	return c:IsFaceup() and c:IsSetCard(SET_GOBLIN) and c:IsCanBeXyzMaterial()
 end
 function s.xyztg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then
@@ -49,21 +49,25 @@ function s.xyztg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.xyzop(e,tp,eg,ep,ev,re,r,rp)
 	local mg=Duel.GetMatchingGroup(s.matfilter,tp,LOCATION_MZONE,0,nil)
+	if #mg==0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local xc=Duel.GetMatchingGroup(Card.IsXyzSummonable,tp,LOCATION_EXTRA,0,nil,nil,mg):GetFirst()
+	local xc=Duel.SelectMatchingCard(tp,Card.IsXyzSummonable,tp,LOCATION_EXTRA,0,1,1,nil,nil,mg):GetFirst()
 	if xc then
-		Duel.XyzSummon(tp,xc,nil,mg,1,99)
+		Duel.XyzSummon(tp,xc,nil,mg,2,99)
 	end
 end
 function s.gfilter(c)
 	return c:IsFaceup() and c:IsType(TYPE_XYZ) and c:IsSetCard(SET_GOBLIN)
 end
+function s.disfilter(c)
+	return c:IsNegatableMonster() and c:IsType(TYPE_EFFECT)
+end
 function s.dttg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsNegatableMonster() end
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and s.disfilter(chkc) end
 	if chk==0 then return Duel.CheckRemoveOverlayCard(tp,1,1,1,REASON_EFFECT)
-		and Duel.IsExistingTarget(Card.IsNegatableMonster,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+		and Duel.IsExistingTarget(s.disfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_NEGATE)
-	local g=Duel.SelectTarget(tp,Card.IsNegatableMonster,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+	local g=Duel.SelectTarget(tp,s.disfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DISABLE,g,1,0,0)
 end
 function s.dtop(e,tp,eg,ep,ev,re,r,rp)
