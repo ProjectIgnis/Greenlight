@@ -33,17 +33,17 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 s.listed_names={id+1} --Lamp Tokens
-function s.tcon(e,tp,eg,ep,ev,re,r,rp)
+function s.tkncond(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():IsLocation(LOCATION_GRAVE) and r&REASON_SYNCHRO>0
 end
-function s.ttg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.tkntg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return not Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT)
 		and Duel.GetLocationCount(tp,LOCATION_MZONE)>=2
 		and Duel.IsPlayerCanSpecialSummonMonster(tp,id+1,0,TYPES_TOKEN,0,0,2,RACE_FISH,ATTRIBUTE_FIRE,POS_FACEUP) end
 	Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,2,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,2,tp,0)
 end
-function s.top(e,tp,eg,ep,ev,re,r,rp)
+function s.tknop(e,tp,eg,ep,ev,re,r,rp)
 	--Cannot Special Summon monsters from the Extra Deck, except Fish monsters
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,2))
