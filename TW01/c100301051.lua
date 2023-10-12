@@ -1,5 +1,5 @@
 --リペア・ジェネクス・コントローラー
---Repaired Genex Controller 
+--Repaired Genex Controller
 --Scripted by Hatter
 local s,id=GetID()
 function s.initial_effect(c)
@@ -81,7 +81,7 @@ function s.nsop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
 	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
 	e1:SetTargetRange(1,0)
-	e1:SetTarget(function(_,_,_,st) return (st&SUMMON_TYPE_SYNCHRO)~=SUMMON_TYPE_SYNCHRO end)
+	e1:SetTarget(aux.synlimit)
 	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
 	--Clock Lizard Check
@@ -90,13 +90,12 @@ function s.nsop(e,tp,eg,ep,ev,re,r,rp)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
 	e2:SetCode(EFFECT_SYNCHRO_MATERIAL_CUSTOM)
-	e2:SetTargetRange(LOCATION_MZONE,0) --should this be LOCATION_ALL,LOCATION_ALL?
+	e2:SetTargetRange(LOCATION_MZONE|LOCATION_HAND,0)
 	e2:SetTarget(function(_,c) return not s.gtfilter(c) end)
 	e2:SetOperation(s.synop)
 	e2:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e2,tp)
 end
 function s.synop(e,tg,ntg,sg,lv,sc,tp)
-	return sg:CheckWithSumEqual(Card.GetSynchroLevel,lv,#sg,#sg,sc)
-		and (e:GetHandlerPlayer()==1-tp or sg:IsExists(s.gtfilter,1,nil))
+	return e:GetHandlerPlayer()==1-tp or sg:IsExists(s.gtfilter,1,nil)
 end
