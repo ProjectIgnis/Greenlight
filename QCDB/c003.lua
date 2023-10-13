@@ -3,7 +3,7 @@
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
-	--Return 1 non-Machine "Vanquish Soul" monster to the hand
+	--Special Summon itself, a dragon monster from the GY and the Synchro Summon a Dragon monster
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
