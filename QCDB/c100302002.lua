@@ -4,7 +4,7 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
-	--Special Summon limit
+	--Must be Special Summoned with its own procedure
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
@@ -12,20 +12,21 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Special Summon Procedure
 	local e2=Effect.CreateEffect(c)
+	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_SPSUMMON_PROC)
 	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
-	e2:SetRange(LOCATION_HAND+LOCATION_GRAVE)
-	e2:SetCountLimit(1,id)
+	e2:SetCode(EFFECT_SPSUMMON_PROC)
+	e2:SetRange(LOCATION_HAND|LOCATION_GRAVE)
+	e2:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
 	e2:SetCondition(s.spcon)
 	e2:SetTarget(s.sptg)
 	e2:SetOperation(s.spop)
 	c:RegisterEffect(e2)
 	--Destroy an opponent's monster that declares an attack and inflict damage equal to its original ATK
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,0))
+	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_DESTROY+CATEGORY_DAMAGE)
-	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e3:SetType(EFFECT_TYPE_QUICK_O)
 	e3:SetCode(EVENT_ATTACK_ANNOUNCE)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCondition(function(e,tp) return Duel.GetAttacker():IsControler(1-tp) end)
@@ -35,7 +36,6 @@ function s.initial_effect(c)
 	c:RegisterEffect(e3)
 	--Destroy an opponent's monster that activates an effect on the field and inflict damage equal to its original ATK
 	local e4=e3:Clone()
-	e4:SetType(EFFECT_TYPE_QUICK_O)
 	e4:SetCode(EVENT_CHAINING)
 	e4:SetCondition(s.descond)
 	e4:SetTarget(s.destg2)
@@ -43,8 +43,8 @@ function s.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 s.listed_names={57116033} --Winged Kuriboh
-s.listed_series={SET_ELEMENTAL_HERO} --should "SET_FAVORITE" also be here?
-function s.spfilter(c)
+s.listed_series={SET_ELEMENTAL_HERO,SET_FAVORITE}
+function s.spcfilter(c)
 	return (c:IsCode(57116033) or (c:IsMonster() and c:IsType(TYPE_FUSION) and c:IsSetCard(SET_ELEMENTAL_HERO)))
 		and (c:IsFaceup() or c:IsLocation(LOCATION_HAND))
 		and c:IsAbleToRemoveAsCost() and aux.SpElimFilter(c,true,true)
@@ -52,12 +52,12 @@ end
 function s.spcon(e,c)
 	if c==nil then return true end
 	local tp=e:GetHandlerPlayer()
-	local rg=Duel.GetMatchingGroup(s.spfilter,tp,LOCATION_ONFIELD|LOCATION_HAND|LOCATION_GRAVE,0,e:GetHandler())
+	local rg=Duel.GetMatchingGroup(s.spcfilter,tp,LOCATION_ONFIELD|LOCATION_HAND|LOCATION_GRAVE,0,e:GetHandler())
 	return #rg>0 and aux.SelectUnselectGroup(rg,e,tp,1,1,aux.ChkfMMZ(1),0)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,c)
 	local c=e:GetHandler()
-	local rg=Duel.GetMatchingGroup(s.spfilter,tp,LOCATION_ONFIELD|LOCATION_HAND|LOCATION_GRAVE,0,c)
+	local rg=Duel.GetMatchingGroup(s.spcfilter,tp,LOCATION_ONFIELD|LOCATION_HAND|LOCATION_GRAVE,0,c)
 	local g=aux.SelectUnselectGroup(rg,e,tp,1,1,aux.ChkfMMZ(1),1,tp,HINTMSG_REMOVE,nil,nil,true)
 	if #g>0 then
 		g:KeepAlive()
@@ -74,7 +74,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp,c)
 end
 function s.destg1(e,tp,eg,ep,ev,re,r,rp,chk)
 	local at=Duel.GetAttacker()
-	if chk==0 then return true end
+	if chk==0 then return at:IsRelateToBattle() end
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,at,1,tp,0)
 	if at:GetBaseAttack()>0 then
 		Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,1,1-tp,at:GetBaseAttack())
@@ -92,8 +92,8 @@ function s.descond(e,tp,eg,ep,ev,re,r,rp)
 	return rp==1-tp and re:IsMonsterEffect() and re:GetActivateLocation()==LOCATION_MZONE
 end
 function s.destg2(e,tp,eg,ep,ev,re,r,rp,chk)
-	local rc=eg:GetFirst() --rc=re:GetHandler() ?
-	if chk==0 then return rc:IsDestructable() end
+	local rc=re:GetHandler()
+	if chk==0 then return rc:IsDestructable() and rc:IsRelateToEffect(re) end
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,rc,1,tp,0)
 	if rc:GetBaseAttack()>0 then
 		Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,1,1-tp,rc:GetBaseAttack())
@@ -101,13 +101,9 @@ function s.destg2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.desop2(e,tp,eg,ep,ev,re,r,rp)
 	local rc=eg:GetFirst()
-	if Duel.Destroy(rc,REASON_EFFECT)==0 then return end
+	if not rc:IsRelateToEffect(re) or Duel.Destroy(rc,REASON_EFFECT)==0 then return end
 	local atk=rc:GetBaseAttack()
 	if atk>0 then
 		Duel.Damage(1-tp,atk,REASON_EFFECT)
 	end
 end
---[[
-(This card is always treated as an "Elemental HERO" and "Favorite" card.)
-Cannot be Normal Summoned/Set. Must be Special Summoned (from your hand or GY) by banishing 1 "Elemental HERO" Fusion Monster or 1 "Winged Kuriboh" from your hand, face-up field, or GY. You can only Special Summon "Winged Kuriboh LV6" once per turn this way. When an opponent's monster declares an attack, or when your opponent activates a monster effect on the field (Quick Effect): You can Tribute this card; destroy that monster, and if you do, inflict damage to your opponent equal to its original ATK.
-]]--
