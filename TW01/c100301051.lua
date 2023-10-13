@@ -27,17 +27,19 @@ function s.initial_effect(c)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_TO_HAND)
 	e2:SetRange(LOCATION_MZONE)
+	e2:SetCountLimit(1,0,EFFECT_COUNT_CODE_CHAIN)
 	e2:SetCondition(function(_,tp,eg) return eg:IsExists(s.nsconfilter,1,nil,tp) end)
 	e2:SetTarget(s.nstg)
 	e2:SetOperation(s.nsop)
 	c:RegisterEffect(e2)
 end
 s.listed_series={SET_GENEX}
+s.listed_names={id}
 function s.matfilter(c,sc,st,tp)
 	return c:IsSetCard(SET_GENEX,sc,st,tp) and c:IsLevelBelow(4)
 end
 function s.thfilter(c)
-	return c:IsSetCard(SET_GENEX) and c:IsAbleToHand()
+	return c:IsSetCard(SET_GENEX) and c:IsMonster() and c:IsAbleToHand()
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_GRAVE,0,1,nil) end
@@ -58,14 +60,8 @@ function s.nsfilter(c)
 	return c:IsSetCard(SET_GENEX) and c:IsSummonable(true,nil)
 end
 function s.nstg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local c=e:GetHandler()
-	if chk==0 then return c:GetFlagEffect(id)==0
-		and Duel.IsExistingMatchingCard(s.nsfilter,tp,LOCATION_HAND|LOCATION_MZONE,0,1,nil) end
-	c:RegisterFlagEffect(id,RESET_CHAIN,0,1)
-	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
-end
-function s.gtfilter(c)
-	return c:IsSetCard(SET_GENEX) and c:IsType(TYPE_TUNER)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.nsfilter,tp,LOCATION_HAND|LOCATION_MZONE,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,tp,LOCATION_HAND|LOCATION_MZONE)
 end
 function s.nsop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SUMMON)
@@ -76,25 +72,29 @@ function s.nsop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	--Cannot Special Summon from the Extra Deck, except by Synchro Summon
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(id,1))
+	e1:SetDescription(aux.Stringid(id,2))
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
 	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
 	e1:SetTargetRange(1,0)
-	e1:SetTarget(aux.synlimit)
+	e1:SetTarget(function(_e,_c,_tp,st,pos,_tgp,sumeff) return st&SUMMON_TYPE_SYNCHRO~=SUMMON_TYPE_SYNCHRO or sumeff:IsActivated() end)
 	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
 	--Clock Lizard Check
-	aux.addTempLizardCheck(c,tp,function(_,c) return not c:IsOriginalType(TYPE_SYNCHRO) end)
+	aux.addTempLizardCheck(c,tp,aux.TRUE)
 	--Must use at least 1 "Genex" Tuner to Synchro Summon
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
 	e2:SetCode(EFFECT_SYNCHRO_MATERIAL_CUSTOM)
 	e2:SetTargetRange(LOCATION_MZONE|LOCATION_HAND,0)
-	e2:SetTarget(function(_,c) return not s.gtfilter(c) end)
+	e2:SetTarget(function(_,_c) return not s.gtfilter(_c) end)
 	e2:SetOperation(s.synop)
 	e2:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e2,tp)
+end
+function s.gtfilter(c)
+	return c:IsSetCard(SET_GENEX) and c:IsType(TYPE_TUNER)
 end
 function s.synop(e,tg,ntg,sg,lv,sc,tp)
 	return e:GetHandlerPlayer()==1-tp or sg:IsExists(s.gtfilter,1,nil)

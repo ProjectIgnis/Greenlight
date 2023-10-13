@@ -73,25 +73,21 @@ end
 function s.tdfilter(c,e)
 	return c:IsFaceup() and c:IsSetCard(SET_GENEX) and c:IsAbleToDeck() and c:IsCanBeEffectTarget(e)
 end
-function s.tdrescon(sg,e,tp)
-	local res=sg:GetBinClassCount(Card.GetAttribute)==#sg
-	return res,not res
-end
 function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return false end
 	local g=Duel.GetMatchingGroup(s.tdfilter,tp,LOCATION_GRAVE|LOCATION_REMOVED,0,nil,e)
 	if chk==0 then return #g>0 end
-	local tg=aux.SelectUnselectGroup(g,e,tp,1,6,s.tdrescon,1,tp,HINTMSG_TODECK,function(sg) return #sg>0 end,nil,true)
+	local tg=aux.SelectUnselectGroup(g,e,tp,1,6,aux.dpcheck(Card.GetAttribute),1,tp,HINTMSG_TODECK)
 	Duel.SetTargetCard(tg)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,#g,0,0)
-	Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,tp,LOCATION_SZONE)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,tp,LOCATION_STZONE)
 end
 function s.tdop(e,tp,eg,ep,ev,re,r,rp)
 	local tg=Duel.GetTargetCards(e)
-	if #tg==0 or Duel.SendtoDeck(tg,nil,0,REASON_EFFECT)==0 then return end
+	if #tg==0 or Duel.SendtoDeck(tg,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)==0 then return end
 	local ct=tg:FilterCount(Card.IsLocation,nil,LOCATION_DECK|LOCATION_EXTRA)
 	if ct==0 then return end
-	local g=Duel.GetFieldGroup(tp,0,LOCATION_SZONE)
+	local g=Duel.GetFieldGroup(tp,LOCATION_STZONE,LOCATION_STZONE)
 	if #g==0 or not Duel.SelectYesNo(tp,aux.Stringid(id,2)) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local dg=g:Select(tp,1,ct,nil)
