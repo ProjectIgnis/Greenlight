@@ -5,6 +5,7 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--draw 1 card for each level 7+ on your opponent field
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetCategory(CATEGORY_DRAW)
 	e1:SetRange(LOCATION_MZONE)
@@ -22,14 +23,14 @@ function s.condition(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>=10 and Duel.IsExistingMatchingCard(s.confilter,tp,LOCATION_MZONE,0,1,nil)
 end
 function s.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.tdfilter,tp,0,LOCATION_GRAVE,1,c,tp,c) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.tdfilter,tp,0,LOCATION_GRAVE,1,nil,tp) end
 end
-function s.tdfilter(c,tp,sc)
+function s.tdfilter(c,tp)
 	return c:IsMonster() and c:IsRace(RACE_SPELLCASTER) and c:IsAbleToDeckOrExtraAsCost()
-		and Duel.IsExistingMatchingCard(s.tdfilter2,tp,LOCATION_GRAVE,0,2,Group.FromCards(c,sc),c:GetAttribute())
+		and Duel.IsExistingMatchingCard(s.tdfilter2,tp,LOCATION_GRAVE,0,2,c,c:GetAttribute())
 end
 function s.tdfilter2(c,att)
-	return c:IsMonster() and c:IsAttribute(att) and c:IsAbleToDeckOrExtraAsCost()
+	return c:IsMonster() and c:IsRace(RACE_SPELLCASTER) and c:IsAttribute(att) and c:IsAbleToDeckOrExtraAsCost()
 end
 function s.drfilter(c)
 	return c:IsFaceup() and c:IsLevelAbove(7)
@@ -48,9 +49,9 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	local td=aux.SelectUnselectGroup(g,e,tp,3,3,s.rescon,1,tp,HINTMSG_SELECT)
 	Duel.HintSelection(td,true)
 	if Duel.SendtoDeck(td,nil,SEQ_DECKSHUFFLE,REASON_COST)>0 then
+		Duel.ShuffleDeck(tp)
 		local ct=Duel.GetMatchingGroupCountRush(s.drfilter,tp,0,LOCATION_MZONE,nil)
 		if ct>0 then
-			Duel.ShuffleDeck(tp)
 			Duel.BreakEffect()
 			Duel.Draw(tp,ct,REASON_EFFECT)
 		end
