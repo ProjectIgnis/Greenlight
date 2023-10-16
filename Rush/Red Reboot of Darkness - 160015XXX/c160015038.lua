@@ -4,7 +4,7 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--fusion material
 	c:EnableReviveLimit()
-	Fusion.AddProcMix(c,true,true,160013011,160015009)
+	Fusion.AddProcMix(c,true,true,CARD_CELEB_ROSE_WITCH,160015009)
 	--Destroy 1 spell/trap your opponent controls
 	local e1=Effect.CreateEffect(c)
 	e1:SetCategory(CATEGORY_DESTROY)

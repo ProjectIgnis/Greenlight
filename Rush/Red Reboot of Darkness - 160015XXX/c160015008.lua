@@ -30,7 +30,7 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
 end
 function s.cfilter(c)
-	return c:IsLocation(LOCATION_GRAVE) and c:IsCode(160013012,160013011,CARD_FUSION) and c:IsAbleToHand()
+	return c:IsLocation(LOCATION_GRAVE) and c:IsCode(CARD_CELEB_ROSE_MAGICIAN,CARD_CELEB_ROSE_WITCH,CARD_FUSION) and c:IsAbleToHand()
 end
 function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	--Requirement
