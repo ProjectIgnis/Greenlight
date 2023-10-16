@@ -7,6 +7,7 @@ function s.initial_effect(c)
 	Fusion.AddProcMix(c,true,true,CARD_CELEB_ROSE_WITCH,160015009)
 	--Destroy 1 spell/trap your opponent controls
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_DESTROY)
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_MZONE)
@@ -25,7 +26,7 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	local dg=Duel.GetMatchingGroup(Card.IsSpellTrap,tp,0,LOCATION_ONFIELD,nil)
 	if #dg>0 then
 		local sg=dg:Select(tp,1,1,nil)
-		Duel.HintSelection(sg)
+		Duel.HintSelection(sg,true)
 		if Duel.Destroy(sg,REASON_EFFECT)>0 and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsSpell),tp,LOCATION_ONFIELD,0,1,nil) then
 			Duel.Draw(tp,1,REASON_EFFECT)
 		end
