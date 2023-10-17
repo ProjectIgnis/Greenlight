@@ -37,15 +37,16 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.SelectMatchingCard(tp,s.filter,tp,0,LOCATION_MZONE,1,1,nil)
 	if #g>0 then
 		Duel.HintSelection(g,true)
+		local tc=g:GetFirst()
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_UPDATE_ATTACK)
-		e1:SetValue(-g:GetFirst():GetTextAttack())
+		e1:SetValue(-tc:GetTextAttack())
 		e1:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END)
-		g:GetFirst():RegisterEffectRush(e1)
-		--Complete effect with negate
-		if false then
-
+		tc:RegisterEffectRush(e1)
+		--Negate Continuous Effect
+		if tc:HasContinuousRushEffect() and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+			tc:NegateContinuousRushEffects(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END)
 		end
 	end
 end
