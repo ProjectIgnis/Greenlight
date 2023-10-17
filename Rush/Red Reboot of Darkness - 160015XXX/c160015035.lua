@@ -3,7 +3,6 @@
 --scripted by YoshiDuels
 local s,id=GetID()
 function s.initial_effect(c)
-	--
 	--fusion material
 	c:EnableReviveLimit()
 	Fusion.AddProcMixN(c,true,true,160015003,1,s.matfilter,1)
