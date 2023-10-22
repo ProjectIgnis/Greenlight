@@ -27,18 +27,21 @@ end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
-	if re:GetHandler():IsDestructable() and re:GetHandler():IsRelateToEffect(re) then
-		Duel.SetOperationInfo(0,CATEGORY_DESTROY,eg,1,0,0)
+	local rc=re:GetHandler()
+	if rc:IsDestructable() and rc:IsRelateToEffect(re) then
+		local c=e:GetHandler()
+		local exc=(e:IsHasType(EFFECT_TYPE_ACTIVATE) and c:IsRelateToEffect(e)) and c or nil
+		Duel.SetOperationInfo(0,CATEGORY_DESTROY,eg+rc:GetColumnGroup():RemoveCard(exc),1,0,0)
 	end
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
-	local g=rc:GetColumnGroup()
-	if Duel.NegateActivation(ev) and rc:IsRelateToEffect(re) and Duel.Destroy(eg,REASON_EFFECT)>0 then
-		local dg=g:Remove(function(cc) return cc==e:GetHandler() or cc==rc end,nil)
-		if #dg>0 then
-			Duel.BreakEffect()
-			Duel.Destroy(dg,REASON_EFFECT)
-		end
+	if not (Duel.NegateActivation(ev) and rc:IsRelateToEffect(re)) then return end
+	local c=e:GetHandler()
+	local exc=(e:IsHasType(EFFECT_TYPE_ACTIVATE) and c:IsRelateToEffect(e)) and c or nil
+	local colg=rc:GetColumnGroup():RemoveCard(exc)
+	if Duel.Destroy(eg,REASON_EFFECT)>0 and #colg>0 then
+		Duel.BreakEffect()
+		Duel.Destroy(colg,REASON_EFFECT)
 	end
 end
