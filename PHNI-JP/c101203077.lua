@@ -1,4 +1,4 @@
---Japanese name
+--アロマヒーリング
 --Aroma Healing
 --scripted by Naim
 local s,id=GetID()
@@ -30,15 +30,14 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_AROMA}
 function s.lptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local ct=Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,SET_AROMA),tp,LOCATION_MZONE,0,nil)
-	if chk==0 then return ct>0 end
-	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,ct*1000)
+	local Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsSetCard,SET_AROMA),tp,LOCATION_MZONE,0,nil)
+	if chk==0 then return #g>0 end
+	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,g:GetClassCount(Card.GetCode)*1000)
 end
 function s.lpop(e,tp,eg,ep,ev,re,r,rp)
-	local ct=Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,SET_AROMA),tp,LOCATION_MZONE,0,nil)
-	if ct>0 then
-		Duel.Recover(tp,ct*1000,REASON_EFFECT)
-	end
+	local g=Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsSetCard,SET_AROMA),tp,LOCATION_MZONE,0,nil)
+	if #g==0 then return end
+	Duel.Recover(tp,g:GetClassCount(Card.GetCode)*1000,REASON_EFFECT)
 end
 function s.spfilter(c,e,tp)
 	return c:IsSetCard(SET_AROMA) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)

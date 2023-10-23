@@ -1,5 +1,5 @@
---Japanese name
---Aromaryllis Rosalina
+--アロマリリス－ロザリーナ
+--Aromalylith Rosalina
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)

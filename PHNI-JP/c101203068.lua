@@ -1,4 +1,4 @@
---Japanese name
+--アロマブレンド
 --Aroma Blend
 --scripted by Naim
 local s,id=GetID()
