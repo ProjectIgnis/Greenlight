@@ -30,7 +30,7 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_AROMA}
 function s.lptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsSetCard,SET_AROMA),tp,LOCATION_MZONE,0,nil)
+	local g=Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsSetCard,SET_AROMA),tp,LOCATION_MZONE,0,nil)
 	if chk==0 then return #g>0 end
 	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,g:GetClassCount(Card.GetCode)*1000)
 end
