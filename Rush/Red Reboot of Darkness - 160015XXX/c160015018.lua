@@ -36,6 +36,5 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SET)
 	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.setfilter),tp,LOCATION_GRAVE,0,1,1,nil)
 	if #g==0 then return end
-	Duel.HintSelection(g,true)
 	Duel.SSet(tp,g)
 end
