@@ -55,6 +55,7 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 			Duel.HintSelection(dg,true)
 			dg=dg:AddMaximumCheck()
 			if Duel.Destroy(dg,REASON_EFFECT)>0 then
+				Duel.BreakEffect()
 				Duel.Draw(tp,1,REASON_EFFECT)
 			end
 		end
