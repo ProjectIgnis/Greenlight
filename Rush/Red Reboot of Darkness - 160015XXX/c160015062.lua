@@ -43,7 +43,6 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
 	local sg=Duel.SelectMatchingCard(tp,s.costfilter,tp,LOCATION_MZONE,0,1,1,nil)
 	sg=sg:AddMaximumCheck()
-	Duel.HintSelection(sg,true)
 	local ct=Duel.SendtoGrave(sg,REASON_COST)
 	if ct>0 then
 		--Effect
