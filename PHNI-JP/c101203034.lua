@@ -3,7 +3,7 @@
 --scripted by pyrQ
 local s,id=GetID()
 function s.initial_effect(c)
-	--Make 1 "Guardian" monster that cannot be Normal Summoned/Set able to attack twicec
+	--Make 1 "Guardian" monster that cannot be Normal Summoned/Set able to attack twice
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_IGNITION)
@@ -58,7 +58,14 @@ end
 function s.thfilter(c,tc)
 	return tc:ListsCode(c:GetCode()) and c:IsAbleToHand()
 end
-function s.efftg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.efftg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then
+		if not (chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp)
+			and not chkc:IsSummonableCard() and chkc:IsSetCard(SET_GUARDIAN)) then return false end
+		local label=e:GetLabel()
+		return (label==1 and chkc:IsAbleToHand())
+			or (label==2 and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_GRAVE,0,1,nil,chkc))
+	end
 	if chk==0 then return Duel.IsExistingTarget(s.efftgfilter,tp,LOCATION_GRAVE,0,1,nil,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
 	local tc=Duel.SelectTarget(tp,s.efftgfilter,tp,LOCATION_GRAVE,0,1,1,nil,tp):GetFirst()

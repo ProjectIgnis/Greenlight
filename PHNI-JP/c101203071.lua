@@ -15,12 +15,25 @@ function s.initial_effect(c)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
 end
-function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then
+		local label=e:GetLabel()
+		if label==1 then
+			local owner=chkc:GetOwner()
+			return Duel.GetLocationCount(owner,LOCATION_MZONE)>0
+				and chkc:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP,owner)
+		elseif label==2 then
+			return chkc:IsAbleToHand()
+		elseif label==3 then
+			return true
+		end
+	end
 	if chk==0 then return Duel.IsExistingTarget(aux.FaceupFilter(Card.IsOriginalType,TYPE_MONSTER),tp,LOCATION_STZONE,LOCATION_STZONE,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
 	local tc=Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsOriginalType,TYPE_MONSTER),tp,LOCATION_STZONE,LOCATION_STZONE,1,1,nil):GetFirst()
-	local b1=Duel.GetLocationCount(tc:GetOwner(),LOCATION_MZONE)>0
-		and tc:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	local owner=tc:GetOwner()
+	local b1=Duel.GetLocationCount(owner,LOCATION_MZONE)>0
+		and tc:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP,owner)
 	local b2=tc:IsAbleToHand()
 	local b3=true
 	local op=Duel.SelectEffect(tp,
