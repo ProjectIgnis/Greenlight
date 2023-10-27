@@ -10,8 +10,8 @@ function s.initial_effect(c)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetCountLimit(1,id)
 	e1:SetCondition(s.plcon)
-	e1:SetTarget(s.pltg)
-	e1:SetOperation(s.plop)
+	e1:SetTarget(s.spellpltg)
+	e1:SetOperation(s.spellplop)
 	c:RegisterEffect(e1)
 	--Place 1 monster form your Deck in your Spell/Trap Zone as a Continuous Trap
 	local e2=Effect.CreateEffect(c)
@@ -19,27 +19,27 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_GRAVE)
 	e2:SetCountLimit(1,id)
-	e2:SetCost(aux.selfbanishcost)
 	e2:SetCondition(s.plcon)
-	e2:SetTarget(s.pltg2)
-	e2:SetOperation(s.plop2)
+	e2:SetCost(aux.selfbanishcost)
+	e2:SetTarget(s.trappltg)
+	e2:SetOperation(s.trapplop)
 	c:RegisterEffect(e2)
 end
 function s.mnstrfilter(c)
-	return c:IsLocation(LOCATION_MZONE) or (c:IsLocation(LOCATION_SZONE) and c:IsFaceup() and c:IsOriginalType(TYPE_MONSTER))
+	return c:IsLocation(LOCATION_MZONE) or (c:IsLocation(LOCATION_STZONE) and c:IsFaceup() and c:IsOriginalType(TYPE_MONSTER))
 end
 function s.plcon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetMatchingGroupCount(s.mnstrfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)>=10
+	return Duel.IsExistingMatchingCard(s.mnstrfilter,tp,LOCATION_MZONE|LOCATION_STZONE,LOCATION_MZONE|LOCATION_STZONE,10,nil)
 end
 function s.plfilter(c,tp)
 	return c:IsMonster() and not c:IsForbidden() and c:CheckUniqueOnField(tp)
 end
-function s.pltg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.spellpltg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local ft=Duel.GetLocationCount(tp,LOCATION_SZONE)
 	if e:GetHandler():IsLocation(LOCATION_HAND) then ft=ft-1 end
 	if chk==0 then return ft>0 and Duel.IsExistingMatchingCard(s.plfilter,tp,LOCATION_DECK,0,1,nil,tp) end
 end
-function s.plop(e,tp,eg,ep,ev,re,r,rp)
+function s.spellplop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
 	local tc=Duel.SelectMatchingCard(tp,s.plfilter,tp,LOCATION_DECK,0,1,1,nil,tp):GetFirst()
 	if tc and Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true) then
@@ -53,11 +53,11 @@ function s.plop(e,tp,eg,ep,ev,re,r,rp)
 		tc:RegisterEffect(e1)
 	end
 end
-function s.pltg2(e,tp,eg,ep,ev,re,r,rp,chk)
-	local ft=Duel.GetLocationCount(tp,LOCATION_SZONE)
-	if chk==0 then return ft>0 and Duel.IsExistingMatchingCard(s.plfilter,tp,LOCATION_DECK,0,1,nil,tp) end
+function s.trappltg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
+		and Duel.IsExistingMatchingCard(s.plfilter,tp,LOCATION_DECK,0,1,nil,tp) end
 end
-function s.plop2(e,tp,eg,ep,ev,re,r,rp)
+function s.trapplop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
 	local tc=Duel.SelectMatchingCard(tp,s.plfilter,tp,LOCATION_DECK,0,1,1,nil,tp):GetFirst()
 	if tc and Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true) then
