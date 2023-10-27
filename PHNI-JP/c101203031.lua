@@ -28,8 +28,7 @@ function s.initial_effect(c)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCountLimit(1,id)
 	e3:SetCondition(aux.seqmovcon)
-	e3:SetTarget(aux.seqmovtg)
-	e3:SetOperation(aux.seqmovtgop)
+	e3:SetOperation(aux.seqmovop)
 	c:RegisterEffect(e3)
 	--Change all other monsters in this card's column to face-down Defense Position
 	local e4=Effect.CreateEffect(c)
@@ -56,7 +55,9 @@ function s.postg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_POSITION,g,#g,0,0)
 end
 function s.posop(e,tp,eg,ep,ev,re,r,rp)
-	local g=e:GetHandler():GetColumnGroup():Filter(Card.IsCanTurnSet,nil)
+	local c=e:GetHandler()
+	if not c:IsRelateToEffect(e) then return end
+	local g=c:GetColumnGroup():Filter(Card.IsCanTurnSet,nil)
 	if #g>0 then
 		Duel.ChangePosition(g,POS_FACEDOWN_DEFENSE)
 	end
