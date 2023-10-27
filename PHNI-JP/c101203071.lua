@@ -17,6 +17,7 @@ function s.initial_effect(c)
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then
+		if not (chkc:IsLocation(LOCATION_STZONE) and chkc:IsOriginalType(TYPE_MONSTER) and chkc:IsFaceup()) then return false end
 		local label=e:GetLabel()
 		if label==1 then
 			local owner=chkc:GetOwner()
