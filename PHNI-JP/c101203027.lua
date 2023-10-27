@@ -22,6 +22,7 @@ function s.initial_effect(c)
 	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e2:SetCode(id)
 	e2:SetRange(LOCATION_MZONE)
+	e2:SetCondition(function(e,tp,eg,ep,ev,re,r,rp) return rp==tp end)
 	e2:SetTarget(s.atktg)
 	e2:SetOperation(s.atkop)
 	c:RegisterEffect(e2)
@@ -37,14 +38,14 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 		and #g>0 and aux.SelectUnselectGroup(g,e,tp,1,2,s.rescon,0)
 	end
-	local dg=aux.SelectUnselectGroup(g,e,tp,1,2,s.rescon,1,tp,HINTMSG_TARGET)
+	local dg=aux.SelectUnselectGroup(g,e,tp,1,2,s.rescon,1,tp,HINTMSG_TARGET,s.rescon)
 	Duel.SetTargetCard(dg)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,LOCATION_HAND)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,dg,#dg,tp,0)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0
+	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
 		local g=Duel.GetTargetCards(e)
 		if #g>0 and Duel.Destroy(g,REASON_EFFECT)>0 then
 			local evg=Duel.GetOperatedGroup()
@@ -64,6 +65,7 @@ function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,e:GetHandler(),1,tp,atk)
 end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
 	if not (c:IsFaceup() and c:IsRelateToEffect(e)) then return end
 	local g=Duel.GetTargetCards(e):Filter(Card.IsFaceup,nil)
 	if #g==0 then return end
@@ -76,7 +78,3 @@ function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetReset(RESET_EVENT|RESETS_STANDARD_DISABLE|RESET_PHASE|PHASE_END|RESET_SELF_TURN,2)
 	c:RegisterEffect(e1)
 end
---[[
-
-You can target up to 2 face-up monsters you control, including a Fiend monster; Special Summon this card from your hand, and if you do, destroy those monsters. You can only use this effect of "Berserk Archfiend" once per turn. When a monster(s) is destroyed by this card's previous effect: You can target an equal number of face-up monsters your opponent controls; this card gains ATK equal to those monsters' total original ATK until the end of your next turn.
-]]--
