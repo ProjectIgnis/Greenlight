@@ -14,7 +14,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 function s.filter(c)
-	return c:IsMonster() and c:IsRace(RACE_PSYCHIC) and c:IsLevel(7) and c:GetDefense()==0 and not c:IsPublic()
+	return c:IsMonster() and c:IsRace(RACE_PSYCHIC) and c:IsLevel(7) and c:GetDefense()==0 and c:IsAttribute(ATTRIBUTE_LIGHT|ATTRIBUTE_DARK) and not c:IsPublic()
 end
 function s.thcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_HAND,0,1,nil) end
