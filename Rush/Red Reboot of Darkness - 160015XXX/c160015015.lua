@@ -21,11 +21,14 @@ end
 function s.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsPlayerCanDiscardDeck(tp,2) end
 end
+function s.filter(c)
+	return c:IsFaceup() and c:IsCode(160002025)
+end
 function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	--Effect
 	if Duel.DiscardDeck(tp,2,REASON_EFFECT)==0 then return end
-	if Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_MZONE,0,1,nil,160002025) 
+	if Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_MZONE,0,1,nil) 
 		and Duel.IsExistingMatchingCard(Card.IsSpellTrap,tp,0,LOCATION_ONFIELD,1,nil)
 		and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
 			local dg=Duel.SelectMatchingCard(tp,Card.IsSpellTrap,tp,0,LOCATION_ONFIELD,1,1,nil)
