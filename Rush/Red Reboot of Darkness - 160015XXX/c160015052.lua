@@ -5,7 +5,7 @@ function s.initial_effect(c)
 	-- Excavate 3, add 1 caard to the hand, send the rest to Grave
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_SEARCH+CATEGORY_DECKDES)
+	e1:SetCategory(CATEGORY_TOHAND|CATEGORY_SEARCH|CATEGORY_DECKDES)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetCost(s.thcost)
@@ -14,13 +14,13 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 function s.filter(c)
-	return c:IsMonster() and c:IsRace(RACE_PSYCHIC) and c:IsLevel(7) and c:GetDefense()==0 and c:IsAttribute(ATTRIBUTE_LIGHT|ATTRIBUTE_DARK) and not c:IsPublic()
+	return c:IsMonster() and c:IsRace(RACE_PSYCHIC) and c:IsLevel(7) and c:IsDefense(0) and c:IsAttribute(ATTRIBUTE_LIGHT|ATTRIBUTE_DARK) and not c:IsPublic()
 end
 function s.thcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_HAND,0,1,nil) end
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>2 end
+	if chk==0 then return Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>=3 end
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	--Requirement
@@ -39,7 +39,6 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 			Duel.DisableShuffleCheck()
 			Duel.SendtoHand(tg,nil,REASON_EFFECT)
 			Duel.ConfirmCards(1-tp,tg)
-			Duel.ShuffleHand(tp)
 			g:RemoveCard(tg)
 		end
 	end

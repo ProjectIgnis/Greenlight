@@ -33,11 +33,11 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	--Effect
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local dg=Duel.GetMatchingGroup(Card.IsNotMaximumModeSide,tp,0,LOCATION_MZONE,nil)
-	if dg and #dg>0 then
+	if #dg>0 then
 		local sg=dg:Select(tp,1,1,nil)
 		sg=sg:AddMaximumCheck()
 		Duel.HintSelection(sg,true)
-		if Duel.Destroy(sg,REASON_EFFECT)>0 then
+		if Duel.Destroy(sg,REASON_EFFECT)>0 and Duel.GetLP(tp)<=2000 then
 			--avoid battle damage
 			local e1=Effect.CreateEffect(e:GetHandler())
 			e1:SetType(EFFECT_TYPE_FIELD)
@@ -54,11 +54,11 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 			e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 			e2:SetTargetRange(1,0)
 			e2:SetValue(s.damval)
-			e2:SetReset(RESET_PHASE+PHASE_END)
+			e2:SetReset(RESET_PHASE|PHASE_END)
 			Duel.RegisterEffect(e2,tp)
 			local e3=e2:Clone()
 			e3:SetCode(EFFECT_NO_EFFECT_DAMAGE)
-			e3:SetReset(RESET_PHASE+PHASE_END)
+			e3:SetReset(RESET_PHASE|PHASE_END)
 			Duel.RegisterEffect(e3,tp)
 		end
 	end

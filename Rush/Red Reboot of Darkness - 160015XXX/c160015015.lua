@@ -16,7 +16,7 @@ function s.initial_effect(c)
 end
 s.listed_names={160002025}
 function s.condition(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsMainPhase() and e:GetHandler():IsStatus(STATUS_SPSUMMON_TURN+STATUS_SUMMON_TURN)
+	return e:GetHandler():IsStatus(STATUS_SPSUMMON_TURN|STATUS_SUMMON_TURN)
 end
 function s.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsPlayerCanDiscardDeck(tp,2) end
@@ -25,7 +25,6 @@ function s.filter(c)
 	return c:IsFaceup() and c:IsCode(160002025)
 end
 function s.operation(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
 	--Effect
 	if Duel.DiscardDeck(tp,2,REASON_EFFECT)==0 then return end
 	if Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_MZONE,0,1,nil) 
