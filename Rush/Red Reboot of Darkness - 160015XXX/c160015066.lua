@@ -43,8 +43,8 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<tc.min_material_count then return end
 	local sp=tc:GetOwner()
 	local sg=Duel.GetMatchingGroup(s.sumfilter,sp,LOCATION_GRAVE,0,nil,e,sp,tc)
-	if aux.SelectUnselectGroup(sg,1,tp,tc.min_material_count,tc.max_material_count,s.rescon(tc),0) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
-		local spg=aux.SelectUnselectGroup(sg,1,tp,tc.min_material_count,tc.max_material_count,s.rescon(tc),1,sp)
+	if aux.SelectUnselectGroup(sg,1,sp,tc.min_material_count,tc.max_material_count,s.rescon(tc),0) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+		local spg=aux.SelectUnselectGroup(sg,1,sp,tc.min_material_count,tc.max_material_count,s.rescon(tc),1,sp)
 		if #spg>0 then
 			Duel.SpecialSummon(spg,0,sp,sp,false,false,POS_FACEUP)
 		end
