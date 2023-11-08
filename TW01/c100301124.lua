@@ -19,7 +19,7 @@ function s.initial_effect(c)
 	e2:SetTarget(s.thtg)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
-	--Destroy 1 of your monsters and 1 of your opponent's cards
+	--Banish 1 of your "Ritual Beast" cards and 1 of your opponent's cards
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_REMOVE)
@@ -34,8 +34,7 @@ function s.initial_effect(c)
 	e3:SetOperation(s.rmvop)
 	c:RegisterEffect(e3)
 end
-s.listed_series={SET_RITUAL_BEAST,SET_RITUAL_BEAST_TAMER,SET_SPIRITUAL_BEAST}
-s.material_setcode=s.listed_series
+s.listed_series={SET_RITUAL_BEAST}
 function s.thfilter(c)
 	return c:IsSetCard(SET_RITUAL_BEAST) and c:IsFaceup() and (c:IsAbleToHand() or c:IsAbleToExtra())
 end
@@ -69,7 +68,7 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.rmvfilter(c,e,tp)
 	return c:IsAbleToRemove() and c:IsCanBeEffectTarget(e)
-		and ((c:IsFaceup() and c:IsSetCard(SET_LIBROMANCER) and c:IsControler(tp)) or c:IsControler(1-tp))
+		and ((c:IsFaceup() and c:IsSetCard(SET_RITUAL_BEAST) and c:IsControler(tp)) or c:IsControler(1-tp))
 end
 function s.rescon(sg,e,tp,mg)
 	return sg:Filter(Card.IsControler,nil,tp)==1
