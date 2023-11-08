@@ -7,7 +7,15 @@ function s.initial_effect(c)
 	--Link Summon Procedure
 	Link.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsType,TYPE_EFFECT),3)
 	--Neither player can Tribute cards to activate a card effect"
-	--not supported at the moment
+	--The following effect requires a core update to be supported
+	--local e1=Effect.CreateEffect(c)
+	--e1:SetType(EFFECT_TYPE_FIELD)
+	--e1:SetRange(LOCATION_MZONE)
+	--e1:SetCode(EFFECT_CANNOT_RELEASE)
+	--e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	--e1:SetTargetRange(1,1)
+	--e1:SetTarget(function(e,c,rp,r) return r&REASON_COST>0 end )
+	--c:RegisterEffect(e1)
 	--Return 1 "Ritual Beast" card to the hand
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
