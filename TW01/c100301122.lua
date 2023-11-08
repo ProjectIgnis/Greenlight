@@ -3,6 +3,8 @@
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
+	--Can only be Special Summoned once per turn
+	c:SetSPSummonOnce(id)
 	--Normal Summon 1 "Ritual Beast" monster
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
