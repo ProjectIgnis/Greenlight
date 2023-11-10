@@ -24,7 +24,7 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local draw=Duel.IsBattlePhase()
 		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_LIGHT_SARC),tp,LOCATION_ONFIELD,0,1,nil)
 		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.ListsCode,CARD_LIGHT_SARC),tp,LOCATION_MZONE,0,1,nil)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil
+	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil)
 		and (not draw or (ct1>0 and Duel.IsPlayerCanDraw(tp,ct1)
 		and ct2>0 and Duel.IsPlayerCanDraw(1-tp,ct2))) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
