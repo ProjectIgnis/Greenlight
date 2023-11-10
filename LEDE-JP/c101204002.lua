@@ -54,7 +54,9 @@ function s.atkval(e,c)
 	return ct>0 and ct*500
 end
 function s.tfilter(c,tp)
-	return (c:IsCode(CARD_LIGHT_SARC) or c:ListsCode(CARD_LIGHT_SARC) and c:IsLocation(LOCATION_MZONE)) and c:IsControler(tp)
+	return ((c:IsCode(CARD_LIGHT_SARC) and c:IsOnField())
+		or (c:ListsCode(CARD_LIGHT_SARC) and c:IsLocation(LOCATION_MZONE)))
+		and c:IsFaceup() and c:IsControler(tp)
 end
 function s.condition(e,tp,eg,ep,ev,re,r,rp)
 	if rp==tp or e:GetHandler():IsStatus(STATUS_BATTLE_DESTROYED) then return false end

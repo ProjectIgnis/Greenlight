@@ -44,7 +44,7 @@ function s.lvop(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetCode(EFFECT_UPDATE_LEVEL)
 		e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
 		e1:SetRange(LOCATION_MZONE)
-		e1:SetValue(ct)
+		e1:SetValue(ev)
 		e1:SetReset(RESET_EVENT|RESETS_STANDARD_DISABLE)
 		c:RegisterEffect(e1)
 	end
@@ -54,7 +54,7 @@ function s.atkval(e,c)
 	return ct>0 and ct*500
 end
 function s.condition(e,tp,eg,ep,ev,re,r,rp)
-	return re:IsSpellEffect() and Duel.IsChainNegatable(ev)
+	return rp~=tp and re:IsSpellEffect() and Duel.IsChainNegatable(ev)
 		and not e:GetHandler():IsStatus(STATUS_BATTLE_DESTROYED)
 		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_LIGHT_SARC),tp,LOCATION_ONFIELD,0,1,nil)
 end
