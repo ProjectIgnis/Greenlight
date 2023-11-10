@@ -1,4 +1,4 @@
---
+--光の黄金櫃
 --Gold Sarcophagus of Light
 --Scripted by Larry126
 local s,id=GetID()
