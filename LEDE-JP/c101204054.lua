@@ -1,4 +1,4 @@
---
+--未来への沈黙
 --Silence Towards the Future
 --Scripted by Larry126
 local s,id=GetID()
