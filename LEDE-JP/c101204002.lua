@@ -1,4 +1,4 @@
---
+--サイレント・ソードマン・ゼロ
 --Silent Swordsman Zero
 --Scripted by Larry126
 local s,id=GetID()

@@ -1,5 +1,5 @@
---
---
+--時の沈黙－ターン・サイレンス
+--Turn Silence
 --Scripted by Larry126
 local s,id=GetID()
 function s.initial_effect(c)

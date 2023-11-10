@@ -1,4 +1,4 @@
---
+--サイレント・マジシャン・ゼロ
 --Silent Magician Zero
 --Scripted by Larry126
 local s,id=GetID()

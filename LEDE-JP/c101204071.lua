@@ -1,4 +1,4 @@
---JP Name
+--隠し砦 ストロング・ホールド
 --Stronghold the Hidden Fortress
 --Scripted by The Razgriz
 local s,id=GetID()

@@ -1,4 +1,4 @@
---
+--トリコロール・ガジェット
 --Tricolore Gadget
 --Scripted by Larry126
 local s,id=GetID()
