@@ -18,14 +18,13 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e2:SetCode(EVENT_PRE_DAMAGE_CALCULATE)
-	e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
 	e2:SetRange(LOCATION_GRAVE)
 	e2:SetCondition(function(_,tp)
 		local tc=Duel.GetBattleMonster(tp)
 		return tc and tc:ListsCode(CARD_LIGHT_SARC)
 	end)
 	e2:SetCost(aux.bfgcost)
-	e2:SetOperation(function() Duel.NegateAttack() Duel.SkipPhase(Duel.GetTurnPlayer(),PHASE_BATTLE,RESET_PHASE|PHASE_BATTLE_STEP,1) end)
+	e2:SetOperation(s.skipop)
 	c:RegisterEffect(e2)
 end
 s.listed_names={CARD_LIGHT_SARC}
@@ -52,4 +51,8 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 		and Duel.IsChainDisablable(ev) then
 		Duel.NegateEffect(ev)
 	end
+end
+function s.skipop(e,tp,eg,ep,ev,re,r,rp)
+	Duel.GetAttacker():SetStatus(STATUS_ATTACK_CANCELED,true)
+	Duel.SkipPhase(Duel.GetTurnPlayer(),PHASE_BATTLE,RESET_PHASE|PHASE_BATTLE_STEP,1)
 end
