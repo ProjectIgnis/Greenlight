@@ -30,7 +30,6 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	--Gains 1000 ATK for each "Gold Sarcophagus of Light" and monsters that mention it
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_ATKCHANGE)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetRange(LOCATION_MZONE)
@@ -54,23 +53,16 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 end
 --ATK gain functions
 function s.gslfilter(c)
-	return c:IsCode(CARD_LIGHT_SARC) or (c:IsMonster() and c:IsFaceup() and c:ListsCode(CARD_LIGHT_SARC))
+	return c:IsFaceup() and (c:IsCode(CARD_LIGHT_SARC) or (c:IsLocation(LOCATION_MZONE) and c:ListsCode(CARD_LIGHT_SARC)))
 end
 function s.val(e,c)
-	local tp=e:GetHandlerPlayer()
-	local g=Duel.GetFieldGroup(tp,LOCATION_MZONE,0):Filter(s.gslfilter,nil)
-	return #g*1000 
+	local ct=Duel.GetFieldGroup(e:GetHandlerPlayer(),LOCATION_ONFIELD,0):FilterCount(s.gslfilter,nil)
+	return ct*1000 
 end
 --Destroy functions
-function s.desfilter(c,tp)
-	return c:IsCode(CARD_LIGHT_SARC) and Duel.IsExistingMatchingCard(s.desfilter2,tp,LOCATION_MZONE,0,1,nil)
-end
-function s.desfilter2(c)
-	return c:IsMonster() and c:IsFaceup() and c:ListsCode(CARD_LIGHT_SARC)
-end
 function s.descon(e,tp,eg,ep,ev,re,r,rp)
-	local at=Duel.GetAttacker()
-	return at:IsControler(1-tp) and Duel.IsExistingMatchingCard(s.desfilter,tp,LOCATION_MZONE,0,1,nil,tp)
+	return Duel.GetAttacker():IsControler(1-tp)
+		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_LIGHT_SARC),tp,LOCATION_ONFIELD,0,1,nil)
 end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local at=Duel.GetAttacker()
