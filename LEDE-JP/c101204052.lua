@@ -47,7 +47,7 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local ch=Duel.GetCurrentChain(true)-1
 	if Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_LIGHT_SARC),tp,LOCATION_ONFIELD,0,1,nil)
 		and ch>0 and Duel.GetChainInfo(ch,CHAININFO_TRIGGERING_PLAYER)~=tp
-		and Duel.GetChainInfo(ch,CHAININFO_TRIGGERING_EFFECT):IsActiveType(TYPE_MONSTER)
+		and Duel.GetChainInfo(ch,CHAININFO_TRIGGERING_EFFECT):IsMonsterEffect()
 		and Duel.IsChainDisablable(ev) then
 		Duel.NegateEffect(ev)
 	end
