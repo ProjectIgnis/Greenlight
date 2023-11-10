@@ -27,7 +27,7 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	c:AddMonsterAttribute(TYPE_EFFECT|TYPE_TRAP)
 	Duel.SpecialSummonStep(c,0,tp,tp,true,false,POS_FACEUP)
 	c:AddMonsterAttributeComplete()
-	--Gains 1000 ATK for each "Gold Sarcophagus of Light" and monsters that mention it
+	--Gains 1000 ATK for each card you control that is "Gold Sarcophagus of Light" or a monster that mentions it
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_SINGLE)
@@ -36,7 +36,7 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetValue(s.val)
 	e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 	c:RegisterEffect(e1,true)
-	--Destroy attacking monster if you control "Gold Sarcophagus of Light" and monster that mentions
+	--Destroy attacking monster while you control "Gold Sarcophagus of Light"
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_DESTROY)
