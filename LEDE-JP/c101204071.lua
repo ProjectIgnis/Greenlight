@@ -55,6 +55,7 @@ end
 --ATK gain functions
 function s.gslfilter(c)
 	return c:IsCode(CARD_LIGHT_SARC) or (c:IsMonster() and c:IsFaceup() and c:ListsCode(CARD_LIGHT_SARC))
+end
 function s.val(e,c)
 	local tp=e:GetHandlerPlayer()
 	local g=Duel.GetFieldGroup(tp,LOCATION_MZONE,0):Filter(s.gslfilter,nil)
