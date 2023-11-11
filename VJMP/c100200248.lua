@@ -4,9 +4,9 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
-	-- Link Summon procedure
+	--Link Summon procedure
 	Link.AddProcedure(c,nil,2,4,s.lcheck)
-	-- Must first be Link Summoned
+	--Must first be Link Summoned
 	local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_SINGLE)
 	e0:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_SINGLE_RANGE)
@@ -17,10 +17,10 @@ function s.initial_effect(c)
 	--Loses 3000 ATK while you have no Spells in your GY
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetCondition(function(e,c) return not Duel.IsExistingMatchingCard(Card.IsSpell,e:GetHandlerPlayer(),LOCATION_GRAVE,0,1,nil) end )
+	e1:SetCondition(function(e,c) return not Duel.IsExistingMatchingCard(Card.IsSpell,e:GetHandlerPlayer(),LOCATION_GRAVE,0,1,nil) end)
 	e1:SetValue(-3000)
 	c:RegisterEffect(e1)
 	--Negate the effect of opponent's activated effect and destroy 1 card your opponent controls
@@ -42,8 +42,7 @@ function s.lcheck(g,lc,sumtype,tp)
 	return g:IsExists(Card.IsType,1,nil,TYPE_LINK,lc,sumtype,tp)
 end
 function s.negcon(e,tp,eg,ep,ev,re,r,rp)
-	return ep==1-tp and Duel.GetCurrentChain(true)>=2
-		and Duel.IsChainDisablable(ev) and not e:GetHandler():IsStatus(STATUS_BATTLE_DESTROYED)
+	return ep==1-tp and Duel.GetCurrentChain(true)>=2 and Duel.IsChainDisablable(ev)
 end
 function s.costfilter(c)
 	return c:IsSpell() and c:IsAbleToRemoveAsCost()

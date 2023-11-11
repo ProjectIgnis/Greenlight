@@ -5,7 +5,7 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--Can only be Special Summoned once per turn
 	c:SetSPSummonOnce(id)
-	--Normal Summon 1 "Ritual Beast" monster
+	--Normal Summon 1 "Ritual Beast" monster from your hand
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SUMMON)
@@ -20,11 +20,11 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e2:SetCode(EFFECT_DESTROY_REPLACE)
-	e2:SetRange(LOCATION_GRAVE+LOCATION_MZONE)
+	e2:SetRange(LOCATION_MZONE|LOCATION_GRAVE)
 	e2:SetCountLimit(1,{id,1})
 	e2:SetTarget(s.reptg)
-	e2:SetValue(s.repval)
-	e2:SetOperation(s.repop)
+	e2:SetOperation(function(e) Duel.Remove(e:GetHandler(),POS_FACEUP,REASON_EFFECT|REASON_REPLACE) end)
+	e2:SetValue(function(e,c) return s.repfilter(c,e:GetHandlerPlayer()) end)
 	c:RegisterEffect(e2)
 	--Special Summon 1 "Ritual Beast" monster from the Deck
 	local e3=Effect.CreateEffect(c)
@@ -41,8 +41,9 @@ end
 s.listed_series={SET_RITUAL_BEAST}
 s.listed_names={id}
 function s.nscost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsDiscardable() end
-	Duel.SendtoGrave(e:GetHandler(),REASON_COST|REASON_DISCARD)
+	local c=e:GetHandler()
+	if chk==0 then return c:IsDiscardable() end
+	Duel.SendtoGrave(c,REASON_COST|REASON_DISCARD)
 end
 function s.nsfilter(c)
 	return c:IsSetCard(SET_RITUAL_BEAST) and c:IsSummonable(true,nil)
@@ -59,20 +60,14 @@ function s.nsop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.repfilter(c,tp)
-	return c:IsFaceup() and c:IsSetCard(SET_RITUAL_BEAST) and c:IsLocation(LOCATION_ONFIELD)
-		and c:IsControler(tp) and c:IsReason(REASON_EFFECT|REASON_BATTLE) and not c:IsReason(REASON_REPLACE)
+	return c:IsFaceup() and c:IsSetCard(SET_RITUAL_BEAST) and c:IsOnField() and c:IsControler(tp)
+		and c:IsReason(REASON_BATTLE|REASON_EFFECT) and not c:IsReason(REASON_REPLACE)
 end
 function s.reptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return not c:IsStatus(STATUS_DESTROY_CONFIRMED)
 		and c:IsAbleToRemove() and eg:IsExists(s.repfilter,1,nil,tp) end
 	return Duel.SelectEffectYesNo(tp,c,96)
-end
-function s.repval(e,c)
-	return s.repfilter(c,e:GetHandlerPlayer())
-end
-function s.repop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Remove(e:GetHandler(),POS_FACEUP,REASON_EFFECT|REASON_REPLACE)
 end
 function s.spfilter(c,e,tp)
 	return c:IsSetCard(SET_RITUAL_BEAST) and not c:IsCode(id) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)

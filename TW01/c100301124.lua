@@ -6,16 +6,15 @@ function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Link Summon Procedure
 	Link.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsType,TYPE_EFFECT),3)
-	--Neither player can Tribute cards to activate a card effect"
-	--The following effect requires a core update to be supported
-	--local e1=Effect.CreateEffect(c)
-	--e1:SetType(EFFECT_TYPE_FIELD)
-	--e1:SetRange(LOCATION_MZONE)
-	--e1:SetCode(EFFECT_CANNOT_RELEASE)
-	--e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	--e1:SetTargetRange(1,1)
-	--e1:SetTarget(function(e,c,rp,r) return r&REASON_COST>0 end )
-	--c:RegisterEffect(e1)
+	--Neither player can Tribute cards to activate a card effect
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e1:SetCode(EFFECT_CANNOT_RELEASE)
+	e1:SetRange(LOCATION_MZONE)
+	e1:SetTargetRange(1,1)
+	e1:SetTarget(function(e,c,rp,r,re) return r&REASON_COST>0 and re and re:IsActivated() end)
+	c:RegisterEffect(e1)
 	--Return 1 "Ritual Beast" card to the hand
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
@@ -32,11 +31,11 @@ function s.initial_effect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_REMOVE)
 	e3:SetType(EFFECT_TYPE_QUICK_O)
-	e3:SetCode(EVENT_FREE_CHAIN)
 	e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e3:SetCode(EVENT_FREE_CHAIN)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCountLimit(1,{id,1})
-	e3:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
+	e3:SetHintTiming(0,TIMING_MAIN_END|TIMINGS_CHECK_MONSTER_E)
 	e3:SetCondition(function(e,tp) return Duel.IsTurnPlayer(1-tp) end)
 	e3:SetTarget(s.rmvtg)
 	e3:SetOperation(s.rmvop)
@@ -47,26 +46,23 @@ function s.thfilter(c)
 	return c:IsSetCard(SET_RITUAL_BEAST) and c:IsFaceup() and (c:IsAbleToHand() or c:IsAbleToExtra())
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.thfilter(chkc)  end
+	if chkc then return chkc:IsLocation(LOCATION_REMOVED) and chkc:IsControler(tp) and s.thfilter(chkc)  end
 	if chk==0 then return Duel.IsExistingTarget(s.thfilter,tp,LOCATION_REMOVED,0,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND) --maybe use a custom string?
-	local g=Duel.SelectTarget(tp,s.thfilter,tp,LOCATION_MZONE,0,1,1,e:GetHandler()):GetFirst()
-	if g:GetFirst():IsType(TYPE_EXTRA) then
-		Duel.SetOperationInfo(0,CATEGORY_TOEXTRA,g,1,0,0)
-	else
-		Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
-	end
-	Duel.SetPossibleOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
+	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(id,2))
+	local tc=Duel.SelectTarget(tp,s.thfilter,tp,LOCATION_REMOVED,0,1,1,nil):GetFirst()
+	local category=tc:IsType(TYPE_EXTRA) and CATEGORY_TOEXTRA or CATEGORY_TOHAND
+	Duel.SetOperationInfo(0,category,tc,1,tp,0)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_SUMMON,nil,1,tp,LOCATION_HAND)
 end
 function s.nsfilter(c)
-	return c:IsSetCard(SET_RITUAL_BEAST) and not c:IsCode(id) and c:IsSummonable(true,nil)
+	return c:IsSetCard(SET_RITUAL_BEAST) and c:IsSummonable(true,nil)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and Duel.SendtoHand(tc,nil,REASON_EFFECT)>0
-		and tc:IsLocation(LOCATION_HAND|LOCATION_EXTRA) 
-		and Duel.IsExistingMatchingCard(s.nsfilter,tp,LOCATION_HAND,0,1,nil)
-		and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+	if not (tc:IsRelateToEffect(e) and Duel.SendtoHand(tc,nil,REASON_EFFECT)>0 and tc:IsLocation(LOCATION_HAND|LOCATION_EXTRA)) then return end
+	if tc:IsLocation(LOCATION_HAND) then Duel.ShuffleHand(tp) end
+	if Duel.IsExistingMatchingCard(s.nsfilter,tp,LOCATION_HAND,0,1,nil)
+		and Duel.SelectYesNo(tp,aux.Stringid(id,3)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SUMMON)
 		local g=Duel.SelectMatchingCard(tp,s.nsfilter,tp,LOCATION_HAND,0,1,1,nil)
 		if #g>0 then
@@ -76,10 +72,10 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.rmvfilter(c,e,tp)
 	return c:IsAbleToRemove() and c:IsCanBeEffectTarget(e)
-		and ((c:IsFaceup() and c:IsSetCard(SET_RITUAL_BEAST) and c:IsControler(tp)) or c:IsControler(1-tp))
+		and ((c:IsFaceup() and c:IsSetCard(SET_RITUAL_BEAST)) or c:IsControler(1-tp))
 end
 function s.rescon(sg,e,tp,mg)
-	return sg:Filter(Card.IsControler,nil,tp)==1
+	return sg:FilterCount(Card.IsControler,nil,tp)==1
 end
 function s.rmvtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return false end
