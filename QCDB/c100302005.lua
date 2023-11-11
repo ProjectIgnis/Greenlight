@@ -1,77 +1,76 @@
--- 覇王龍ズァーク－シンクロ・ユニバース
+--覇王龍ズァーク－シンクロ・ユニバース
 --Supreme King Z-ARC - Synchro Universe
 --Scripted by The Razgriz
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
+	--Pendulum procedure
 	Pendulum.AddProcedure(c,false)
+	--Synchro Summon procedure
 	Synchro.AddProcedure(c,nil,1,1,Synchro.NonTunerEx(s.matfilter),1,99)
-	--Becomes "Supreme King Z-ARC" while on field
+	--Special Summon this card from the Pendulum Zone
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e1:SetCode(EFFECT_CHANGE_CODE)
-	e1:SetRange(LOCATION_MZONE)
-	e1:SetValue(CARD_ZARC)
+	e1:SetDescription(aux.Stringid(id,0))
+	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetType(EFFECT_TYPE_IGNITION)
+	e1:SetRange(LOCATION_PZONE)
+	e1:SetCountLimit(1,id)
+	e1:SetCost(s.selfspcost)
+	e1:SetTarget(s.selfsptg)
+	e1:SetOperation(s.selfspop)
 	c:RegisterEffect(e1)
-	--Special Summon this card from Pendulum Zone
+	--Becomes "Supreme King Z-ARC" while on field
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(id,0))
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e2:SetType(EFFECT_TYPE_IGNITION)
-	e2:SetRange(LOCATION_PZONE)
-	e2:SetCountLimit(1,id)
-	e2:SetCost(s.spcost)
-	e2:SetTarget(s.sptg)
-	e2:SetOperation(s.spop)
+	e2:SetType(EFFECT_TYPE_SINGLE)
+	e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e2:SetCode(EFFECT_CHANGE_CODE)
+	e2:SetRange(LOCATION_MZONE)
+	e2:SetValue(CARD_ZARC)
 	c:RegisterEffect(e2)
-	--Special Summon 2 "Supreme King Dragon" monsters
+	--Special Summon up to 2 "Supreme King Dragon" monsters
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
+	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetCode(EVENT_BATTLED)
-	e3:SetRange(LOCATION_MZONE)
 	e3:SetCondition(s.spcon)
-	e3:SetTarget(s.sptg2)
-	e3:SetOperation(s.spop2)
+	e3:SetTarget(s.sptg)
+	e3:SetOperation(s.spop)
 	c:RegisterEffect(e3)
-	local e4=e3:Clone()
-	e3:SetCode(EVENT_BATTLE_DAMAGE)
-	e3:SetCondition(function(_,tp,_,ep) return ep==1-tp end)
+	--Place this card in Pendulum Zone
+	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(id,2))
+	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e4:SetProperty(EFFECT_FLAG_DELAY)
+	e4:SetCode(EVENT_DESTROYED)
+	e4:SetCondition(s.pencon)
+	e4:SetTarget(s.pentg)
+	e4:SetOperation(s.penop)
 	c:RegisterEffect(e4)
-	--Place this card in Pendulum Zone if destroyed
-	local e5=Effect.CreateEffect(c)
-	e5:SetDescription(aux.Stringid(id,2))
-	e5:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e5:SetCode(EVENT_DESTROYED)
-	e5:SetProperty(EFFECT_FLAG_DELAY)
-	e5:SetCondition(s.pencon)
-	e5:SetTarget(s.pentg)
-	e5:SetOperation(s.penop)
-	c:RegisterEffect(e5)
 end
 s.listed_series={SET_SUPREME_KING_GATE,SET_SUPREME_KING_DRAGON}
+s.listed_names={CARD_ZARC}
 function s.matfilter(c,val,sc,sumtype,tp)
 	return c:IsAttribute(ATTRIBUTE_DARK,sc,sumtype,tp) and c:IsType(TYPE_PENDULUM,sc,sumtype,tp)
 end
-function s.cfilter(c,ft,tp)
+function s.cfilter(c,tp)
 	return c:IsSetCard({SET_SUPREME_KING_GATE,SET_SUPREME_KING_DRAGON}) and c:IsType(TYPE_PENDULUM)
-		and (ft>0 or (c:IsControler(tp) and c:GetSequence()<5)) and (c:IsControler(tp) or c:IsFaceup())
+		and Duel.GetMZoneCount(tp,c)>0
 end
-function s.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
-	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
-	if chk==0 then return Duel.CheckReleaseGroupCost(tp,s.cfilter,1,false,aux.ReleaseCheckMMZ,nil,ft,tp) end
+function s.selfspcost(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.CheckReleaseGroupCost(tp,s.cfilter,1,false,nil,nil,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
-	local g=Duel.SelectReleaseGroupCost(tp,s.cfilter,1,1,false,aux.ReleaseCheckMMZ,nil,ft,tp)
+	local g=Duel.SelectReleaseGroupCost(tp,s.cfilter,1,1,false,nil,nil,tp)
 	Duel.Release(g,REASON_COST)
 end
-function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsCanBeSpecialSummoned(e,0,tp,false,false) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,e:GetHandler(),1,0,0)
-end
-function s.spop(e,tp,eg,ep,ev,re,r,rp)
+function s.selfsptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsRelateToEffect(e) then
+	if chk==0 then return c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
+end
+function s.selfspop(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	if c:IsRelateToEffect(e) then
 		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
@@ -79,20 +78,19 @@ function s.spfilter(c,e,tp)
 	return c:IsSetCard(SET_SUPREME_KING_DRAGON) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE)
 end
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if c:IsStatus(STATUS_BATTLE_DESTROYED) then return false end
-	local bc=c:GetBattleTarget()
-	return bc and bc:IsStatus(STATUS_BATTLE_DESTROYED)
+	local bc=e:GetHandler():GetBattleTarget()
+	local ex,_,damp=Duel.CheckEvent(EVENT_BATTLE_DAMAGE,true)
+	return (bc and bc:IsStatus(STATUS_BATTLE_DESTROYED)) or (ex and damp==1-tp)
 end
 function s.spfilter(c,e,tp)
-	if not (c:IsSetCard(SET_SUPREME_KING_DRAGON) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)) then return false end
+	if not (c:IsSetCard(SET_SUPREME_KING_DRAGON) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE)) then return false end
 	if c:IsLocation(LOCATION_EXTRA) then
 		return Duel.GetLocationCountFromEx(tp,tp,nil,c)>0
 	else
 		return Duel.GetMZoneCount(tp)>0
 	end
 end
-function s.sptg2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_DECK|LOCATION_EXTRA|LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK|LOCATION_EXTRA|LOCATION_GRAVE)
 end
@@ -112,7 +110,7 @@ function s.rescon(ft1,ft2,ft3,ft4,ft)
 			return res,not res
 		end
 end
-function s.spop2(e,tp,eg,ep,ev,re,r,rp)
+function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local ft1=Duel.GetLocationCount(tp,LOCATION_MZONE)
 	local ft2=Duel.GetLocationCountFromEx(tp)
 	local ft3=Duel.GetLocationCountFromEx(tp,tp,nil,TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ)
@@ -137,7 +135,6 @@ function s.spop2(e,tp,eg,ep,ev,re,r,rp)
 	if ft2>0 or ft3>0 or ft4>0 then loc=loc+LOCATION_EXTRA end
 	if loc==0 then return end
 	local sg=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.spfilter),tp,loc,0,nil,e,tp)
-	Debug.Message(#sg)
 	if #sg==0 then return end
 	local rg=aux.SelectUnselectGroup(sg,e,tp,1,ft,s.rescon(ft1,ft2,ft3,ft4,ft),1,tp,HINTMSG_SPSUMMON)
 	Duel.SpecialSummon(rg,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
