@@ -80,7 +80,7 @@ end
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)
 	local bc=e:GetHandler():GetBattleTarget()
 	local ex,_,damp=Duel.CheckEvent(EVENT_BATTLE_DAMAGE,true)
-	return (bc and bc:IsStatus(STATUS_BATTLE_DESTROYED)) or (ex and damp==1-tp)
+	return (bc and bc:IsStatus(STATUS_BATTLE_DESTROYED) and bc:IsControler(1-tp)) or (ex and damp==1-tp)
 end
 function s.spfilter(c,e,tp)
 	if not (c:IsSetCard(SET_SUPREME_KING_DRAGON) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE)) then return false end

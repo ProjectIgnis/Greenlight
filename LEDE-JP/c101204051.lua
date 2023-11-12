@@ -11,8 +11,8 @@ function s.initial_effect(c)
 	--Cannot be destroyed by monster effects
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE)
-	e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e2:SetRange(LOCATION_SZONE)
 	e2:SetValue(function(_,re) return re:IsMonsterEffect() end)
 	c:RegisterEffect(e2)
@@ -31,10 +31,11 @@ function s.initial_effect(c)
 	e4:SetDescription(aux.Stringid(id,1))
 	e4:SetCategory(CATEGORY_TOGRAVE)
 	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e4:SetCode(EVENT_CUSTOM+id)
 	e4:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
+	e4:SetCode(EVENT_CUSTOM+id)
 	e4:SetRange(LOCATION_SZONE)
 	e4:SetCountLimit(1,{id,1})
+	e4:SetCondition(function() return Duel.GetCurrentPhase()~=PHASE_DAMAGE end)
 	e4:SetTarget(s.tgtg)
 	e4:SetOperation(s.tgop)
 	c:RegisterEffect(e4)
@@ -45,8 +46,8 @@ function s.initial_effect(c)
 	local e5=Effect.CreateEffect(c)
 	e5:SetDescription(aux.Stringid(id,1))
 	e5:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e5:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e5:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e5:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e5:SetRange(LOCATION_SZONE)
 	e5:SetLabelObject(e4)
 	e5:SetOperation(s.regop)
@@ -68,15 +69,8 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.ConfirmCards(1-tp,g)
 	end
 end
-function s.cfilter(c)
-	return c:IsSpell() and c:IsDiscardable()
-end
-function s.tgcost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_HAND,0,1,e:GetHandler()) end
-	Duel.DiscardHand(tp,s.cfilter,1,1,REASON_COST|REASON_DISCARD)
-end
 function s.tgfilter(c,e,p)
-	return c:IsSummonPlayer(p) and c:IsSummonLocation(LOCATION_GRAVE)
+	return c:IsSummonPlayer(p) and c:IsSummonLocation(LOCATION_GRAVE) and c:IsAbleToGrave()
 		and c:IsLocation(LOCATION_MZONE) and c:IsCanBeEffectTarget(e)
 end
 function s.regop(e,tp,eg,ep,ev,re,r,rp)
@@ -92,6 +86,13 @@ function s.regop(e,tp,eg,ep,ev,re,r,rp)
 		e:GetLabelObject():SetLabelObject(g)
 		Duel.RaiseSingleEvent(e:GetHandler(),EVENT_CUSTOM+id,e,0,tp,tp,0)
 	end
+end
+function s.cfilter(c)
+	return c:IsSpell() and c:IsDiscardable()
+end
+function s.tgcost(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_HAND,0,1,nil) end
+	Duel.DiscardHand(tp,s.cfilter,1,1,REASON_COST|REASON_DISCARD)
 end
 function s.tgtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local g=e:GetLabelObject():Filter(s.tgfilter,nil,e,1-tp)

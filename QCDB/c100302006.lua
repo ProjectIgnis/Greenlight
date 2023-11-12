@@ -20,7 +20,7 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetCountLimit(1,{id,1})
-	e2:SetOperation(s.ssop)
+	e2:SetOperation(s.effop)
 	c:RegisterEffect(e2)
 	--Link Summon 1 Link-3 or higher Cyberse Link Monster
 	local e3=Effect.CreateEffect(c)
@@ -50,7 +50,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
-function s.ssop(e,tp,eg,ep,ev,re,r,rp)
+function s.effop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	--Reincarnation Link Summon effect
 	local e1=Effect.CreateEffect(c)
@@ -85,7 +85,7 @@ function s.reinclinkcon(e,c,must,g,min,max)
 	local mustg=Auxiliary.GetMustBeMaterialGroup(tp,g,tp,c,g,REASON_LINK)
 	if must then mustg:Merge(must) end
 	return ((#mustg==1 and s.reincmatfilter(mustg:GetFirst(),c,tp)) or (#mustg==0 and #g>0))
-		and Duel.GetFlagEffect(tp,id)==0
+		and not Duel.HasFlagEffect(tp,id)
 end
 function s.reinclinktg(e,tp,eg,ep,ev,re,r,rp,chk,c,must,g,min,max)
 	local g=Duel.GetMatchingGroup(s.reincmatfilter,tp,LOCATION_MZONE,0,nil,c,tp)

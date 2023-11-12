@@ -5,15 +5,16 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetHintTiming(0,TIMING_END_PHASE)
+	e1:SetHintTiming(0,TIMING_BATTLE_START|TIMING_END_PHASE)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
 end
-s.listed_names={CARD_LIGHT_SARC}
+s.listed_names={CARD_GOLD_SARC_OF_LIGHT}
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and 
 		Duel.IsPlayerCanSpecialSummonMonster(tp,id,0,TYPE_EFFECT|TYPE_MONSTER,0,2000,4,RACE_MACHINE,ATTRIBUTE_EARTH) end
@@ -21,22 +22,21 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if not c:IsRelateToEffect(e) then return end
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
+	if not c:IsRelateToEffect(e) or Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
 		or not Duel.IsPlayerCanSpecialSummonMonster(tp,id,0,TYPE_EFFECT|TYPE_MONSTER,0,2000,4,RACE_MACHINE,ATTRIBUTE_EARTH) then return end
 	c:AddMonsterAttribute(TYPE_EFFECT|TYPE_TRAP)
 	Duel.SpecialSummonStep(c,0,tp,tp,true,false,POS_FACEUP)
 	c:AddMonsterAttributeComplete()
 	--Gains 1000 ATK for each card you control that is "Gold Sarcophagus of Light" or a monster that mentions it
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_SINGLE)
+	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
 	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetValue(s.val)
+	e1:SetValue(s.atkval)
 	e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 	c:RegisterEffect(e1,true)
-	--Destroy attacking monster while you control "Gold Sarcophagus of Light"
+	--Destroy an opponent's attacking monster
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_DESTROY)
@@ -51,18 +51,15 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	c:RegisterEffect(e2,true)
 	Duel.SpecialSummonComplete()
 end
---ATK gain functions
-function s.gslfilter(c)
-	return c:IsFaceup() and (c:IsCode(CARD_LIGHT_SARC) or (c:IsLocation(LOCATION_MZONE) and c:ListsCode(CARD_LIGHT_SARC)))
+function s.atkfilter(c)
+	return c:IsFaceup() and (c:IsCode(CARD_GOLD_SARC_OF_LIGHT) or (c:IsMonster() and c:ListsCode(CARD_GOLD_SARC_OF_LIGHT)))
 end
-function s.val(e,c)
-	local ct=Duel.GetFieldGroup(e:GetHandlerPlayer(),LOCATION_ONFIELD,0):FilterCount(s.gslfilter,nil)
-	return ct*1000 
+function s.atkval(e,c)
+	return Duel.GetFieldGroup(e:GetHandlerPlayer(),LOCATION_ONFIELD,0):FilterCount(s.atkfilter,nil)*1000 
 end
---Destroy functions
 function s.descon(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetAttacker():IsControler(1-tp)
-		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_LIGHT_SARC),tp,LOCATION_ONFIELD,0,1,nil)
+		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_GOLD_SARC_OF_LIGHT),tp,LOCATION_ONFIELD,0,1,nil)
 end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local at=Duel.GetAttacker()
