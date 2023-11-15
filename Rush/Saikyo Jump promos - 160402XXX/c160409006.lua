@@ -4,7 +4,7 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--Fusion Procedure
 	c:EnableReviveLimit()
-	Fusion.AddProcMix(c,true,true,CARD_TRANSAMU_RAINAC,s.ffilter)
+	Fusion.AddProcMix(c,true,true,CARD_TRANSAMU_RAINAC,1,s.ffilter)
 	--atk increase
 	local e1=Effect.CreateEffect(c)
 	e1:SetCategory(CATEGORY_ATKCHANGE)
@@ -16,6 +16,7 @@ function s.initial_effect(c)
 	e1:SetOperation(s.operation)
 	c:RegisterEffect(e1)
 end
+s.named_material={CARD_TRANSAMU_RAINAC}
 function s.ffilter(c,fc,sumtype,tp)
 	return c:IsAttribute(ATTRIBUTE_LIGHT,scard,sumtype,tp) and c:IsRace(RACE_GALAXY,fc,sumtype,tp) and c:GetLevel()==7
 end
