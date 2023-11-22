@@ -15,7 +15,7 @@ function s.initial_effect(c)
 	e1a:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e1a:SetProperty(EFFECT_FLAG_DELAY)
 	e1a:SetCode(EVENT_CUSTOM+id)
-	e1a:SetRange(LOCATION_MZONE)
+	e1a:SetRange(LOCATION_SZONE)
 	e1a:SetCountLimit(1,id)
 	e1a:SetTarget(s.lptg)
 	e1a:SetOperation(s.lpop)
@@ -74,8 +74,8 @@ function s.initial_effect(c)
 	--Register discarded Spell/Traps
 	local e3b=Effect.CreateEffect(c)
 	e3b:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e3b:SetCode(EVENT_DISCARD)
 	e3b:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e3b:SetCode(EVENT_DISCARD)
 	e3b:SetRange(LOCATION_SZONE)
 	e3b:SetLabelObject(e3a)
 	e3b:SetOperation(s.stregop)
@@ -132,7 +132,8 @@ function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) then
+	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
+		--Gains 1000 ATK
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_UPDATE_ATTACK)
@@ -157,8 +158,8 @@ function s.regsumop(e,tp,eg,ep,ev,re,r,rp)
 end
 --Add 1 discarded Spell/Trap to your hand
 function s.thfilter(c,e,tp)
-	return c:IsSpellTrap() and c:IsCanBeEffectTarget(e) and c:IsFaceup()
-		 and c:IsLocation(LOCATION_GRAVE) and c:IsAbleToHand() and c:IsControler(tp) and c:IsPreviousControler(tp)
+	return c:IsSpellTrap() and c:IsCanBeEffectTarget(e) and c:IsLocation(LOCATION_GRAVE)
+		and c:IsAbleToHand() and c:IsControler(tp) and c:IsPreviousControler(tp)
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local g=e:GetLabelObject():Filter(s.thfilter,nil,e,tp)

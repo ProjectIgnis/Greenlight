@@ -1,7 +1,6 @@
 --トイ・ソルジャー
 --Toy Soldier
 --scripted by Naim
-local CARD_TOY_BOX=100304003
 local s,id=GetID()
 function s.initial_effect(c)
 	--Can be Set as a Spell
@@ -38,10 +37,9 @@ function s.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 s.listed_names={CARD_TOY_BOX}
-s.self_set_effect=true
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return c:IsPreviousLocation(LOCATION_SZONE) and c:IsPreviousPosition(POS_FACEDOWN)
+	return c:IsPreviousLocation(LOCATION_STZONE) and c:IsPreviousPosition(POS_FACEDOWN)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()

@@ -22,54 +22,61 @@ function s.initial_effect(c)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetRange(LOCATION_GRAVE)
 	e2:SetCountLimit(1,{id,1})
-	e2:SetCost(aux.bfgcost)
+	e2:SetCost(aux.selfbanishcost)
 	e2:SetTarget(s.tdtg)
 	e2:SetOperation(s.tdop)
 	c:RegisterEffect(e2)
 end
-function s.cfilter(c,e,tp,fishsync)
-	return c:IsRace(RACE_FISH) and c:IsFaceup()
-		and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil,e,tp,c:GetCode(),fishsync)
-end
-function s.thfilter(c,e,tp,code,fishsync)
-	return c:IsCode(code) and (c:IsAbleToHand() or
-		(fishsync>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)))
-end
 function s.fishsyncfilter(c)
 	return c:IsRace(RACE_FISH) and c:IsType(TYPE_SYNCHRO) and c:IsFaceup()
 end
+function s.desfilter(c,e,tp,fishsync)
+	return c:IsRace(RACE_FISH) and c:IsFaceup()
+		and Duel.IsExistingMatchingCard(s.thspfilter,tp,LOCATION_DECK,0,1,nil,e,tp,c,c:GetCode(),fishsync)
+end
+function s.thspfilter(c,e,tp,des_c,code,fishsync)
+	return c:IsCode(code) and c:IsMonster() and (c:IsAbleToHand() or
+		(fishsync and Duel.GetMZoneCount(tp,des_c)>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)))
+end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	local fishsync=Duel.GetMatchingGroupCount(s.fishsyncfilter,tp,LOCATION_MZONE,0,nil)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.cfilter(c,e,tp,fishsync) end
-	if chk==0 then return Duel.IsExistingTarget(s.cfilter,tp,LOCATION_MZONE,0,1,nil,e,tp,fishsync) end
+	local fishsync=e:IsHasType(EFFECT_TYPE_ACTIVATE) and Duel.IsExistingMatchingCard(s.fishsyncfilter,tp,LOCATION_MZONE,0,1,nil)
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.desfilter(c,e,tp,fishsync) end
+	if chk==0 then return Duel.IsExistingTarget(s.desfilter,tp,LOCATION_MZONE,0,1,nil,e,tp,fishsync) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectTarget(tp,s.cfilter,tp,LOCATION_MZONE,0,1,1,nil,e,tp,fishsync)
+	local g=Duel.SelectTarget(tp,s.desfilter,tp,LOCATION_MZONE,0,1,1,nil,e,tp,fishsync)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,tp,0)
-	if fishsync>0 then
+	if fishsync then
 		Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 		Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
 	else
 		Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 	end
-	e:SetLabel(fishsync)
+	e:SetLabel(fishsync and 1 or 0)
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	local code=tc:GetCode()
 	if tc:IsRelateToEffect(e) and tc:IsFaceup() and tc:IsRace(RACE_FISH) and Duel.Destroy(tc,REASON_EFFECT)>0 then
-		local fishsync=e:GetLabel()
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local sc=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil,e,tp,code,fishsync):GetFirst()
+		local fishsync=e:GetLabel()==1
+		local hint_msg=fishsync and aux.Stringid(id,2) or HINTMSG_ATOHAND
+		Duel.Hint(HINT_SELECTMSG,tp,hint_msg)
+		local sc=Duel.SelectMatchingCard(tp,s.thspfilter,tp,LOCATION_DECK,0,1,1,nil,e,tp,nil,code,fishsync):GetFirst()
 		if not sc then return end
-		aux.ToHandOrElse(sc,tp,
-			function(sc)
-				return fishsync>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and sc:IsCanBeSpecialSummoned(e,0,tp,false,false)
-			end,
-			function(sc)
-				return Duel.SpecialSummon(sc,0,tp,tp,false,false,POS_FACEUP)
-			end,
-			aux.Stringid(id,2)
-		)
+		local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
+		if fishsync and ft>0 and sc:IsCanBeSpecialSummoned(e,0,tp,false,false) then
+			aux.ToHandOrElse(sc,tp,
+				function(sc)
+					return fishsync and ft>0 and sc:IsCanBeSpecialSummoned(e,0,tp,false,false)
+				end,
+				function(sc)
+					return Duel.SpecialSummon(sc,0,tp,tp,false,false,POS_FACEUP)
+				end,
+				aux.Stringid(id,3)
+			)
+		else
+			Duel.SendtoHand(sc,nil,REASON_EFFECT)
+			Duel.ConfirmCards(1-tp,sc)
+		end
 	end
 end
 function s.fishfilter(c,e,tp)
@@ -77,10 +84,10 @@ function s.fishfilter(c,e,tp)
 		and (c:IsAbleToDeck() or c:IsCanBeSpecialSummoned(e,0,tp,false,false))
 end
 function s.rescon(sg,e,tp,mg)
-	return sg:CheckSameProperty(Card.GetCode) and sg:IsExists(s.spcheck,1,nil,sg,e,tp)
+	return sg:CheckSameProperty(Card.GetCode) and #sg==2 and sg:IsExists(s.spcheck,1,nil,sg,e,tp)
 end
 function s.spcheck(c,sg,e,tp)
-	return c:IsCanBeSpecialSummoned(e,0,tp,false,false) and sg:FilterCount(Card.IsAbleToDeck,c)==1
+	return c:IsCanBeSpecialSummoned(e,0,tp,false,false) and (sg-c):GetFirst():IsAbleToDeck()
 end
 function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return false end
@@ -97,9 +104,11 @@ function s.tdop(e,tp,eg,ep,ev,re,r,rp)
 	if #g==0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local td=g:FilterSelect(tp,Card.IsAbleToDeck,1,1,nil)
+	if #td==0 then return end
+	Duel.HintSelection(td,true)
 	g:RemoveCard(td)
-	if #td>0 and Duel.SendtoDeck(td,nil,SEQ_DECKBOTTOM,REASON_EFFECT)>0 and #g>0
-		and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and g:GetFirst():IsCanBeSpecialSummoned(e,0,tp,false,false) then
-		Duel.SpecialSummon(g:GetFirst(),0,tp,tp,false,false,POS_FACEUP)
+	if Duel.SendtoDeck(td,nil,SEQ_DECKBOTTOM,REASON_EFFECT)>0 and #g>0
+		and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
 	end
 end

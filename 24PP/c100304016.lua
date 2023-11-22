@@ -11,11 +11,11 @@ function s.initial_effect(c)
 	--Treat a Fish monster as a Tuner
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
-	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetRange(LOCATION_SZONE)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetCode(EVENT_FREE_CHAIN)
-	e2:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
+	e2:SetRange(LOCATION_SZONE)
+	e2:SetHintTiming(0,TIMING_MAIN_END|TIMINGS_CHECK_MONSTER)
 	e2:SetCountLimit(1,id)
 	e2:SetTarget(s.tunertg)
 	e2:SetOperation(s.tunerop)
@@ -25,8 +25,8 @@ function s.initial_effect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_POSITION)
 	e3:SetType(EFFECT_TYPE_QUICK_O)
-	e3:SetRange(LOCATION_SZONE)
 	e3:SetCode(EVENT_ATTACK_ANNOUNCE)
+	e3:SetRange(LOCATION_SZONE)
 	e3:SetCountLimit(1,{id,1})
 	e3:SetCondition(function(e,tp) return Duel.GetAttacker():IsControler(1-tp) end)
 	e3:SetCost(s.poscost)
@@ -48,27 +48,28 @@ function s.initial_effect(c)
 	e4:SetOperation(s.spop)
 	c:RegisterEffect(e4)
 	local e5=e4:Clone()
-	e5:SetCondition(s.spcon2)
 	e5:SetCode(EVENT_TO_GRAVE)
+	e5:SetCondition(s.spcon2)
 	c:RegisterEffect(e5)
 end
-function s.filter(c)
+function s.tunerfilter(c)
 	return c:IsFaceup() and c:IsRace(RACE_FISH) and not c:IsType(TYPE_TUNER)
 end
 function s.tunertg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.filter(chkc) end
-	if chk==0 then return Duel.IsExistingTarget(s.filter,tp,LOCATION_MZONE,0,1,nil) end
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.tunerfilter(chkc) end
+	if chk==0 then return Duel.IsExistingTarget(s.tunerfilter,tp,LOCATION_MZONE,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_APPLYTO)
-	Duel.SelectTarget(tp,s.filter,tp,LOCATION_MZONE,0,1,1,nil)
+	Duel.SelectTarget(tp,s.tunerfilter,tp,LOCATION_MZONE,0,1,1,nil)
 end
 function s.tunerop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and s.filter(tc) then
+	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
+		--Treated as a Tuner this turn
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_ADD_TYPE)
-		e1:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END)
 		e1:SetValue(TYPE_TUNER)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END)
 		tc:RegisterEffect(e1)
 	end
 end
@@ -92,14 +93,13 @@ function s.posop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.ChangePosition(g,POS_FACEUP_DEFENSE)
 end
 function s.spconfilter1(c,tp)
-	return c:IsPreviousControler(tp) and c:IsPreviousLocation(LOCATION_MZONE) and c:IsPreviousPosition(POS_FACEUP)
-		and c:GetPreviousRaceOnField()&RACE_FISH==RACE_FISH
+	return c:IsPreviousControler(tp) and c:GetPreviousRaceOnField()&RACE_FISH==RACE_FISH
 end
 function s.spcon1(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(s.spconfilter1,1,nil,tp)
 end
 function s.spconfilter2(c,tp)
-	return c:IsRace(RACE_FISH) and not c:IsReason(REASON_BATTLE) and s.spconfilter1(c,tp)
+	return c:IsRace(RACE_FISH) and c:IsPreviousControler(tp) and not c:IsReason(REASON_BATTLE)
 end
 function s.spcon2(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(s.spconfilter2,1,nil,tp)
