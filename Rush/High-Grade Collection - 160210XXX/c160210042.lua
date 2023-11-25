@@ -18,8 +18,11 @@ function s.initial_effect(c)
 	e1:SetOperation(s.atkop)
 	c:RegisterEffect(e1)
 end
+function s.cfilter(c)
+	return c:IsMonster() and c:IsAbleToGraveAsCost()
+end
 function s.atkcost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToGraveAsCost,tp,LOCATION_HAND,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_HAND,0,1,nil) end
 end
 function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
@@ -29,7 +32,7 @@ function s.rescon(sg,e,tp,mg)
 	return sg:IsExists(Card.IsMonster,1,nil)
 end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetMatchingGroup(Card.IsAbleToGrave,tp,LOCATION_HAND,0,nil)
+	local g=Duel.GetMatchingGroup(Card.IsAbleToGraveAsCost,tp,LOCATION_HAND,0,nil)
 	if #g==0 then return end
 	local tg=aux.SelectUnselectGroup(g,e,tp,1,math.min(3,#g),s.rescon,1,tp,HINTMSG_TOGRAVE,s.rescon)
 	if #tg>0 and Duel.SendtoGrave(tg,REASON_COST)>0 then
