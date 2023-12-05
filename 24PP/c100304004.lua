@@ -47,7 +47,7 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
 end
 function s.tgfilter(c)
-	return c:IsRace(RACE_PYRO) and c:IsLevel(4) and c:IsAbleToGrave() --the correct level is not known yet
+	return c:IsRace(RACE_PYRO) and c:IsLevel(8) and c:IsAbleToGrave()
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end

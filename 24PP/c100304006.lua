@@ -1,5 +1,5 @@
 --石油採掘
---Oil / Oil Drilling
+--Oil
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)

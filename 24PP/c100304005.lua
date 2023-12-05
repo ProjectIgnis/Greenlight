@@ -34,14 +34,13 @@ function s.tkncost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.Release(g,REASON_COST)
 	e:SetLabel(#g*2)
 end
---NOTE: the level of the token is unknown at the moment. I am using 4
 function s.tkntg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsPlayerCanSpecialSummonMonster(tp,id+100,0,TYPES_TOKEN,200,2000,4,RACE_MACHINE,ATTRIBUTE_FIRE,POS_FACEUP) end
+	if chk==0 then return Duel.IsPlayerCanSpecialSummonMonster(tp,id+100,0,TYPES_TOKEN,200,200,1,RACE_MACHINE,ATTRIBUTE_FIRE,POS_FACEUP) end
 	Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
 end
 function s.tkop(e,tp,eg,ep,ev,re,r,rp)
-	if not Duel.IsPlayerCanSpecialSummonMonster(tp,id+100,0,TYPES_TOKEN,200,2000,4,RACE_MACHINE,ATTRIBUTE_FIRE,POS_FACEUP) then return end
+	if not Duel.IsPlayerCanSpecialSummonMonster(tp,id+100,0,TYPES_TOKEN,200,200,1,RACE_MACHINE,ATTRIBUTE_FIRE,POS_FACEUP) then return end
 	local ft=math.min(e:GetLabel(),Duel.GetLocationCount(tp,LOCATION_MZONE))
 	if ft==0 then return end
 	if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
@@ -49,7 +48,7 @@ function s.tkop(e,tp,eg,ep,ev,re,r,rp)
 	for i=1,ct do
 		local token=Duel.CreateToken(tp,id+100)
 		if Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP) then
-			--Inflict 800 damage when the tokens are destroyed
+			--Inflict 500 damage when the tokens are destroyed
 			local e1=Effect.CreateEffect(e:GetHandler())
 			e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 			e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
@@ -63,7 +62,7 @@ end
 function s.damop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsReason(REASON_DESTROY) then
-		Duel.Damage(1-e:GetHandlerPlayer(),800,REASON_EFFECT)
+		Duel.Damage(1-e:GetHandlerPlayer(),500,REASON_EFFECT)
 	end
 	e:Reset()
 end
