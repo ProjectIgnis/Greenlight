@@ -19,7 +19,7 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_DESTROY)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_REMOVE)
 	e2:SetCountLimit(1,{id,1})
 	e2:SetTarget(s.destg)
@@ -35,43 +35,37 @@ function s.tkncost(e,tp,eg,ep,ev,re,r,rp,chk)
 	e:SetLabel(#g*2)
 end
 function s.tkntg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsPlayerCanSpecialSummonMonster(tp,id+100,0,TYPES_TOKEN,200,200,1,RACE_MACHINE,ATTRIBUTE_FIRE,POS_FACEUP) end
+	if chk==0 then return Duel.IsPlayerCanSpecialSummonMonster(tp,id+100,0,TYPES_TOKEN,200,200,1,RACE_MACHINE,ATTRIBUTE_FIRE) end
 	Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
 end
-function s.tkop(e,tp,eg,ep,ev,re,r,rp)
-	if not Duel.IsPlayerCanSpecialSummonMonster(tp,id+100,0,TYPES_TOKEN,200,200,1,RACE_MACHINE,ATTRIBUTE_FIRE,POS_FACEUP) then return end
+function s.tknop(e,tp,eg,ep,ev,re,r,rp)
+	if not Duel.IsPlayerCanSpecialSummonMonster(tp,id+100,0,TYPES_TOKEN,200,200,1,RACE_MACHINE,ATTRIBUTE_FIRE) then return end
 	local ft=math.min(e:GetLabel(),Duel.GetLocationCount(tp,LOCATION_MZONE))
 	if ft==0 then return end
 	if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
+	local c=e:GetHandler()
 	local ct=Duel.AnnounceNumberRange(tp,1,ft)
 	for i=1,ct do
 		local token=Duel.CreateToken(tp,id+100)
 		if Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP) then
 			--Inflict 500 damage when the tokens are destroyed
-			local e1=Effect.CreateEffect(e:GetHandler())
+			local e1=Effect.CreateEffect(c)
 			e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 			e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-			e1:SetCode(EVENT_LEAVE_FIELD)
-			e1:SetOperation(s.damop)
+			e1:SetCode(EVENT_DESTROYED)
+			e1:SetOperation(function(e) Duel.Damage(1-tp,500,REASON_EFFECT) e:Reset() end)
 			token:RegisterEffect(e1,true)
 		end
 	end
 	Duel.SpecialSummonComplete()
 end
-function s.damop(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if c:IsReason(REASON_DESTROY) then
-		Duel.Damage(1-e:GetHandlerPlayer(),500,REASON_EFFECT)
-	end
-	e:Reset()
-end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and chkc:IsFaceup() and chkc:IsType(TYPES_TOKEN) end
-	local ct=Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsType,TYPES_TOKEN),LOCATION_MZONE,0,nil)
-	if chk==0 then return Duel.IsExistingTarget(aux.FaceupFilter(Card.IsType,TYPES_TOKEN),tp,LOCATION_MZONE,0,1,nil) end
+	if chkc then return chkc:IsOnField() and chkc:IsControler(tp) and chkc:IsType(TYPE_TOKEN) end
+	if chk==0 then return Duel.IsExistingTarget(Card.IsType,tp,LOCATION_ONFIELD,0,1,nil,TYPE_TOKEN) end
+	local ct=Duel.GetMatchingGroupCount(Card.IsType,tp,LOCATION_ONFIELD,0,nil,TYPE_TOKEN)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsType,TYPES_TOKEN),tp,LOCATION_MZONE,0,1,ct,nil)
+	local g=Duel.SelectTarget(tp,Card.IsType,tp,LOCATION_ONFIELD,0,1,ct,nil,TYPE_TOKEN)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,#g,tp,0)
 end
 function s.desop(e,tp,eg,ep,ev,re,r,rp)

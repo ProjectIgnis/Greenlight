@@ -8,24 +8,25 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e1)
-	--Level 7+ Synchro Monsters gain 400 ATK for each of your banished Level 7+ Synchro Monsters
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_UPDATE_ATTACK)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetTargetRange(LOCATION_MZONE,0)
-	e2:SetTarget(s.atktg)
-	e2:SetValue(s.atkval)
-	c:RegisterEffect(e2)
 	--Destroy 1 card your opponent controls
+	local e2=Effect.CreateEffect(c)
+	e2:SetDescription(aux.Stringid(id,0))
+	e2:SetCategory(CATEGORY_DESTROY)
+	e2:SetType(EFFECT_TYPE_IGNITION)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetRange(LOCATION_SZONE)
+	e2:SetCost(s.descost)
+	e2:SetTarget(s.destg)
+	e2:SetOperation(s.desop)
+	c:RegisterEffect(e2)
+	--Level 7+ Synchro Monsters gain 400 ATK for each of your banished Level 7+ Synchro Monsters
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,0))
-	e3:SetCategory(CATEGORY_DESTROY)
-	e3:SetType(EFFECT_TYPE_IGNITION)
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetCode(EFFECT_UPDATE_ATTACK)
 	e3:SetRange(LOCATION_SZONE)
-	e3:SetCost(s.descost)
-	e3:SetTarget(s.destg)
-	e3:SetOperation(s.desop)
+	e3:SetTargetRange(LOCATION_MZONE,0)
+	e3:SetTarget(function(e,c) return c:IsLevelAbove(7) and c:IsType(TYPE_SYNCHRO) end)
+	e3:SetValue(s.atkval)
 	c:RegisterEffect(e3)
 	--Negate the attack of your opponent's monster
 	local e4=Effect.CreateEffect(c)
@@ -34,13 +35,14 @@ function s.initial_effect(c)
 	e4:SetCode(EVENT_ATTACK_ANNOUNCE)
 	e4:SetRange(LOCATION_SZONE)
 	e4:SetCountLimit(1)
-	e4:SetCondition(function(e,tp) return Duel.GetAttacker():IsControler(1-tp) end)
-	e4:SetOperation(function() Duel.NegateAttack() end )
+	e4:SetCondition(function(e,tp) return Duel.GetAttacker():IsControler(1-tp) and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsType,TYPE_SYNCHRO),tp,LOCATION_REMOVED,0,1,nil) end)
+	e4:SetOperation(function() Duel.NegateAttack() end)
 	c:RegisterEffect(e4)
 end
+s.listed_series={SET_POWER_TOOL}
 function s.costfilter(c)
 	return c:IsAbleToRemoveAsCost() and (c:IsLocation(LOCATION_MZONE)
-		or (c:IsSetCard(SET_POWER_TOOL) or (c:IsRace(RACE_DRAGON) and c:IsLevel(7,8))))
+		or (c:IsType(TYPE_SYNCHRO) and (c:IsSetCard(SET_POWER_TOOL) or (c:IsRace(RACE_DRAGON) and c:IsLevel(7,8)))))
 end
 function s.rescon(sg,e,tp,mg)
 	return sg:FilterCount(Card.IsLocation,nil,LOCATION_MZONE)==1
@@ -48,8 +50,8 @@ end
 function s.descost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetMatchingGroup(s.costfilter,tp,LOCATION_MZONE|LOCATION_GRAVE,0,nil)
 	if chk==0 then return #g>=2 and aux.SelectUnselectGroup(g,e,tp,2,2,s.rescon,0) end
-	local g=aux.SelectUnselectGroup(g,e,tp,2,2,s.rescon,1,tp,HINTMSG_REMOVE,s.rescon)
-	Duel.Remove(g,nil,REASON_COST)
+	local g=aux.SelectUnselectGroup(g,e,tp,2,2,s.rescon,1,tp,HINTMSG_REMOVE)
+	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsControler(1-tp) and chkc:IsOnField() end
@@ -63,9 +65,6 @@ function s.desop(e,tp,eg,ep,ev,re,r,rp)
 	if tc:IsRelateToEffect(e) then
 		Duel.Destroy(tc,REASON_EFFECT)
 	end
-end
-function s.atktg(e,c)
-	return c:IsLevelAbove(7) and c:IsType(TYPE_SYNCHRO)
 end
 function s.atkfilter(c)
 	return c:IsFaceup() and c:IsLevelAbove(7) and c:IsType(TYPE_SYNCHRO)

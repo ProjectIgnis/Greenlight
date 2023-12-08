@@ -8,8 +8,8 @@ function s.initial_effect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_LVCHANGE+CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
+	e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetCountLimit(1,id)
 	e1:SetTarget(s.lvtg)
 	e1:SetOperation(s.lvop)
@@ -18,8 +18,8 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_TOGRAVE+CATEGORY_DRAW)
-	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetType(EFFECT_TYPE_IGNITION)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetCountLimit(1,{id,1})
 	e2:SetTarget(s.tgtg)
@@ -39,16 +39,16 @@ end
 function s.lvop(e,tp,eg,ep,ev,re,r,rp,c)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) and c:IsFaceup() and not c:IsLevel(4) then
+		--Change its Level to 4
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-		e1:SetRange(LOCATION_MZONE)
-		e1:SetReset(RESET_EVENT|RESETS_STANDARD_DISABLE)
 		e1:SetCode(EFFECT_CHANGE_LEVEL)
 		e1:SetValue(4)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD_DISABLE)
 		c:RegisterEffect(e1)
+		if not c:IsLevel(4) then return end
 		local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.thfilter),tp,LOCATION_DECK|LOCATION_GRAVE,0,nil)
-		if c:IsLevel(4) and #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+		if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 			local sg=g:Select(tp,1,1,nil)
 			Duel.BreakEffect()
@@ -63,14 +63,14 @@ function s.tgtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return c:IsAbleToGrave() and Duel.IsExistingTarget(Card.IsAbleToGrave,tp,LOCATION_ONFIELD,0,1,c) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
 	local g=Duel.SelectTarget(tp,Card.IsAbleToGrave,tp,LOCATION_ONFIELD,0,1,1,c)
-	g:Merge(c)
-	Duel.SetTargetCard(g)
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,g,#g,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,g+c,2,tp,0)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
 function s.tgop(e,tp,eg,ep,ev,re,r,rp)
-	local tg=Duel.GetTargetCards(e)
-	if #tg==2 and Duel.SendtoGrave(tg,REASON_EFFECT)==2
+	local c=e:GetHandler()
+	local tc=Duel.GetFirstTarget()
+	if not (c:IsRelateToEffect(e) and tc:IsRelateToEffect(e)) then return end
+	if Duel.SendtoGrave(Group.CreateGroup(c,tc),REASON_EFFECT)==2
 		and Duel.GetOperatedGroup():FilterCount(Card.IsLocation,nil,LOCATION_GRAVE)==2 then
 		Duel.Draw(tp,1,REASON_EFFECT)
 	end

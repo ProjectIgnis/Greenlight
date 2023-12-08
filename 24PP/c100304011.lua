@@ -9,34 +9,32 @@ function s.initial_effect(c)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
 	--Inflict damage equal to half of the ATK of the monster destroyed
-	local e1a=Effect.CreateEffect(c)
-	e1a:SetDescription(aux.Stringid(id,0))
-	e1a:SetCategory(CATEGORY_DAMAGE)
-	e1a:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e1a:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
-	e1a:SetCode(EVENT_CUSTOM+id)
-	e1a:SetRange(LOCATION_SZONE)
-	e1a:SetCountLimit(1,id)
-	e1a:SetTarget(s.damtg)
-	e1a:SetOperation(s.damop)
-	c:RegisterEffect(e1a)
-	local g1=Group.CreateGroup()
-	g1:KeepAlive()
-	e1a:SetLabelObject(g1)
+	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,0))
+	e1:SetCategory(CATEGORY_DAMAGE)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e1:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
+	e1:SetCode(EVENT_CUSTOM+id)
+	e1:SetRange(LOCATION_SZONE)
+	e1:SetCountLimit(1,id)
+	e1:SetTarget(s.damtg)
+	e1:SetOperation(s.damop)
+	c:RegisterEffect(e1)
 	--Keep track of the destroyed monsters
-	local e1b=Effect.CreateEffect(c)
-	e1b:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e1b:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e1b:SetCode(EVENT_DESTROYED)
-	e1b:SetRange(LOCATION_SZONE)
-	e1b:SetLabelObject(e1a)
-	e1b:SetOperation(s.atkregop)
-	c:RegisterEffect(e1b)
+	aux.GlobalCheck(s,function()
+		s.desgroup=Group.CreateGroup()
+		s.desgroup:KeepAlive()
+		local ge1=Effect.CreateEffect(c)
+		ge1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+		ge1:SetCode(EVENT_DESTROYED)
+		ge1:SetOperation(s.desgroupregop)
+		Duel.RegisterEffect(ge1,0)
+	end)
 	--Destroy 1 card on the field
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_DESTROY)
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e2:SetType(EFFECT_TYPE_QUICK_O)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetCode(EVENT_BE_BATTLE_TARGET)
 	e2:SetRange(LOCATION_SZONE)
@@ -47,27 +45,24 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 function s.cfilter(c,e)
-	return c:IsPreviousPosition(POS_FACEUP) and c:IsReason(REASON_EFFECT)
-		and c:IsPreviousLocation(LOCATION_MZONE) and c:IsSummonLocation(LOCATION_EXTRA)
+	return c:IsReason(REASON_EFFECT) and c:IsPreviousLocation(LOCATION_MZONE) and c:IsSummonLocation(LOCATION_EXTRA)
 		and c:GetAttack()>0 and (not e or c:IsCanBeEffectTarget(e))
 end
-function s.atkregop(e,tp,eg,ep,ev,re,r,rp)
-	local tg=eg:Filter(s.cfilter,nil,e)
+function s.desgroupregop(e,tp,eg,ep,ev,re,r,rp)
+	local tg=eg:Filter(s.cfilter,nil)
 	if #tg>0 then
 		for tc in tg:Iter() do
 			tc:RegisterFlagEffect(id,RESET_CHAIN,0,1)
 		end
-		local g=e:GetLabelObject():GetLabelObject()
-		if Duel.GetCurrentChain()==0 then g:Clear() end
-		g:Merge(tg)
-		g:Remove(function(c) return c:GetFlagEffect(id)==0 end,nil)
-		e:GetLabelObject():SetLabelObject(g)
-		Duel.RaiseSingleEvent(e:GetHandler(),EVENT_CUSTOM+id,e,0,tp,tp,0)
+		if Duel.GetCurrentChain()==0 then s.desgroup:Clear() end
+		s.desgroup:Merge(tg)
+		s.desgroup:Remove(function(c) return c:GetFlagEffect(id)==0 end,nil)
+		Duel.RaiseEvent(s.desgroup,EVENT_CUSTOM+id,e,0,tp,tp,0)
 	end
 end
 function s.damtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	local g=e:GetLabelObject():Filter(s.cfilter,nil,e)
-	if chkc then return g:IsContains(chkc) and s.cfilter(chkc,nil) end
+	local g=s.desgroup:Filter(s.cfilter,nil,e)
+	if chkc then return g:IsContains(chkc) and s.cfilter(chkc,e) end
 	if chk==0 then return #g>0 end
 	local tc=nil
 	if #g==1 then
@@ -84,13 +79,14 @@ function s.damop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	local val=tc:GetAttack()//2
 	if tc:IsRelateToEffect(e) and val>0 then
-		Duel.Damage(tp,val,REASON_EFFECT)
-		Duel.Damage(1-tp,val,REASON_EFFECT)
+		Duel.Damage(tp,val,REASON_EFFECT,true)
+		Duel.Damage(1-tp,val,REASON_EFFECT,true)
+		Duel.RDComplete()
 	end
 end
 function s.descond(e,tp,eg,ep,ev,re,r,rp)
 	local d=Duel.GetAttackTarget()
-	return d and d:IsControler(tp) and d:IsFaceup() and d:IsAttribute(ATTRIBUTE_DARK) and d:IsType(TYPE_SYNCHRO) and c:IsSummonLocation(LOCATION_EXTRA)
+	return d and d:IsControler(tp) and d:IsFaceup() and d:IsAttribute(ATTRIBUTE_DARK) and d:IsType(TYPE_SYNCHRO) and d:IsSummonLocation(LOCATION_EXTRA)
 end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chkc then return chkc:IsLocation(LOCATION_ONFIELD) end
