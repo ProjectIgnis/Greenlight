@@ -19,7 +19,6 @@ function s.initial_effect(c)
 	e2:SetCondition(s.indcond)
 	e2:SetValue(s.val)
 	c:RegisterEffect(e2)
-	
 end
 function s.filter(c)
 	return c:IsFaceup() and c:IsAttack(2500)
