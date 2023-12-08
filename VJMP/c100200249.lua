@@ -3,8 +3,8 @@
 --Scripted by Larry126
 local s,id=GetID()
 function s.initial_effect(c)
-	--Link Summon
 	c:EnableReviveLimit()
+	--Link Summon procedure
 	Link.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsType,TYPE_EFFECT),2,2)
 	--You can use 1 opponent's monster as Link Material with this card
 	local e1=Effect.CreateEffect(c)
@@ -33,18 +33,21 @@ end
 function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if not c:IsRelateToEffect(e) or not tc:IsRelateToEffect(e) then return end
+	if not (c:IsRelateToEffect(e) and tc:IsRelateToEffect(e)) then return end
+	--Can also use that opponent's monster as Link Material for a Link-5 monster
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_EXTRA_MATERIAL)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e1:SetCode(EFFECT_EXTRA_MATERIAL)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetAbsoluteRange(tp,1,0)
 	e1:SetOperation(s.extracon)
 	e1:SetValue(s.extraval)
-	e1:SetReset(RESET_PHASE|PHASE_END|RESET_EVENT|RESETS_STANDARD)
+	e1:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END)
 	tc:RegisterEffect(e1)
 	c:CreateEffectRelation(e1)
+	tc:SetCardTarget(c)
+	tc:RegisterFlagEffect(id,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(id,1))
 end
 function s.extrafilter(c,tp)
 	return c:IsLocation(LOCATION_MZONE) and c:IsControler(tp)

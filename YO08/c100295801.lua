@@ -3,12 +3,12 @@
 --Scripted by DyXel
 local s,id=GetID()
 function s.initial_effect(c)
-	--Destroy + Search + Change level
+	--Destroy 1 other FIRE monster in your hand or face-up field and search 1 FIRE Beast, Beast-Warrior, or Winged Beast
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_DECKDES)
-	e1:SetType(EFFECT_TYPE_TRIGGER_O+EFFECT_TYPE_SINGLE)
-	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
+	e1:SetCategory(CATEGORY_DESTROY+CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_LVCHANGE)
+	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetCountLimit(1,{id,0})
 	e1:SetTarget(s.thtg)
@@ -17,7 +17,7 @@ function s.initial_effect(c)
 	local e2=e1:Clone()
 	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
 	c:RegisterEffect(e2)
-	--Special Summon Garunix when destroyed
+	--Special Summon 1 "Fire King High Avatar Garunix" from your Deck in Defense Position
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
@@ -30,13 +30,12 @@ function s.initial_effect(c)
 	e3:SetOperation(s.spop)
 	c:RegisterEffect(e3)
 end
-s.listed_names={23015896}
-s.listed_series={0x81}
+s.listed_names={id,23015896}
 function s.desfilter(c)
-	return c:IsAttribute(ATTRIBUTE_FIRE) and (not c:IsLocation(LOCATION_MZONE) or c:IsFaceup())
+	return c:IsAttribute(ATTRIBUTE_FIRE) and (c:IsLocation(LOCATION_HAND) or c:IsFaceup())
 end
 function s.thfilter(c)
-	return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACES_BEAST_BWARRIOR_WINGB) and c:IsAbleToHand()
+	return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACES_BEAST_BWARRIOR_WINGB) and c:IsAbleToHand() and not c:IsCode(id)
 end
 function s.filter(c)
 	return not c:IsPublic() or c:IsMonster()
@@ -44,8 +43,8 @@ end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then
-		return Duel.IsExistingMatchingCard(s.desfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,c) and
-		       Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil)
+		return Duel.IsExistingMatchingCard(s.desfilter,tp,LOCATION_HAND|LOCATION_MZONE,0,1,c)
+			and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil)
 	end
 	local dg=Duel.GetMatchingGroup(s.desfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,c)
 	if not Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_HAND,0,1,nil) then
@@ -57,24 +56,27 @@ function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
+	local exc=c:IsRelateToEffect(e) and c or nil
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g1=Duel.SelectMatchingCard(tp,s.desfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,c)
-	if #g1==0 or Duel.Destroy(g1,REASON_EFFECT)==0 then return end
+	local desg=Duel.SelectMatchingCard(tp,s.desfilter,tp,LOCATION_HAND|LOCATION_MZONE,0,1,1,exc)
+	if #desg==0 or Duel.Destroy(desg,REASON_EFFECT)==0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g2=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,c)
-	if #g2==0 then return end
-	Duel.SendtoHand(g2,nil,REASON_EFFECT)
-	Duel.ConfirmCards(1-tp,g2)
-	local lvl=g2:GetFirst():GetLevel()
-	if not c:IsRelateToEffect(e) or not c:IsFaceup() or lvl==c:GetLevel() or not Duel.SelectYesNo(tp,aux.Stringid(id,3)) then return end
-	Duel.BreakEffect()
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_CHANGE_LEVEL)
-	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e1:SetValue(lvl)
-	e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-	c:RegisterEffect(e1)
+	local sc=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil):GetFirst()
+	if not sc or Duel.SendtoHand(sc,nil,REASON_EFFECT)==0 then return end
+	Duel.ConfirmCards(1-tp,sc)
+	Duel.ShuffleHand(tp)
+	local lvl=sc:GetLevel()
+	if c:IsRelateToEffect(e) and c:IsFaceup() and c:HasLevel() and not c:IsLevel(lvl)
+		and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+		Duel.BreakEffect()
+		--This card's Level becomes that monster's
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_CHANGE_LEVEL)
+		e1:SetValue(lvl)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD_DISABLE)
+		c:RegisterEffect(e1)
+	end
 end
 function s.spfilter(c,e,tp)
 	return c:IsCode(23015896) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE)
