@@ -26,7 +26,7 @@ function s.initial_effect(c)
 	e3:SetTarget(function(e,c) return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_DRAGON) end)
 	e3:SetValue(1)
 	c:RegisterEffect(e3)
-	--Synchro summon duringt he Battle Phase
+	--Synchro summon during the Battle Phase
 	local e4=Effect.CreateEffect(c)
 	e4:SetDescription(aux.Stringid(id,1))
 	e4:SetCategory(CATEGORY_SPECIAL_SUMMON)
