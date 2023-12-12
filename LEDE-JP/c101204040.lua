@@ -3,6 +3,9 @@
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
+	c:EnableReviveLimit()
+	--Synchro Summon Procedure
+	Synchro.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsRace,RACE_DRAGON),1,1,Synchro.NonTunerEx(Card.IsRace,RACE_DRAGON),1,99)
 	--Change all monsters on the field to Attack Position.
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
