@@ -30,25 +30,25 @@ function s.initial_effect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetCode(EVENT_BATTLE_DESTROYING)
-	e3:SetCountLimit(1)
-	e3:SetCondition(function(e) return aux.bdcon(e,tp,eg,ep,ev,re,r,rp) and e:GetHandler():CanChainAttack() end )
+	e3:SetCondition(s.exatkcon)
 	e3:SetCost(aux.dxmcostgen(1,1,nil))
 	e3:SetOperation(function() Duel.ChainAttack() end)
 	c:RegisterEffect(e3,false,REGISTER_FLAG_DETACH_XMAT)
 end
 s.listes_names={id}
-function s.cfilter(c)
-	return c:IsSpellTrap() and c:IsDiscardable()
-end
 function s.ovfilter(c,tp,xyzc)
 	return c:IsFaceup() and c:IsType(TYPE_XYZ,xyzc,SUMMON_TYPE_XYZ,tp) and c:IsRankBelow(4)
 end
+function s.cfilter(c)
+	return c:IsSpellTrap() and c:IsDiscardable()
+end
 function s.xyzop(e,tp,chk,mc)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_HAND,0,1,nil) end
+	if chk==0 then return not Duel.HasFlagEffect(tp,id) and Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_HAND,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DISCARD)
 	local tc=Duel.GetMatchingGroup(s.cfilter,tp,LOCATION_HAND,0,nil):SelectUnselect(Group.CreateGroup(),tp,false,Xyz.ProcCancellable)
 	if tc then
 		Duel.SendtoGrave(tc,REASON_DISCARD|REASON_COST)
+		Duel.RegisterFlagEffect(tp,id,RESET_PHASE|PHASE_END,EFFECT_FLAG_OATH,1)
 		return true
 	else return false end
 end
@@ -62,8 +62,13 @@ end
 function s.disop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(s.disfilter,tp,0,LOCATION_MZONE,nil)
 	if #g==0 then return end
-	--Negate the effects of all face-up monsters your opponent currently controls
+	local c=e:GetHandler()
 	for tc in g:Iter() do
-		tc:NegateEffects(e:GetHandler())
+		--Negate their effects
+		tc:NegateEffects(c)
 	end
+end
+function s.exatkcon(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	return Duel.GetAttacker()==c and c:CanChainAttack() and aux.bdocon(e,tp,eg,ep,ev,re,r,rp)
 end
