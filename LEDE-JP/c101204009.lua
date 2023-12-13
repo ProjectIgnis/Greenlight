@@ -20,24 +20,27 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e2:SetCode(EVENT_SUMMON_SUCCESS)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetCountLimit(1,{id,1})
 	e2:SetTarget(s.thtg)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
-	--Place this card in your Pendulum Zone
-	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,2))
-	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	local e3=e2:Clone()
 	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e3:SetProperty(EFFECT_FLAG_DELAY)
-	e3:SetRange(LOCATION_EXTRA)
-	e3:SetCountLimit(1,{id,2})
-	e3:SetCondition(s.pencon)
-	e3:SetTarget(s.pentg)
-	e3:SetOperation(s.penop)
 	c:RegisterEffect(e3)
+	--Place this card in your Pendulum Zone
+	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(id,2))
+	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e4:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e4:SetProperty(EFFECT_FLAG_DELAY)
+	e4:SetRange(LOCATION_EXTRA)
+	e4:SetCountLimit(1,{id,2})
+	e4:SetCondition(s.pencon)
+	e4:SetTarget(s.pentg)
+	e4:SetOperation(s.penop)
+	c:RegisterEffect(e4)
 end
 s.listed_series={SET_MELODIOUS}
 s.listed_names={id}
@@ -52,7 +55,7 @@ function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return Duel.IsExistingTarget(s.ffilter,tp,LOCATION_MZONE,0,1,nil)
 		and Duel.IsExistingMatchingCard(s.tgfilter,tp,LOCATION_DECK,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
-	Duel.SelectTarget(tp,s.filter,tp,LOCATION_MZONE,0,1,1,nil)
+	Duel.SelectTarget(tp,s.ffilter,tp,LOCATION_MZONE,0,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
 end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
@@ -72,7 +75,7 @@ function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.thfilter(c)
-	return c:IsMonster() and c:IsSetCard(SET_MELODIOUS) and c:IsAbleToHand()
+	return c:IsMonster() and c:IsSetCard(SET_MELODIOUS) and c:IsAbleToHand() and not c:IsCode(id)
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
