@@ -1,5 +1,5 @@
 --盃満ちる燦幻荘
---Overflowing Brightfleet Manor
+--Brimming Sangen Manor
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
@@ -18,7 +18,7 @@ function s.initial_effect(c)
 	e2:SetTarget(function(e,c) return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_DRAGON) end)
 	e2:SetValue(s.immval)
 	c:RegisterEffect(e2)
-	--Search 1 "Bestowed Dragon" monster from your Deck to your hand, then discard 1 card
+	--Search 1 "Tenpai Dragon" monster from your Deck to your hand, then discard 1 card
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,0))
 	e3:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_HANDES)
@@ -40,12 +40,12 @@ function s.initial_effect(c)
 	e4:SetOperation(s.atkop)
 	c:RegisterEffect(e4)
 end
-s.listed_series={SET_BESTOWED_DRAGON}
+s.listed_series={SET_TENPAI_DRAGON}
 function s.immval(e,te)
 	return te:GetOwnerPlayer()==1-e:GetHandlerPlayer() and te:IsActivated()
 end
 function s.thfilter(c)
-	return c:IsSetCard(SET_BESTOWED_DRAGON) and c:IsMonster() and c:IsAbleToHand()
+	return c:IsSetCard(SET_TENPAI_DRAGON) and c:IsMonster() and c:IsAbleToHand()
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
@@ -57,6 +57,7 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil)
 	if #g>0 and Duel.SendtoHand(g,nil,REASON_EFFECT)>0 then
 		Duel.ConfirmCards(1-tp,g)
+		Duel.ShuffleHand(tp)
 		Duel.BreakEffect()
 		Duel.DiscardHand(tp,nil,1,1,REASON_EFFECT|REASON_DISCARD,nil)
 	end
@@ -74,11 +75,12 @@ end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
+		--Its ATK becomes doubled
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_SET_ATTACK_FINAL)
-		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 		e1:SetValue(tc:GetAttack()*2)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 		tc:RegisterEffect(e1)
 	end
 end

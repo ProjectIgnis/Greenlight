@@ -1,12 +1,12 @@
 --燦幻超龍トランセンド・ドラギオン
---Brightfleet Superdragon Transcend Dragion
+--Sangen Superdragon Trascend Dragion
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Synchro Summon Procedure
 	Synchro.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsRace,RACE_DRAGON),1,1,Synchro.NonTunerEx(Card.IsRace,RACE_DRAGON),1,99)
-	--Change all monsters on the field to Attack Position.
+	--Change all monsters on the field to Attack Position
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_POSITION)
@@ -31,6 +31,7 @@ function s.initial_effect(c)
 	e3:SetCode(EFFECT_CANNOT_ACTIVATE)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetTargetRange(0,1)
+	e3:SetCondition(function() return Duel.IsBattlePhase() end)
 	e3:SetValue(1)
 	c:RegisterEffect(e3)
 	--Special Summon this card from the GY and destroy 1 card on the field
@@ -40,8 +41,8 @@ function s.initial_effect(c)
 	e4:SetType(EFFECT_TYPE_QUICK_O)
 	e4:SetCode(EVENT_FREE_CHAIN)
 	e4:SetRange(LOCATION_GRAVE)
-	e4:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
-	e4:SetCountLimit(1,{id,1},EFFECT_COUNT_CODE_DUEL)
+	e4:SetHintTiming(0,TIMING_BATTLE_PHASE|TIMING_BATTLE_STEP_END|TIMING_BATTLE_END|TIMINGS_CHECK_MONSTER_E)
+	e4:SetCountLimit(1,id,EFFECT_COUNT_CODE_DUEL)
 	e4:SetCondition(function() return Duel.GetFlagEffect(0,id)+Duel.GetFlagEffect(1,id)>=3 end)
 	e4:SetTarget(s.sptg)
 	e4:SetOperation(s.spop)
@@ -56,7 +57,7 @@ function s.initial_effect(c)
 	end)
 end
 function s.posfilter(c)
-	return c:IsDefensePos() or c:IsFacedown()
+	return c:IsDefensePos() and c:IsCanChangePosition()
 end
 function s.postg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
@@ -65,13 +66,14 @@ function s.postg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.posop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(s.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
-	if #g==0 then return end
-	Duel.ChangePosition(g,POS_FACEUP_ATTACK)
+	if #g>0 then
+		Duel.ChangePosition(g,POS_FACEUP_ATTACK)
+	end
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsCanBeSpecialSummoned(e,0,tp,false,false)
-		and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,PLAYER_EITHER,LOCATION_ONFIELD)
 end
@@ -79,10 +81,10 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
 		local g=Duel.GetFieldGroup(0,LOCATION_ONFIELD,LOCATION_ONFIELD)
-		if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,3)) then
+		if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 			local dg=g:Select(tp,1,1,nil)
-			Duel.HintSelection(dg)
+			Duel.HintSelection(dg,true)
 			Duel.BreakEffect()
 			Duel.Destroy(dg,REASON_EFFECT)
 		end

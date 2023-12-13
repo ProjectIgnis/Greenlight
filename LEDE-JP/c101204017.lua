@@ -1,5 +1,5 @@
 --天盃龍ファドラ
---Bestowed Dragon Fadra
+--Tenpai Dragon Fadora
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
@@ -8,8 +8,8 @@ function s.initial_effect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
+	e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetCountLimit(1,id)
 	e1:SetTarget(s.sptg)
 	e1:SetOperation(s.spop)
@@ -31,7 +31,7 @@ function s.initial_effect(c)
 	e4:SetTarget(function(e,c) return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_DRAGON) end)
 	e4:SetValue(1)
 	c:RegisterEffect(e4)
-	--Synchro summon during the Battle Phase
+	--Synchro Summon during the Battle Phase
 	local e5=Effect.CreateEffect(c)
 	e5:SetDescription(aux.Stringid(id,1))
 	e5:SetCategory(CATEGORY_SPECIAL_SUMMON)
@@ -64,13 +64,13 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.synchtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsSynchroSummonable,tp,LOCATION_EXTRA,0,1,e:GetHandler()) end
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsSynchroSummonable,tp,LOCATION_EXTRA,0,1,nil,e:GetHandler()) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
 end
 function s.synchop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsControler(1-tp) or not c:IsRelateToEffect(e) or c:IsFacedown() then return end
-	local g=Duel.GetMatchingGroup(Card.IsSynchroSummonable,tp,LOCATION_EXTRA,0,c)
+	local g=Duel.GetMatchingGroup(Card.IsSynchroSummonable,tp,LOCATION_EXTRA,0,nil,c)
 	if #g>0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local sg=g:Select(tp,1,1,nil)
