@@ -5,7 +5,6 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e1)
@@ -27,8 +26,8 @@ function s.initial_effect(c)
 								desc=aux.Stringid(id,1),
 								stage2=s.stage2})
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
+	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e3:SetRange(LOCATION_SZONE)
 	e3:SetCountLimit(1,{id,1})
 	e3:SetCondition(function(e,tp,eg) return eg:IsExists(s.cfilter,1,nil) end)
@@ -38,6 +37,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 s.listed_series={SET_SILENFORC}
+s.listed_names={id}
 function s.thfilter(c)
 	return c:IsSetCard(SET_SILENFORC) and c:IsAbleToHand() and c:IsFaceup() and not c:IsCode(id)
 end
@@ -46,7 +46,7 @@ function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return Duel.IsExistingTarget(s.thfilter,tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 	local g=Duel.SelectTarget(tp,s.thfilter,tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,LOCATION_GRAVE|LOCATION_REMOVED)
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,tp,0)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
@@ -60,16 +60,14 @@ end
 function s.cfilter(c)
 	return c:IsFaceup() and not c:IsRitualMonster()
 end
-function s.stage2(e,tc,tp,sg,chk)
-	if chk==0 then
-		--Cannot be destroyed by battle
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetDescription(3008)
-		e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
-		e1:SetValue(1)
-		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
-		tc:RegisterEffect(e1)
-	end
+function s.stage2(mat,e,tp,eg,ep,ev,re,r,rp,tc)
+	--Cannot be destroyed by battle
+	local e1=Effect.CreateEffect(e:GetHandler())
+	e1:SetDescription(3000)
+	e1:SetType(EFFECT_TYPE_SINGLE)
+	e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+	e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
+	e1:SetValue(1)
+	e1:SetReset(RESET_EVENT|RESETS_STANDARD)
+	tc:RegisterEffect(e1)
 end

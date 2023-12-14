@@ -1,5 +1,5 @@
---JP name
---Couplet The Melodious Diva
+--幻奏の歌姫クープレ
+--Couplet the Melodious Songstress
 --Scripted by The Razgriz
 local s,id=GetID()
 function s.initial_effect(c)
@@ -14,7 +14,7 @@ function s.initial_effect(c)
 	e1:SetTargetRange(1,0)
 	e1:SetTarget(function(e,_c,tp,sumtp,sumpos) return not _c:IsAttribute(ATTRIBUTE_LIGHT) and (sumtp&SUMMON_TYPE_PENDULUM)==SUMMON_TYPE_PENDULUM end)
 	c:RegisterEffect(e1)
-	--Add 1 "Melodious" Spell/Trap from Deck to hand
+	--Search 1 "Melodious" Spell/Trap
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
@@ -25,15 +25,15 @@ function s.initial_effect(c)
 	e2:SetTarget(s.thtg)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
-	--Reveal this card/Sp. Summon 1 "Melodious" monster from hand or GY
+	--Special Summon 1 Level 4 or lower "Melodious" monster from your hand or GY
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,0))
+	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e3:SetCode(EVENT_TO_HAND)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
+	e3:SetCode(EVENT_TO_HAND)
 	e3:SetCountLimit(1,{id,1})
-	e3:SetCondition(s.spcon)
+	e3:SetCondition(function(e) return not e:GetHandler():IsReason(REASON_RULE) end)
 	e3:SetCost(s.spcost)
 	e3:SetTarget(s.sptg)
 	e3:SetOperation(s.spop)
@@ -42,8 +42,8 @@ function s.initial_effect(c)
 	local e4=Effect.CreateEffect(c)
 	e4:SetDescription(aux.Stringid(id,2))
 	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e4:SetProperty(EFFECT_FLAG_DELAY,EFFECT_FLAG2_CHECK_SIMULTANEOUS)
 	e4:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e4:SetProperty(EFFECT_FLAG_DELAY)
 	e4:SetRange(LOCATION_EXTRA)
 	e4:SetCountLimit(1,{id,2})
 	e4:SetCondition(s.pencon)
@@ -52,12 +52,12 @@ function s.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 s.listed_series={SET_MELODIOUS}
-function s.thfilter(c)
-	return c:IsSpellTrap() and c:IsSetCard(SET_MELODIOUS) and c:IsAbleToHand()
-end
 function s.thcon(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,0,nil)
 	return g:FilterCount(Card.IsSetCard,nil,SET_MELODIOUS)==#g
+end
+function s.thfilter(c)
+	return c:IsSetCard(SET_MELODIOUS) and c:IsSpellTrap() and c:IsAbleToHand()
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
@@ -71,9 +71,6 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.ConfirmCards(1-tp,g)
 	end
 end
-function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-	return not e:GetHandler():IsReason(REASON_RULE)
-end
 function s.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return not e:GetHandler():IsPublic() end
 end
@@ -81,7 +78,8 @@ function s.spfilter(c,e,tp)
 	return c:IsSetCard(SET_MELODIOUS) and c:IsLevelBelow(4) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_GRAVE,0,1,nil,e,tp) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND|LOCATION_GRAVE)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
@@ -96,8 +94,7 @@ function s.cfilter(c,tp)
 	return c:IsFaceup() and c:IsSetCard(SET_MELODIOUS) and c:IsType(TYPE_FUSION) and c:IsControler(tp)
 end
 function s.pencon(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	return eg:IsExists(s.cfilter,1,nil,tp) and c:IsFaceup() and c:IsLocation(LOCATION_EXTRA)
+	return eg:IsExists(s.cfilter,1,nil,tp)
 end
 function s.pentg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.CheckPendulumZones(tp) end
