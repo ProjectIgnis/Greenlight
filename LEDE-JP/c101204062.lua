@@ -1,4 +1,4 @@
---Japanese name
+--粛声なる祝福
 --Silenforcing Blessing
 --scripted by Naim
 local s,id=GetID()
@@ -21,7 +21,11 @@ function s.initial_effect(c)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
 	--Ritual Summon 1 Ritual LIGHT Warrior or Dragon Monster
-	local e3=Ritual.CreateProc(c,RITPROC_GREATER,s.ritfilter,nil,aux.Stringid(id,1))
+	local e3=Ritual.CreateProc({handler=c,
+								lvtype=RITPROC_GREATER,
+								filter=s.ritfilter,
+								desc=aux.Stringid(id,1),
+								stage2=s.stage2})
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
@@ -55,4 +59,17 @@ function s.ritfilter(c)
 end
 function s.cfilter(c)
 	return c:IsFaceup() and not c:IsRitualMonster()
+end
+function s.stage2(e,tc,tp,sg,chk)
+	if chk==0 then
+		--Cannot be destroyed by battle
+		local e1=Effect.CreateEffect(e:GetHandler())
+		e1:SetDescription(3008)
+		e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
+		e1:SetValue(1)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
+		tc:RegisterEffect(e1)
+	end
 end
