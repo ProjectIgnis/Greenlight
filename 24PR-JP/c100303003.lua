@@ -10,11 +10,11 @@ function s.initial_effect(c)
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e1:SetRange(LOCATION_MZONE)
 	e1:SetCode(EFFECT_IMMUNE_EFFECT)
+	e1:SetRange(LOCATION_MZONE)
 	e1:SetValue(function(e,te) return te:GetOwner()~=e:GetOwner() end)
 	c:RegisterEffect(e1)
-	--Attach top 3 cards from your Deck to this card
+	--Attach the top 3 cards of your Deck to this card
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_CONTROL+CATEGORY_DAMAGE+CATEGORY_DESTROY)
@@ -42,20 +42,19 @@ end
 function s.atchop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local g=Duel.GetDecktopGroup(tp,3)
-	if c:IsRelateToEffect(e) and #g==3 then
-		Duel.DisableShuffleCheck()
-		Duel.Overlay(c,g)
-		local og=c:GetOverlayGroup()
-		if og:FilterCount(Card.IsMonster,nil)<4 then
-			Duel.BreakEffect()
-			Duel.GetControl(c,1-tp)
-		else
-			Duel.BreakEffect()
-			if Duel.Damage(tp,#og*400,REASON_EFFECT)==#og*400 then
-				local dg=Duel.GetFieldGroup(tp,LOCATION_MZONE,0)
-				if #dg==0 then return end
-				Duel.Destroy(dg,REASON_EFFECT)
-			end
+	if not (c:IsRelateToEffect(e) and #g==3) then return end
+	Duel.DisableShuffleCheck()
+	Duel.Overlay(c,g)
+	local og=c:GetOverlayGroup()
+	if og:FilterCount(Card.IsMonster,nil)<=4 then
+		Duel.BreakEffect()
+		Duel.GetControl(c,1-tp)
+	else
+		Duel.BreakEffect()
+		if Duel.Damage(tp,#og*400,REASON_EFFECT)>0 then
+			local dg=Duel.GetFieldGroup(tp,LOCATION_MZONE,0)
+			if #dg==0 then return end
+			Duel.Destroy(dg,REASON_EFFECT)
 		end
 	end
 end

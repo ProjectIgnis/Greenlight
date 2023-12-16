@@ -40,17 +40,20 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(s.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
-	Duel.ChangePosition(g,POS_FACEUP_DEFENSE)
+	if #g>0 then
+		Duel.ChangePosition(g,POS_FACEUP_DEFENSE)
+	end
+	local c=e:GetHandler()
 	--Players cannot attack with a monster that was Normal/Special Summoned this turn if they control a Defense Position monster
-	local e1=Effect.CreateEffect(e:GetHandler())
+	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_CANNOT_ATTACK_ANNOUNCE)
 	e1:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+	e1:SetCode(EFFECT_CANNOT_ATTACK_ANNOUNCE)
 	e1:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
-	e1:SetReset(RESET_PHASE|PHASE_END)
 	e1:SetTarget(s.atktg)
+	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
-	aux.RegisterClientHint(e:GetHandler(),nil,tp,1,1,aux.Stringid(id,1),nil)
+	aux.RegisterClientHint(c,nil,tp,1,1,aux.Stringid(id,1),nil)
 end
 function s.atktg(e,c)
 	local tp=c:GetControler()
