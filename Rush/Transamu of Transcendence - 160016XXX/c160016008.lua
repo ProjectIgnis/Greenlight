@@ -10,7 +10,7 @@ function s.initial_effect(c)
 	e0:SetValue(s.valcheck)
 	c:RegisterEffect(e0)
 	--summon/set with 1 tribute
-	local e1=aux.AddNormalSummonProcedure(c,true,true,1,1,SUMMON_TYPE_TRIBUTE,aux.Stringid(id,0),nil,s.otop)
+	local e1=aux.AddNormalSummonProcedure(c,true,true,1,1,SUMMON_TYPE_TRIBUTE,aux.Stringid(id,1),nil,s.otop)
 	--Summon with 3 tribute
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
@@ -106,15 +106,19 @@ function s.valcheck(e,c)
 	end
 	if e:GetLabel()==1 then
 		e:SetLabel(0)		
-		local e2=Effect.CreateEffect(c)
-		e2:SetType(EFFECT_TYPE_SINGLE)
-		e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-		e2:SetCode(EFFECT_UPDATE_ATTACK)
-		e2:SetRange(LOCATION_MZONE)
-		e2:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TOFIELD)
-		e2:SetValue(lvl*100)
-		e:GetHandler():RegisterEffect(e2)
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+		e1:SetCode(EFFECT_UPDATE_ATTACK)
+		e1:SetRange(LOCATION_MZONE)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TOFIELD)
+		e1:SetValue(lvl*100)
+		e1:SetCondition(s.condition)
+		e:GetHandler():RegisterEffect(e1)
 	end
+end
+function s.condition(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():GetSummonType()==SUMMON_TYPE_TRIBUTE+1
 end
 function s.facechk(e,tp,eg,ep,ev,re,r,rp)
 	e:GetLabelObject():SetLabel(1)
