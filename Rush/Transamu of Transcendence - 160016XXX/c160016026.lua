@@ -1,5 +1,5 @@
 --人造人間７.７号
---Jinzo 7.7
+--Jinzo #7.7
 --scripted by YoshiDuels
 local s,id=GetID()
 function s.initial_effect(c)
