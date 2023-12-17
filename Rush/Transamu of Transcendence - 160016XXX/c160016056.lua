@@ -22,6 +22,12 @@ function s.initial_effect(c)
 	e3:SetCode(EFFECT_CANNOT_DISABLE)
 	c:RegisterEffect(e3)
 end
+function s.eqfilter(c)
+	return c:IsFaceup() and c:IsRace(RACE_MACHINE) and not c:IsMaximumModeSide()
+end
+function s.eqlimit(e,c)
+	return c:IsFaceup()
+end
 function s.con(e)
 	local c=e:GetHandler():GetEquipTarget()
 	return c:IsOriginalCodeRule(CARD_JINZO)
