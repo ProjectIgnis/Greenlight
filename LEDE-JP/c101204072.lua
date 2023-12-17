@@ -29,8 +29,7 @@ function s.initial_effect(c)
 	e2:SetOperation(Fusion.SummonEffOP(params))
 	c:RegisterEffect(e2)
 end
-s.listed_names={CARD_ANCIENT_GEAR_GOLEM,id}
-s.listed_series={SET_ANCIENT_GEAR}
+s.listed_names={CARD_ANCIENT_GEAR_GOLEM}
 function s.fusfilter(c)
 	return c:ListsCode(CARD_ANCIENT_GEAR_GOLEM)
 end
