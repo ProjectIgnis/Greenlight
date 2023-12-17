@@ -46,9 +46,10 @@ function s.initial_effect(c)
 	e3:SetOperation(s.toptgop)
 	c:RegisterEffect(e3)
 end
+s.listed_series={SET_LIGHTSWORN}
 function s.rmlimit(e,c,tp,r)
 	return c:IsSetCard(SET_LIGHTSWORN) and c:IsMonster() and c:IsFaceup()
-		and c:IsControler(e:GetHandlerPlayer()) and r&REASON_EFFECT>0
+		and c:IsControler(e:GetHandlerPlayer()) and not c:IsImmuneToEffect(e) and r&REASON_EFFECT>0
 end
 function s.tgfilter(c)
 	return c:IsSetCard(SET_LIGHTSWORN) and c:IsMonster() and c:IsAbleToGrave()
