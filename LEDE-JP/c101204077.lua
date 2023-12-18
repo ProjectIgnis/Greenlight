@@ -10,7 +10,7 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER)
+	e1:SetHintTiming(0,TIMING_MAIN_END|TIMINGS_CHECK_MONSTER)
 	e1:SetCountLimit(1,id)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
@@ -29,27 +29,29 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_LIGHTSWORN}
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	local ct=Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,SET_LIGHTSWORN),tp,LOCATION_MZONE,0,nil)
 	if chkc then return chkc:IsLocation(LOCATION_ONFIELD) and chkc:IsControler(1-tp) and chkc:IsNegatable() end
+	local ct=Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,SET_LIGHTSWORN),tp,LOCATION_MZONE,0,nil)
 	if chk==0 then return ct>0 and Duel.IsExistingTarget(Card.IsNegatable,tp,0,LOCATION_ONFIELD,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_NEGATE)
 	local g=Duel.SelectTarget(tp,Card.IsNegatable,tp,0,LOCATION_ONFIELD,1,ct,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DISABLE,g,#g,0,0)
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
+	local tg=Duel.GetTargetCards(e):Match(Card.IsFaceup,nil)
+	if #tg==0 then return end
 	local c=e:GetHandler()
-	for tc in g:Iter() do
+	for tc in tg:Iter() do
 		tc:NegateEffects(c,RESET_PHASE|PHASE_END,true)
 	end
 end
 function s.settg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsSSetable() end
-	Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,e:GetHandler(),1,tp,0)
+	local c=e:GetHandler()
+	if chk==0 then return c:IsSSetable() end
+	Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,c,1,tp,0)
 end
 function s.setop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) and c:IsSSetable() then
 		Duel.SSet(tp,c)
-		Duel.ConfirmCards(1-tp,c)
 	end
 end

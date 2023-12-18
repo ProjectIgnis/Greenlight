@@ -7,37 +7,45 @@ function s.initial_effect(c)
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetHintTiming(0)
 	c:RegisterEffect(e1)
+	--"Ancient Gear Golem" and monsters that mention it are unaffected by your opponent's activated monster effects
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_IMMUNE_EFFECT)
+	e2:SetTargetRange(LOCATION_MZONE,0)
+	e2:SetRange(LOCATION_SZONE)
+	e2:SetTarget(function(e,c) return c:IsCode(CARD_ANCIENT_GEAR_GOLEM) or c:ListsCode(CARD_ANCIENT_GEAR_GOLEM) end)
+	e2:SetValue(s.immval)
+	c:RegisterEffect(e2)
 	--Fusion Summon 1 Fusion Monster that mentions "Ancient Gear Golem"
-	local params = {fusfilter=s.fusfilter,
-					matfilter=Card.IsAbleToRemove,
+	local params={fusfilter=function(c) return c:ListsCode(CARD_ANCIENT_GEAR_GOLEM) end,
+					matfilter=Fusion.OnFieldMat(Card.IsAbleToRemove),
 					extrafil=s.fmatextra,
 					extratg=s.extratarget,
 					extraop=Fusion.BanishMaterial,
 					stage2=s.stage2}
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(id,0))
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
-	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetCode(EVENT_FREE_CHAIN)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetHintTiming(0,TIMING_BATTLE_START|TIMING_BATTLE_END|TIMINGS_CHECK_MONSTER)
-	e2:SetCountLimit(1,id)
-	e2:SetCondition(function(e,tp) return Duel.GetFieldGroupCount(tp,0,LOCATION_MZONE)>0 end)
-	e2:SetTarget(Fusion.SummonEffTG(params))
-	e2:SetOperation(Fusion.SummonEffOP(params))
-	c:RegisterEffect(e2)
+	local e3=Effect.CreateEffect(c)
+	e3:SetDescription(aux.Stringid(id,0))
+	e3:SetCategory(CATEGORY_REMOVE+CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
+	e3:SetType(EFFECT_TYPE_QUICK_O)
+	e3:SetCode(EVENT_FREE_CHAIN)
+	e3:SetRange(LOCATION_SZONE)
+	e3:SetHintTiming(0,TIMING_MAIN_END|TIMINGS_CHECK_MONSTER_E)
+	e3:SetCountLimit(1,id)
+	e3:SetCondition(function(e,tp) return Duel.GetFieldGroupCount(tp,0,LOCATION_MZONE)>0 end)
+	e3:SetTarget(Fusion.SummonEffTG(params))
+	e3:SetOperation(Fusion.SummonEffOP(params))
+	c:RegisterEffect(e3)
 end
 s.listed_names={CARD_ANCIENT_GEAR_GOLEM}
-function s.fusfilter(c)
-	return c:ListsCode(CARD_ANCIENT_GEAR_GOLEM)
+function s.immval(e,te)
+	return te:GetOwnerPlayer()==1-e:GetHandlerPlayer() and te:IsActivated() and te:IsMonsterEffect()
 end
-function s.aggfilter(c)
-	return c:IsCode(CARD_ANCIENT_GEAR_GOLEM) and c:IsLocation(LOCATION_MZONE)
+function s.aggfilter(c,tp)
+	return c:IsCode(CARD_ANCIENT_GEAR_GOLEM) and c:IsLocation(LOCATION_MZONE) and c:IsControler(tp)
 end
 function s.fcheck(tp,sg,fc)
-	return sg:IsExists(s.aggfilter,1,nil)
+	return sg:IsExists(s.aggfilter,1,nil,tp)
 end
 function s.fmatextra(e,tp,mg)
 	if not Duel.IsPlayerAffectedByEffect(tp,CARD_SPIRIT_ELIMINATION) then
@@ -51,8 +59,8 @@ function s.extratarget(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.stage2(e,tc,tp,sg,chk)
 	if chk==0 then
-		--Can make a 2nd and 3rd attack during the Battle Phase
-		local e1=Effect.CreateEffect(c)
+		--Can make up to 3 attacks during each Battle Phase
+		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetDescription(aux.Stringid(id,1))
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)

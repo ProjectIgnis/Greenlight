@@ -8,10 +8,10 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
 	e1:SetCode(EFFECT_CHANGE_CODE)
-	e1:SetRange(LOCATION_MZONE+LOCATION_GRAVE)
+	e1:SetRange(LOCATION_MZONE|LOCATION_GRAVE)
 	e1:SetValue(CARD_ANCIENT_GEAR_GOLEM)
 	c:RegisterEffect(e1)
-	--Search 1 "Ancient Gear" Card or "Geartown" then discard 1 card
+	--Search up to 2 "Ancient Gear" cards or "Geartown" then discard 1 card
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_HANDES)
@@ -48,10 +48,11 @@ function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	--Cannot set cards for the rest of this turn
+	--Cannot Set cards for the rest of this turn
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,1))
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
 	e1:SetCode(EFFECT_CANNOT_MSET)
 	e1:SetTargetRange(1,0)
 	e1:SetReset(RESET_PHASE|PHASE_END)

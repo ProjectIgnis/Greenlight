@@ -6,7 +6,7 @@ function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Synchro Summon Procedure
 	Synchro.AddProcedure(c,nil,1,1,Synchro.NonTuner(nil),1,99)
-	--"Lightsworn" monsters you control cannot be banished by card effects.
+	--"Lightsworn" monsters you control cannot be banished by card effects
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
@@ -36,19 +36,19 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2a)
 	--Send cards from the top of your Deck to the GY
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,0))
+	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_DECKDES)
 	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCountLimit(1,{id,1})
 	e3:SetCost(s.toptgcost)
 	e3:SetTarget(s.toptgtg)
-	e3:SetOperation(s.toptgop)
+	e3:SetOperation(function(e,tp) Duel.DiscardDeck(tp,e:GetLabel(),REASON_EFFECT) end)
 	c:RegisterEffect(e3)
 end
 s.listed_series={SET_LIGHTSWORN}
 function s.rmlimit(e,c,tp,r)
-	return c:IsSetCard(SET_LIGHTSWORN) and c:IsMonster() and c:IsFaceup()
+	return c:IsSetCard(SET_LIGHTSWORN) and c:IsLocation(LOCATION_MZONE) and c:IsFaceup()
 		and c:IsControler(e:GetHandlerPlayer()) and not c:IsImmuneToEffect(e) and r&REASON_EFFECT>0
 end
 function s.tgfilter(c)
@@ -68,7 +68,7 @@ function s.tgop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.valcheck(e,c)
-	local ct=c:GetMaterial():FilterCount(Card.IsSetCard,nil,SET_LIGHTSWORN)
+	local ct=c:GetMaterial():FilterCount(Card.IsSetCard,nil,SET_LIGHTSWORN,c,SUMMON_TYPE_SYNCHRO,e:GetHandlerPlayer())
 	e:GetLabelObject():SetLabel(ct)
 end
 function s.costfilter(c)
@@ -77,8 +77,8 @@ end
 function s.toptgcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsPlayerCanDiscardDeckAsCost(tp,1) 
 		and Duel.IsExistingMatchingCard(s.costfilter,tp,LOCATION_GRAVE,0,1,nil) end
-	local ct=0
-	for i=1,4 do
+	local ct=1
+	for i=2,4 do
 		if Duel.IsPlayerCanDiscardDeckAsCost(tp,i) then
 			ct=ct+1
 		end
@@ -91,7 +91,4 @@ end
 function s.toptgtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_DECKDES,nil,0,tp,e:GetLabel())
-end
-function s.toptgop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.DiscardDeck(tp,e:GetLabel(),REASON_EFFECT)
 end

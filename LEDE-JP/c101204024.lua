@@ -10,13 +10,13 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_HAND)
 	e1:SetCountLimit(1,id)
-	e1:SetCost(s.hndspcost)
-	e1:SetTarget(s.hndsptg)
-	e1:SetOperation(s.hndspop)
+	e1:SetCost(s.selfspcost)
+	e1:SetTarget(s.selfsptg)
+	e1:SetOperation(s.selfspop)
 	c:RegisterEffect(e1)
-	--Special Summon 1 "Lightsworn" monster from GY
+	--Special Summon 1 "Lightsworn" monster from your GY
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(id,2))
+	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
@@ -32,7 +32,7 @@ s.listed_series={SET_LIGHTSWORN}
 function s.costfilter(c)
 	return c:IsSetCard(SET_LIGHTSWORN) and c:IsAbleToDeckAsCost()
 end
-function s.hndspcost(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.selfspcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return Duel.IsExistingMatchingCard(s.costfilter,tp,LOCATION_HAND,0,1,c) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
@@ -40,7 +40,7 @@ function s.hndspcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.ConfirmCards(1-tp,g)
 	Duel.SendtoDeck(g,nil,SEQ_DECKTOP,REASON_EFFECT)
 end
-function s.hndsptg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.selfsptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
@@ -48,9 +48,9 @@ function s.hndsptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
 	Duel.SetOperationInfo(0,CATEGORY_DECKDES,nil,0,tp,2)
 end
-function s.hndspop(e,tp,eg,ep,ev,re,r,rp)
+function s.selfspop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP) then
+	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
 		Duel.BreakEffect()
 		Duel.DiscardDeck(tp,2,REASON_EFFECT)
 	end
@@ -69,6 +69,6 @@ end
 function s.gyspop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) then
-		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
+		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
 	end
 end

@@ -14,13 +14,13 @@ function s.initial_effect(c)
 	e1:SetTarget(s.sptg)
 	e1:SetOperation(s.spop)
 	c:RegisterEffect(e1)
-	--Send 1 "Lightsworn" card to the GYo grave
+	--Send 1 "Lightsworn" card from your Deck to the GY
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_TOGRAVE)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
+	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e2:SetCountLimit(1,{id,1})
 	e2:SetTarget(s.tgtg)
 	e2:SetOperation(s.tgop)
@@ -30,8 +30,8 @@ function s.initial_effect(c)
 	e3:SetDescription(aux.Stringid(id,2))
 	e3:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e3:SetCode(EVENT_TO_GRAVE)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
+	e3:SetCode(EVENT_TO_GRAVE)
 	e3:SetCountLimit(1,{id,2})
 	e3:SetTarget(s.thtg)
 	e3:SetOperation(s.thop)
@@ -39,8 +39,11 @@ function s.initial_effect(c)
 end
 s.listed_names={id}
 s.listed_series={SET_LIGHTSWORN}
+function s.spconfilter(c)
+	return c:IsSetCard(SET_LIGHTSWORN) and c:IsMonster()
+end
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_GRAVE,0,1,nil,SET_LIGHTSWORN)
+	return Duel.IsExistingMatchingCard(s.spconfilter,tp,LOCATION_GRAVE,0,1,nil)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
