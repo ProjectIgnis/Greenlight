@@ -1,5 +1,6 @@
 --プライム・ドワーフ
 --Prime Dwarf
+--Scripted by YoshiDuels
 local s,id=GetID()
 function s.initial_effect(c)
 	local params={aux.FilterBoolFunction(Card.IsAttribute,ATTRIBUTE_LIGHT),Fusion.OnFieldMat(aux.FaceupFilter(Card.IsAttribute,ATTRIBUTE_LIGHT)),s.fextra}
