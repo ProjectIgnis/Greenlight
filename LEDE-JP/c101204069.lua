@@ -7,8 +7,8 @@ function s.initial_effect(c)
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DISABLE+CATEGORY_REMOVE)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
+	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
 	e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
@@ -17,7 +17,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 function s.cfilter(c,e,tp)
-	return c:IsFaceup() and not c:IsType(TYPE_TOKEN)
+	return c:IsFaceup() and not c:IsType(TYPE_TOKEN) and c:IsNegatableMonster()
 		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_DECK|LOCATION_EXTRA,0,1,nil,e,tp,c:GetRace(),c:GetAttribute(),c:GetAttack())
 end
 function s.spfilter(c,e,tp,rac,att,atk)
@@ -33,34 +33,33 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsControler(1-tp) and chkc:IsLocation(LOCATION_MZONE) and s.cfilter(chkc,e,tp) end
 	if chk==0 then return Duel.IsExistingTarget(s.cfilter,tp,0,LOCATION_MZONE,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	local g=Duel.SelectTarget(tp,s.cfilter,tp,0,LOCATION_MZONE,1,1,nil,e,tp)
+	local tc=Duel.SelectTarget(tp,s.cfilter,tp,0,LOCATION_MZONE,1,1,nil,e,tp):GetFirst()
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND|LOCATION_DECK|LOCATION_EXTRA)
-	Duel.SetOperationInfo(0,CATEGORY_DISABLE,g:GetFirst(),1,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_DISABLE,tc,1,tp,0)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_REMOVE,g,2,tp,0)
 	--Your opponent cannot activate the targeted monster's effects in response to this card's activation
 	if e:IsHasType(EFFECT_TYPE_ACTIVATE) then
-		Duel.SetChainLimit(function(e,tp,p) return e:GetHandler()~=g:GetFirst() end)
+		Duel.SetChainLimit(function(e,tp,p) return e:GetHandler()~=tc end)
 	end
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local sc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_HAND|LOCATION_DECK|LOCATION_EXTRA,0,1,1,nil,e,tp,tc:GetRace(),tc:GetAttribute(),tc:GetAttack()):GetFirst()
-		if sc and Duel.SpecialSummonStep(sc,0,tp,tp,false,false,POS_FACEUP_DEFENSE) then
-			--Its effects are negated
-			sc:NegateEffects(c)
-			Duel.SpecialSummonComplete()
-			--Negate the effects of the target
-			tc:NegateEffects(c)
-			--If they have the same name, you can banish them
-			if sc:IsCode(tc:GetCode()) and sc:IsAbleToRemove(tp,POS_FACEDOWN,REASON_EFFECT)
-				and tc:IsAbleToRemove(tp,POS_FACEDOWN,REASON_EFFECT)
-				and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
-					Duel.BreakEffect()
-					Duel.Remove(Group.FromCards(tc,sc),POS_FACEDOWN,REASON_EFFECT)
-				end
+	if not (tc:IsRelateToEffect(e) and tc:IsFaceup()) then return end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+	local sc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_HAND|LOCATION_DECK|LOCATION_EXTRA,0,1,1,nil,e,tp,tc:GetRace(),tc:GetAttribute(),tc:GetAttack()):GetFirst()
+	if sc and Duel.SpecialSummonStep(sc,0,tp,tp,false,false,POS_FACEUP) then
+		local c=e:GetHandler()
+		--Negate the effects of the summoned monster
+		sc:NegateEffects(c)
+		if Duel.SpecialSummonComplete()==0 then return end
+		--Negate the effects of the targeted monster
+		tc:NegateEffects(c)
+		Duel.AdjustInstantly(tc)
+		if sc:IsCode(tc:GetCode()) and sc:IsAbleToRemove(tp,POS_FACEDOWN,REASON_EFFECT)
+			and tc:IsAbleToRemove(tp,POS_FACEDOWN,REASON_EFFECT)
+			and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+			Duel.BreakEffect()
+			Duel.Remove(Group.FromCards(tc,sc),POS_FACEDOWN,REASON_EFFECT)
 		end
 	end
 end
