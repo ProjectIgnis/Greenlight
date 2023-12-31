@@ -10,7 +10,7 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(0,TIMING_END_PHASE)
-	e1:SetCounterLimit(1,id)
+	e1:SetCountLimit(1,id)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
@@ -18,9 +18,9 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_DAMAGE)
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e2:SetCode(EVENT_BATTLE_DESTROYED)
-	e2:SetCounterLimit(1,{id,1})
+	e2:SetCountLimit(1,{id,1})
 	e2:SetTarget(s.damtg)
 	e2:SetOperation(s.damop)
 	c:RegisterEffect(e2)
@@ -36,7 +36,7 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
 		or not Duel.IsPlayerCanSpecialSummonMonster(tp,id,1,TYPE_MONSTER+TYPE_EFFECT,1800,500,4,RACE_ZOMBIE,ATTRIBUTE_DARK) then return end
 	c:AddMonsterAttribute(TYPE_EFFECT+TYPE_TRAP)
-	Duel.SpecialSummonStep(c,0,tp,tp,true,false,POS_FACEUP)
+	Duel.SpecialSummonStep(c,1,tp,tp,true,false,POS_FACEUP)
 	c:AddMonsterAttributeComplete()
 	--Monsters the opponent controls must attack this card
 	local e1=Effect.CreateEffect(c)
@@ -52,26 +52,17 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	Duel.SpecialSummonComplete()
 end
 function s.damtg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local c=e:GetHandler()
 	local ac=Duel.GetAttacker()
-	local bc=e:GetHandler():GetBattleTarget()
-	if chk==0 then return e:GetHandler():IsSummonType(1)
-		and ac==bc and ac:IsControler(1-tp)end
+	if chk==0 then return c:IsSummonType(1) and ac==c:GetBattleTarget() and ac:IsControler(1-tp) end
 	local dam=math.min(3000,ac:GetBaseAttack()*2)
 	Duel.SetTargetPlayer(1-tp)
 	Duel.SetTargetParam(dam)
 	Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,0,1-tp,dam)
 end
-function s.damtg(e,tp,eg,ep,ev,re,r,rp)
+function s.damop(e,tp,eg,ep,ev,re,r,rp)
 	local bc=e:GetHandler():GetBattleTarget()
-	local dam=math.min(3000,ac:GetBaseAttack()*2)
+	local dam=math.min(3000,bc:GetBaseAttack()*2)
 	local p=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER)
 	Duel.Damage(p,dam,REASON_EFFECT)
 end
-
---[[
-
-Special Summon this card as an Effect Monster (Zombie/DARK/Level 4/ATK 1800/DEF 500) with the following effect (this card is also still a Trap).
-● Monsters your opponent controls that can attack must attack this card.
-If this card Special Summoned by its own effect is destroyed by battle with an opponent's attacking monster: Inflict damage to your opponent equal to double the original ATK of the monster that destroyed it (max. 3000). You can only use each effect of "Zoma the Earthbound Spirit" once per turn.
-
-]]--
