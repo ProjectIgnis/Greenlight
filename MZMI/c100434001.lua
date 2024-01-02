@@ -3,7 +3,7 @@
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
-	--Search 1 Spell/Trap that lists "Flame Swordsman"
+	--Search 1 Spell/Trap that mentions "Flame Swordsman"
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
@@ -29,7 +29,7 @@ function s.initial_effect(c)
 	e3:SetOperation(s.tgop)
 	c:RegisterEffect(e3)
 end
-s.listed_names={45231177} --Flame Swordsman
+s.listed_names={45231177,id} --Flame Swordsman
 function s.thfilter(c)
 	return c:IsSpellTrap() and c:ListsCode(45231177) and c:IsAbleToHand()
 end
