@@ -66,9 +66,8 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 		e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 		e2:SetTargetRange(1,1)
 		e2:SetRange(LOCATION_MZONE)
-		e2:SetTarget(function (e,c,rp,r,re) return c==token and r&(REASON_COST+REASON_EFFECT)>0 and re and not re:GetHandler():IsRace(RACE_INSECT) end)
+		e2:SetTarget(function(e,c,rp,r,re) return c==token and r&(REASON_COST+REASON_EFFECT)>0 and re and not re:GetHandler():IsRace(RACE_INSECT) end)
 		e2:SetReset(RESET_EVENT|RESETS_STANDARD)
 		token:RegisterEffect(e2,true)
 	end
 end
-

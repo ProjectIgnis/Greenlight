@@ -10,7 +10,6 @@ function s.initial_effect(c)
 	e1:SetCode(EVENT_STARTUP)
 	e1:SetCountLimit(1)
 	e1:SetRange(0x5f)
-	e1:SetLabel(0)
 	e1:SetOperation(s.op)
 	c:RegisterEffect(e1)
 end

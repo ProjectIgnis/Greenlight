@@ -6,14 +6,13 @@ function s.initial_effect(c)
 end
 s.listed_names={62337487,77454922}
 s.listed_series={SET_FORTRESS_WHALE}
-function s.cfilter(c)
-	return c:IsAbleToGraveAsCost() and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil)
-end
 function s.thfilter(c)
 	return c:IsCode(62337487,77454922) and c:IsAbleToHand()
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
-	return aux.CanActivateSkill(tp) and Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_HAND,0,1,nil) and Duel.GetFlagEffect(tp,id)==0
+	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil)
+		and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil)
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SKILL_FLIP,tp,id|(1<<32))
@@ -22,9 +21,8 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	--OPD register
 	Duel.RegisterFlagEffect(tp,id,0,0,0)
 	--Discard 1 card to add "Fortress Whale" or "Fortress Whale's Oath" from Deck
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DISCARD)
-	local g=Duel.SelectMatchingCard(tp,s.cfilter,tp,LOCATION_HAND,0,1,1,nil)
-	if Duel.SendtoGrave(g,REASON_COST+REASON_DISCARD)>0 then
+	local ct=Duel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST|REASON_DISCARD,nil)
+	if ct>0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 		local sg=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil)
 		if #sg>0 then
@@ -50,5 +48,5 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.RegisterEffect(e2,tp)
 end
 function s.ctval(e,re,rp)
-	return re:IsActiveType(TYPE_SPELL|TYPE_TRAP) and rp==1-e:GetHandlerPlayer()
+	return re:IsSpellTrapEffect() and rp==1-e:GetHandlerPlayer()
 end

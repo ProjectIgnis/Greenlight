@@ -10,7 +10,6 @@ function s.initial_effect(c)
 	e1:SetCode(EVENT_STARTUP)
 	e1:SetCountLimit(1)
 	e1:SetRange(0x5f)
-	e1:SetLabel(0)
 	e1:SetOperation(s.op)
 	c:RegisterEffect(e1)
 end
@@ -29,7 +28,7 @@ function s.op(e,tp,eg,ep,ev,re,r,rp)
 	Duel.RegisterEffect(e1,tp)
 end
 function s.rvcon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetTurnPlayer()==1-tp and Duel.GetCurrentPhase()==PHASE_DRAW and #eg>0
+	return Duel.IsTurnPlayer(1-tp) and Duel.IsPhase(PHASE_DRAW) and #eg>0
 end
 function s.rvop(e,tp,eg,ep,ev,re,r,rp)
 	local hg=eg:Filter(Card.IsLocation,nil,LOCATION_HAND)

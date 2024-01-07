@@ -28,4 +28,3 @@ function s.op(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetValue(function(e,te) return te:GetOwner()~=e:GetOwner() end)
 	Duel.RegisterEffect(e1,tp)
 end
-

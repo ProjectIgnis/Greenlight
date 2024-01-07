@@ -4,22 +4,23 @@ local s,id=GetID()
 function s.initial_effect(c)
 	aux.AddSkillProcedure(c,1,false,s.flipcon,s.flipop)
 end
-function s.tdfilter(c,tp)
-	return c:IsMonster() and c:IsAbleToDeckAsCost() and Duel.IsExistingMatchingCard(Card.IsAbleToGraveAsCost,tp,LOCATION_HAND,0,1,nil)
+function s.tdfilter(c)
+	return c:IsMonster() and c:IsAbleToDeckAsCost()
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetFieldGroup(tp,0,LOCATION_MZONE)
-	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0 and Duel.IsExistingMatchingCard(s.tdfilter,tp,0,LOCATION_MZONE,1,nil,tp)
+	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and Duel.IsExistingMatchingCard(s.tdfilter,tp,LOCATION_GRAVE,0,1,nil)
+		and Duel.IsExistingMatchingCard(Card.IsAbleToGraveAsCost,tp,LOCATION_HAND,0,1,nil)
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SKILL_FLIP,tp,id|(1<<32))
 	Duel.Hint(HINT_CARD,tp,id)
 	local c=e:GetHandler()
 	--OPD register
-	Duel.RegisterFlagEffect(tp,id,RESET_PHASE|PHASE_END,0,1)
+	Duel.RegisterFlagEffect(tp,id,0,0,1)
 	--Shuffle 1 monster back into Main Deck then send 1 card from hand to GY
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-	local g=Duel.SelectMatchingCard(tp,s.tdfilter,tp,LOCATION_GRAVE,0,1,1,nil,tp)
+	local g=Duel.SelectMatchingCard(tp,s.tdfilter,tp,LOCATION_GRAVE,0,1,1,nil)
 	if Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_COST)>0 and g:IsLocation(LOCATION_DECK) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 		local sg=Duel.SelectMatchingCard(tp,Card.IsAbleToGraveAsCost,tp,LOCATION_HAND,0,1,1,nil)

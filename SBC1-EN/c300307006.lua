@@ -22,15 +22,14 @@ function s.op(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetOperation(s.flipop)
 	Duel.RegisterEffect(e1,tp)
 end
-function s.cfilter(c,e,tp,tid)
-	return c:IsAbleToGraveAsCost() and Duel.IsExistingMatchingCard(s.spfilter,tp,0,LOCATION_GRAVE,1,nil,e,tp,tid)
-end
 function s.spfilter(c,e,tp,tid)
-	return c:GetTurnID()==tid and (c:GetReason()&REASON_DESTROY)~=0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
+	return c:GetTurnID()==tid and (c:GetReason()&REASON_DESTROY)~=0
+		and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
-	local tid=Duel.GetTurnCount()
-	return Duel.IsTurnPlayer(tp) and Duel.GetFlagEffect(ep,id)==0 and Duel.IsExistingMatchingCard(s.cfilter,tp,LOCATION_HAND,0,1,nil,e,tp,tid)
+	return Duel.IsTurnPlayer(tp) and Duel.GetFlagEffect(ep,id)==0
+		and Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil)
+		and Duel.IsExistingMatchingCard(s.spfilter,tp,0,LOCATION_GRAVE,1,nil,e,tp,Duel.GetTurnCount())
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	if not Duel.SelectYesNo(tp,aux.Stringid(id,0)) then return end
@@ -39,12 +38,10 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	--OPD register
 	Duel.RegisterFlagEffect(ep,id,0,0,0)
 	--Discard 1 card to Set 1 monster from opponent's GY to your field
-	local tid=Duel.GetTurnCount()
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DISCARD)
-	local g=Duel.SelectMatchingCard(tp,s.cfilter,tp,LOCATION_HAND,0,1,1,nil,e,tp,tid)
-	if Duel.SendtoGrave(g,REASON_COST+REASON_DISCARD)>0 then
+	local ct=Duel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST|REASON_DISCARD,nil)
+	if ct>0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SET)
-		local sg=Duel.SelectMatchingCard(tp,s.spfilter,tp,0,LOCATION_GRAVE,1,1,nil,e,tp,tid)
+		local sg=Duel.SelectMatchingCard(tp,s.spfilter,tp,0,LOCATION_GRAVE,1,1,nil,e,tp,Duel.GetTurnCount())
 		if #sg>0 then
 			Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
 			Duel.ConfirmCards(1-tp,sg)

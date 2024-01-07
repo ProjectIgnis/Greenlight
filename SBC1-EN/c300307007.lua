@@ -6,13 +6,13 @@ function s.initial_effect(c)
 end
 s.listed_names={CARD_DARK_MAGICIAN}
 function s.tdfilter(c)
-	return c:IsCode(CARD_DARK_MAGICIAN) and c:IsAbleToDeckAsCost() and c:IsLocation(LOCATION_HAND)
+	return c:IsCode(CARD_DARK_MAGICIAN) and c:IsAbleToDeckAsCost()
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
-	local b1=Duel.IsPlayerCanDraw(tp,1)
-	local b2=Duel.IsPlayerCanDraw(tp,3)
-	local b3=Duel.IsPlayerCanDraw(tp,5)
-	return aux.CanActivateSkill(tp) and Duel.IsExistingMatchingCard(s.tdfilter,tp,LOCATION_HAND,0,2,nil) and Duel.GetFlagEffect(tp,id)==0 and (b1 or b2 or b3)
+	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and Duel.IsExistingMatchingCard(aux.NOT(Card.IsPublic),tp,LOCATION_HAND,0,1,nil)
+		and Duel.IsExistingMatchingCard(s.tdfilter,tp,LOCATION_HAND,0,2,nil)
+		and Duel.IsPlayerCanDraw(tp,1)
 end
 function s.rescon(sg,e,tp,mg)
 	local d1=Duel.IsPlayerCanDraw(tp,1) and sg:FilterCount(s.tdfilter,nil)==1
@@ -29,6 +29,7 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	--Reveal hand, send DM to bottom of Decks, then draw 1
 	local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
 	Duel.ConfirmCards(1-tp,g)
+	g:Filter(s.tdfilter,nil)
 	local hg=aux.SelectUnselectGroup(g,e,tp,1,3,s.rescon,1,tp,HINTMSG_TODECK)
 	local dg=Duel.SendtoDeck(hg,nil,SEQ_DECKBOTTOM,REASON_COST)
 	if dg==1 then

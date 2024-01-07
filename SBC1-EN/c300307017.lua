@@ -6,7 +6,9 @@ function s.initial_effect(c)
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetFieldGroup(tp,0,LOCATION_MZONE)
-	return aux.CanActivateSkill(tp) and g:FilterCount(Card.IsMonster,nil)==3 and Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil) and Duel.GetFlagEffect(tp,id)==0 
+	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and g:FilterCount(Card.IsMonster,nil)==3
+		and Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil)
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SKILL_FLIP,tp,id|(1<<32))
@@ -27,11 +29,8 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetCode(EFFECT_CHANGE_DAMAGE)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e1:SetTargetRange(0,1)
-	e1:SetValue(s.damval)
+	e1:SetValue(function(e,re,val,r,rp,rc) return val//2 end)
 	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
 	aux.RegisterClientHint(e:GetHandler(),nil,tp,1,0,aux.Stringid(id,0),nil)
-end
-function s.damval(e,re,val,r,rp,rc)
-	return math.floor(val/2)
 end

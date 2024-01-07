@@ -5,15 +5,16 @@ function s.initial_effect(c)
 	aux.AddSkillProcedure(c,1,false,s.flipcon,s.flipop)
 end
 function s.fusfilter(c,e,tp)
-	return c:IsType(TYPE_FUSION) and c.material 
+	return c:IsType(TYPE_FUSION) and c.material
 		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_GRAVE,0,1,nil,e,tp,c)
 end
 function s.spfilter(c,e,tp,sc)
 	return c:IsCode(table.unpack(sc.material)) and c:IsType(TYPE_NORMAL) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
-	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
-	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0 and ft>0 and Duel.GetLP(tp)>800 and Duel.IsExistingMatchingCard(s.fusfilter,tp,LOCATION_EXTRA,0,1,nil,e,tp)
+	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and Duel.GetLP(tp)>800 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 
+		and Duel.IsExistingMatchingCard(s.fusfilter,tp,LOCATION_EXTRA,0,1,nil,e,tp)
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SKILL_FLIP,tp,id|(1<<32))

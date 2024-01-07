@@ -6,13 +6,17 @@ function s.initial_effect(c)
 end
 s.listed_names={CARD_JINZO}
 function s.rfilter(c,e,tp)
-	return c:IsReleasable() and (c:IsRace(RACE_PSYCHIC) or c:IsRace(RACE_MACHINE)) and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_GRAVE,0,1,nil,e,tp)
+	return c:IsReleasable() and c:IsRace(RACE_PSYCHIC|RACE_MACHINE)
+		and Duel.GetMZoneCount(tp,c)>0
+		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_GRAVE,0,1,nil,e,tp)
 end
 function s.spfilter(c,e,tp)
 	return c:IsCode(CARD_JINZO) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
-	return aux.CanActivateSkill(tp) and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsTrap),tp,0,LOCATION_ONFIELD,1,nil) and Duel.IsExistingMatchingCard(s.rfilter,tp,LOCATION_MZONE,0,1,nil) and Duel.GetFlagEffect(tp,id)==0
+	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsTrap),tp,0,LOCATION_ONFIELD,1,nil)
+		and Duel.IsExistingMatchingCard(s.rfilter,tp,LOCATION_MZONE,0,1,nil)
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SKILL_FLIP,tp,id|(1<<32))

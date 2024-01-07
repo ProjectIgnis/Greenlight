@@ -14,18 +14,18 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 s.listed_names={21770260,31709826}
-function s.filter(c,tp)
-	return c:IsCode(21770260) and c:IsFaceup() and Duel.IsExistingMatchingCard(Card.IsSpellTrap,tp,0,LOCATION_ONFIELD,1,nil)
-end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
-	return aux.CanActivateSkill(tp) and Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_SZONE,0,1,nil,tp)
+	return aux.CanActivateSkill(tp)
+		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,21770260),tp,LOCATION_ONFIELD,0,1,nil,tp)
+		and Duel.IsExistingMatchingCard(Card.IsSpellTrap,tp,0,LOCATION_ONFIELD,1,nil)
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SKILL_FLIP,tp,id|(1<<32))
 	Duel.Hint(HINT_CARD,tp,id)
 	--Destroy 1 "Jam Breeding Machine" and 1 Spell/Trap your opponent controls
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g1=Duel.SelectMatchingCard(tp,aux.FaceupFilter(Card.IsCode,21770260),tp,LOCATION_SZONE,0,1,1,nil)
+	local g1=Duel.SelectMatchingCard(tp,aux.FaceupFilter(Card.IsCode,21770260),tp,LOCATION_ONFIELD,0,1,1,nil)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local g2=Duel.SelectMatchingCard(tp,Card.IsSpellTrap,tp,0,LOCATION_ONFIELD,1,1,nil)
 	g1:Merge(g2)
 	Duel.HintSelection(g1)

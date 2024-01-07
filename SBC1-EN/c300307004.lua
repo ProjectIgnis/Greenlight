@@ -39,7 +39,7 @@ function s.op(e,tp,eg,ep,ev,re,r,rp)
 	e3:SetCondition(s.atkcon)
 	e3:SetTarget(function(e,c) return c:IsMonster() and c:IsLevelAbove(7) and c:IsRace(RACE_INSECT) end)
 	e3:SetTargetRange(LOCATION_MZONE,0)
-	Duel.RegisterEffect(e1,tp)
+	Duel.RegisterEffect(e3,tp)
 	--Place 1 "Parasite Paracide" from your GY face-up on opponent's Deck as if it were placed by its own effect
 	local e4=Effect.CreateEffect(c)
 	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
@@ -59,23 +59,21 @@ function s.atkcon(e,tp,eg,ep,ev,re,r,rp)
 	return #g==#fg
 end
 --"Parasite Paracide" placement functions
-function s.dfilter(c,tp)
-	return c:IsAbleToGraveAsCost() and Duel.IsExistingMatchingCard(s.ppfilter,tp,LOCATION_GRAVE,0,1,nil)
-end
 function s.ppfilter(c)
 	return c:IsCode(27911549) and c:IsAbleToDeck()
 end
 function s.ppcon(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetFlagEffect(tp,id)>0 then return false end
-	return aux.CanActivateSkill(tp) and Duel.IsExistingMatchingCard(s.dfilter,tp,LOCATION_HAND,0,1,nil,tp) 
+	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil)
+		and Duel.IsExistingMatchingCard(s.ppfilter,tp,LOCATION_GRAVE,0,1,nil)
 end
 function s.ppop(e,tp,eg,ep,ev,re,r,rp)
 	--OPD Register
 	Duel.RegisterFlagEffect(tp,id,0,0,0)
 	--Discard 1 add to place "Parasite Paracide" on opponent's Deck
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DISCARD)
-	local g=Duel.SelectMatchingCard(tp,s.dfilter,tp,LOCATION_HAND,0,1,1,nil,tp)
-	if Duel.SendtoGrave(g,REASON_COST+REASON_DISCARD)>0 then
+	local ct=Duel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST|REASON_DISCARD,nil)
+	if ct>0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 		local sg=Duel.SelectMatchingCard(tp,s.ppfilter,tp,LOCATION_GRAVE,0,1,1,nil)
 		if #sg>0 then
@@ -101,17 +99,15 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) then
-		if Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP_DEFENSE)>0 then
-			Duel.Damage(tp,1000,REASON_EFFECT)
-			local e1=Effect.CreateEffect(c)
-			e1:SetType(EFFECT_TYPE_FIELD)
-			e1:SetCode(EFFECT_CHANGE_RACE)
-			e1:SetRange(LOCATION_MZONE)
-			e1:SetTargetRange(LOCATION_MZONE,0)
-			e1:SetValue(RACE_INSECT)
-			e1:SetReset(RESET_EVENT|RESETS_STANDARD)
-			c:RegisterEffect(e1)
-		end
+	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP_DEFENSE)>0 then
+		Duel.Damage(tp,1000,REASON_EFFECT)
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_FIELD)
+		e1:SetCode(EFFECT_CHANGE_RACE)
+		e1:SetRange(LOCATION_MZONE)
+		e1:SetTargetRange(LOCATION_MZONE,0)
+		e1:SetValue(RACE_INSECT)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
+		c:RegisterEffect(e1)
 	end
 end

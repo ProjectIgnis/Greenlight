@@ -22,16 +22,17 @@ function s.op(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetOperation(s.flipop)
 	Duel.RegisterEffect(e1,tp)
 end
-function s.rfilter(c,tp)
-	return c:IsReleasable() and c:IsRace(RACE_SPELLCASTER) and (Duel.IsExistingMatchingCard(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil) or Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,0,LOCATION_HAND,1,nil))
+function s.rfilter(c)
+	return c:IsFaceup() and c:IsRace(RACE_SPELLCASTER) and c:IsReleasable()
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsTurnPlayer(tp) and Duel.IsExistingMatchingCard(s.rfilter,tp,LOCATION_MZONE,0,1,nil,tp)
+	return Duel.IsTurnPlayer(tp)
+		and Duel.IsExistingMatchingCard(s.rfilter,tp,LOCATION_MZONE,0,1,nil)
+		and (Duel.IsExistingMatchingCard(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil)
+		or Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,0,LOCATION_HAND,1,nil))
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	if not Duel.SelectYesNo(tp,aux.Stringid(id,0)) then return end
-	local b1=Duel.IsExistingMatchingCard(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil)
-	local b2=Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,0,LOCATION_HAND,1,nil) 
 	Duel.Hint(HINT_SKILL_FLIP,tp,id|(1<<32))
 	Duel.Hint(HINT_CARD,tp,id)
 	--OPD register
@@ -40,6 +41,8 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
 	local g=Duel.SelectMatchingCard(tp,s.rfilter,tp,LOCATION_MZONE,0,1,1,nil,tp)
 	if #g>0 and Duel.Release(g,REASON_COST)>0 then
+		local b1=Duel.IsExistingMatchingCard(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil)
+		local b2=Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,0,LOCATION_HAND,1,nil) 
 		local op=Duel.SelectEffect(1-tp,{b1,aux.Stringid(id,1)},{b2,aux.Stringid(id,2)})
 		if op==1 then
 			Duel.Hint(HINTSELECTMSG,tp,HINTMSG_DESTROY)
@@ -56,4 +59,3 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 		end
 	end
 end
-		

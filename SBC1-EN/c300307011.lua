@@ -49,9 +49,9 @@ function s.thfilter(c)
 end
 function s.thcon(e)
 	local tp=e:GetHandlerPlayer()
-	if Duel.GetFlagEffect(tp,id)>0 then return end
-	return aux.CanActivateSkill(tp) and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_UMI),tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) 
-	and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_GRAVE,0,1,nil) and Duel.GetFlagEffect(tp,id)==0
+	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,CARD_UMI),tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) 
+		and Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_GRAVE,0,1,nil)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,tp,id)
@@ -65,7 +65,7 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SendtoHand(g,tp,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,g)
 	end
-	-- Cannot activate cards or effects
+	--Cannot activate cards or effects
 	local e1=Effect.CreateEffect(e:GetHandler())
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_FIELD)
@@ -75,7 +75,7 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetValue(s.aclimit)
 	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
-	-- Remove restrictions on Normal Summon
+	--Remove restrictions on Normal Summon
 	local e0=Effect.CreateEffect(e:GetHandler())
 	e0:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e0:SetCode(EVENT_SUMMON_SUCCESS)
