@@ -40,7 +40,7 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
 	local g=Duel.SelectMatchingCard(tp,s.rfilter,tp,LOCATION_MZONE,0,1,1,nil,tp)
 	if #g>0 and Duel.Release(g,REASON_COST)>0 then
-		local op=Duel.SelectEffect{1-tp,{b1,aux.Stringid(id,1)},{b2,aux.Stringid(id,2)})
+		local op=Duel.SelectEffect(1-tp,{b1,aux.Stringid(id,1)},{b2,aux.Stringid(id,2)})
 		if op==1 then
 			Duel.Hint(HINTSELECTMSG,tp,HINTMSG_DESTROY)
 			local dg=Duel.SelectMatchingCard(1-tp,Card.IsDestructable,1-tp,LOCATION_ONFIELD,0,1,1,nil)
