@@ -93,10 +93,11 @@ function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
 		local c=e:GetHandler()
 		--It loses exactly 1000 ATK
-		tc:UpdateAttack(-1000,RESET_PHASE|PHASE_END,c)
-		--All other monsters gain 1000 ATK
-		for sc in g:Iter() do
-			sc:UpdateAttack(1000,nil,c)
+		if tc:UpdateAttack(-1000,RESET_PHASE|PHASE_END,c)==-1000 then
+			--All other monsters gain 1000 ATK
+			for sc in g:Iter() do
+				sc:UpdateAttack(1000,RESET_PHASE|PHASE_END,c)
+			end
 		end
 	end
 end
