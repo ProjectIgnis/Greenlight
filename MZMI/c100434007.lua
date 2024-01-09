@@ -30,7 +30,7 @@ function s.initial_effect(c)
 	e3:SetOperation(s.spop)
 	c:RegisterEffect(e3)
 end
-s.listed_names={45231177} --Flame Swordsman
+s.listed_names={CARD_FLAME_SWORDSMAN}
 function s.eqfilter(c)
 	return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_WARRIOR)
 end
@@ -53,7 +53,7 @@ function s.spcond(e,tp,eg,ep,ev,re,r,rp)
 	return ec and ec:IsType(TYPE_FUSION) and ec:IsControler(tp)
 end
 function s.spfilter(c,e,tp,mc)
-	return c:IsLevelBelow(7) and (c:IsCode(45231177) or c:ListsCode(45231177))
+	return c:IsLevelBelow(7) and (c:IsCode(CARD_FLAME_SWORDSMAN) or c:ListsCode(CARD_FLAME_SWORDSMAN))
 		and Duel.GetLocationCountFromEx(tp,tp,mc,c)
 		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_FUSION,tp,false,false) and c:CheckFusionMaterial()
 end

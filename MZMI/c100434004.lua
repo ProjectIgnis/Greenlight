@@ -5,7 +5,7 @@ local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Fusion Summon Procedure
-	Fusion.AddProcMix(c,true,true,45231177,100434005)
+	Fusion.AddProcMix(c,true,true,CARD_FLAME_SWORDSMAN,100434005)
 	--Destroy 1 monster and inflict damage
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))

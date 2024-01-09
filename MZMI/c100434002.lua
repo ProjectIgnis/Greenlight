@@ -33,11 +33,11 @@ function s.initial_effect(c)
 	e3:SetOperation(s.thop)
 	c:RegisterEffect(e3)
 end
-s.listed_names={45231177} --Flame Swordsman
+s.listed_names={CARD_FLAME_SWORDSMAN}
 s.listed_series={SET_SALAMANDRA}
 function s.equipcond(e)
 	local ec=e:GetHandler():GetEquipTarget()
-	return ec and (ec:IsCode(45231177) or ec:ListsCode(45231177))
+	return ec and (ec:IsCode(CARD_FLAME_SWORDSMAN) or ec:ListsCode(CARD_FLAME_SWORDSMAN))
 end
 function s.eqtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and chkc:IsFaceup() and c:IsRace(RACE_WARRIOR) end

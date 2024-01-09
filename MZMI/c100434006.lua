@@ -39,7 +39,7 @@ function s.initial_effect(c)
 	e5:SetOperation(s.atkop)
 	c:RegisterEffect(e5)
 end
-s.listed_names={45231177} --Flame Swordsman
+s.listed_names={CARD_FLAME_SWORDSMAN}
 function s.nsfilter(c,sp)
 	return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_WARRIOR) and c:IsFaceup() and c:IsSummonPlayer(sp)
 end
@@ -53,7 +53,7 @@ function s.costfilter(c,e,tp)
 		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_EXTRA,0,1,nil,e,tp,c)
 end
 function s.spfilter(c,e,tp,mc)
-	return c:IsCode(45231177) and Duel.GetLocationCountFromEx(tp,tp,mc,c)>0
+	return c:IsCode(CARD_FLAME_SWORDSMAN) and Duel.GetLocationCountFromEx(tp,tp,mc,c)>0
 		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_FUSION,tp,false,false) and c:CheckFusionMaterial()
 end
 function s.spcost(e,tp,eg,ep,ev,re,r,rp,chk)

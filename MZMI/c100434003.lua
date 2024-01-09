@@ -39,7 +39,7 @@ function s.initial_effect(c)
 	e3:SetOperation(s.spop)
 	c:RegisterEffect(e3)
 end
-s.listed_names={45231177} --Flame Swordsman
+s.listed_names={CARD_FLAME_SWORDSMAN}
 function s.spcfilter(c,tp)
 	return c:IsReason(REASON_BATTLE|REASON_EFFECT) and c:IsPreviousLocation(LOCATION_MZONE)
 		and c:IsPreviousPosition(POS_FACEUP) and c:IsPreviousControler(tp)
@@ -84,7 +84,7 @@ end
 function s.spfilter(c,e,tp)
 	if c:IsLocation(LOCATION_DECK) and Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return false end
 	if c:IsLocation(LOCATION_EXTRA) and Duel.GetLocationCountFromEx(tp,tp,nil,c)<=0 then return false end
-	return c:IsLevelBelow(7) and (c:IsCode(45231177) or c:ListsCode(45231177))
+	return c:IsLevelBelow(7) and (c:IsCode(CARD_FLAME_SWORDSMAN) or c:ListsCode(CARD_FLAME_SWORDSMAN))
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
