@@ -36,7 +36,7 @@ end
 function s.replacetg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	local ec=c:GetEquipTarget()
-	if chk==0 then return rc:IsReason(REASON_EFFECT|REASON_BATTLE) and not ec:IsReason(REASON_REPLACE)
+	if chk==0 then return ec:IsReason(REASON_EFFECT|REASON_BATTLE) and not ec:IsReason(REASON_REPLACE)
 		and c:IsDestructable(e) and not c:IsStatus(STATUS_DESTROY_CONFIRMED) end
 	if Duel.SelectEffectYesNo(tp,c,96) then
 		c:SetStatus(STATUS_DESTROY_CONFIRMED,true)
@@ -49,7 +49,7 @@ function s.replaceop(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.spcond(e,tp,eg,ep,ev,re,r,rp)
 	local ec=e:GetHandler():GetEquipTarget()
-	return ec and ec:IsType(TYPE_FUSION) and c:IsControler(tp)
+	return ec and ec:IsType(TYPE_FUSION) and ec:IsControler(tp)
 end
 function s.spfilter(c,e,tp,mc)
 	return c:IsLevelBelow(7) and (c:IsCode(45231177) or c:ListsCode(45231177))
@@ -61,14 +61,14 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local ec=c:GetEquipTarget()
 	if chk==0 then return c:IsAbleToGrave() and ec:IsAbleToGrave()
 		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_EXTRA,0,1,nil,e,tp,ec) end
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,Group.FromCards(e,ec),2,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,Group.FromCards(c,ec),2,tp,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local ec=c:GetEquipTarget()
-	if not (c:IsRelateToEffect() and ec:IsRelateToEffect(e)) then return end
-	if Duel.SendtoGrave(Group.FromCards(e,ec),REASON_EFFECT)>0 then
+	if not (c:IsRelateToEffect(e) and ec) then return end
+	if Duel.SendtoGrave(Group.FromCards(c,ec),REASON_EFFECT)>0 then
 		local og=Duel.GetOperatedGroup()
 		if og:FilterCount(Card.IsLocation,nil,LOCATION_GRAVE)==#og then
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
