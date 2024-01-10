@@ -26,7 +26,7 @@ function s.initial_effect(c)
 	e2:SetOperation(s.tknop)
 	c:RegisterEffect(e2)
 end
-local GOLD_PRIDE_TOKEN=id+1
+local GOLD_PRIDE_TOKEN=id+100
 s.listed_names={GOLD_PRIDE_TOKEN}
 s.listed_series={SET_GOLD_PRIDE}
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -48,9 +48,10 @@ function s.costfilter(c,tp)
 		and Duel.IsPlayerCanSpecialSummonMonster(tp,GOLD_PRIDE_TOKEN,SET_GOLD_PRIDE,TYPES_TOKEN,0,0,c:GetLevel(),RACE_MACHINE,ATTRIBUTE_DARK)
 end
 function s.tkncost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.costfilter,tp,LOCATION_HAND|LOCATION_MZONE|LOCATION_GRAVE,0,1,nil,tp) end
+	local c=e:GetHandler()
+	if chk==0 then return Duel.IsExistingMatchingCard(s.costfilter,tp,LOCATION_HAND|LOCATION_MZONE|LOCATION_GRAVE,0,1,c,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectMatchingCard(tp,s.costfilter,tp,LOCATION_HAND|LOCATION_MZONE|LOCATION_GRAVE,0,1,1,nil,tp)
+	local g=Duel.SelectMatchingCard(tp,s.costfilter,tp,LOCATION_HAND|LOCATION_MZONE|LOCATION_GRAVE,0,1,1,c,tp)
 	Duel.Remove(g,POS_FACEUP,REASON_COST)
 	e:SetLabel(g:GetFirst():GetLevel())
 end
@@ -59,37 +60,37 @@ function s.tkntg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
 end
-function s.tkop(e,tp,eg,ep,ev,re,r,rp)
+function s.tknop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) and c:IsFaceup(c) then
-		--Cannot be used as material for a Fusion Summon, unless it is for a "Gold Pride" monster
+	if c:IsRelateToEffect(e) then
+		--Cannot be used as material for a Fusion/Synchro/Xyz/Link Summon, unless it is for a "Gold Pride" monster
 		local e1=Effect.CreateEffect(c)
+		e1:SetDescription(aux.Stringid(id,2))
 		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-		e1:SetCode(EFFECT_CANNOT_BE_FUSION_MATERIAL)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+		e1:SetCode(EFFECT_CANNOT_BE_MATERIAL)
 		e1:SetValue(s.matlimit)
 		e1:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END)
 		c:RegisterEffect(e1)
-		--Cannot be used as material for a Synchro Summon, unless it is for a "Gold Pride" monster
-		local e2=e1:Clone()
-		e2:SetCode(EFFECT_CANNOT_BE_SYNCHRO_MATERIAL)
-		c:RegisterEffect(e2)
-		--Cannot be used as material for a Xyz Summon, unless it is for a "Gold Pride" monster
-		local e3=e1:Clone()
-		e3:SetCode(EFFECT_CANNOT_BE_XYZ_MATERIAL)
-		c:RegisterEffect(e3)
-		--Cannot be used as material for a Link Summon, unless it is for a "Gold Pride" monster
-		local e4=e1:Clone()
-		e4:SetCode(EFFECT_CANNOT_BE_LINK_MATERIAL)
-		c:RegisterEffect(e4)
 	end
 	--Special Summon 1 "Gold Pride Token"
 	local lv=e:GetLabel()
 	if not (Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,GOLD_PRIDE_TOKEN,SET_GOLD_PRIDE,TYPES_TOKEN,0,0,lv,RACE_MACHINE,ATTRIBUTE_DARK)) then return end
 	local token=Duel.CreateToken(tp,GOLD_PRIDE_TOKEN)
+	--Set the Token's Level
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_SINGLE)
+	e2:SetCode(EFFECT_CHANGE_LEVEL_FINAL)
+	e2:SetValue(lv)
+	e2:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TOFIELD)
+	token:RegisterEffect(e2)
 	Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP)
 end
-function s.matlimit(e,c)
+function s.matlimit(e,c,sumtype,tp)
 	if not c then return false end
-	return not c:IsSetCard(SET_GOLD_PRIDE)
+	local summon_types={SUMMON_TYPE_FUSION,SUMMON_TYPE_SYNCHRO,SUMMON_TYPE_XYZ,SUMMON_TYPE_LINK}
+	for _,val in pairs(summon_types) do
+		if val==sumtype then return not c:IsSetCard(SET_GOLD_PRIDE) end
+	end
+	return false
 end

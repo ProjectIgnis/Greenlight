@@ -44,7 +44,7 @@ function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local g0=Duel.GetMatchingGroup(Card.IsCanBeEffectTarget,tp,LOCATION_ONFIELD,0,e:GetHandler(),e)
 	local g1=Duel.GetMatchingGroup(Card.IsCanBeEffectTarget,tp,0,LOCATION_ONFIELD,nil,e)
 	if chk==0 then return (#g0>0 and ct0>0) or (#g1>0 and ct1>0) end
-	local sg=aux.SelectUnselectGroup(g0+g1,e,tp,1,ct0+ct1,s.desrescon(ct0,ct1),1,tp,HINTMSG_DESTROY,nil,nil,true)
+	local sg=aux.SelectUnselectGroup(g0+g1,e,tp,1,ct0+ct1,s.desrescon(ct0,ct1),1,tp,HINTMSG_DESTROY)
 	Duel.SetTargetCard(sg)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,sg,#sg,0,0)
 end
@@ -56,7 +56,7 @@ function s.desop(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.tdcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return rp==1-tp and c:IsReason(REASON_EFFECT) and c:IsPreviousControler(tp)
+	return rp==1-tp and re:IsActivated() and c:IsReason(REASON_EFFECT) and c:IsPreviousControler(tp)
 		and c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEDOWN)
 end
 function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -67,6 +67,7 @@ function s.tdop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local g=Duel.SelectMatchingCard(tp,s.tdfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,2,nil)
 	if #g>0 then
+		Duel.HintSelection(g,true)
 		Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
 	end
 end

@@ -26,6 +26,7 @@ function s.initial_effect(c)
 	e2:SetOperation(s.gyplop)
 	c:RegisterEffect(e2)
 end
+s.listed_names={id}
 function s.checkzones(c0,c1)
 	local p0,p1=c0:GetOwner(),c1:GetOwner()
 	if p0==p1 then return Duel.GetLocationCount(p0,LOCATION_SZONE)>1 end

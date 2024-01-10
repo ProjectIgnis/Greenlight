@@ -19,17 +19,18 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetRange(LOCATION_GRAVE)
 	e2:SetCountLimit(1,{id,1})
-	e2:SetCost(aux.bfgcost)
+	e2:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E)
+	e2:SetCost(aux.selfbanishcost)
 	e2:SetTarget(s.mattg)
 	e2:SetOperation(s.matop)
 	c:RegisterEffect(e2)
 end
 s.listed_series={SET_GOBLIN}
-function s.xyzfilter(c,e,tp)
+function s.xyzmatfilter(c,e,tp)
 	local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(c),tp,nil,nil,REASON_XYZ)
 	return (#pg<=0 or (#pg==1 and pg:IsContains(c))) and c:IsFaceup() and c:IsType(TYPE_XYZ)
 		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_EXTRA,0,1,nil,e,tp,c,pg)
@@ -40,10 +41,10 @@ function s.spfilter(c,e,tp,mc,pg)
 		and mc:IsCanBeXyzMaterial(c) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_XYZ,tp,false,false)
 end
 function s.xyzsumtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) and s.xyzfilter(chkc,e,tp) end
-	if chk==0 then return Duel.IsExistingTarget(s.xyzfilter,tp,LOCATION_MZONE,0,1,nil,e,tp) end
+	if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) and s.xyzmatfilter(chkc,e,tp) end
+	if chk==0 then return Duel.IsExistingTarget(s.xyzmatfilter,tp,LOCATION_MZONE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	Duel.SelectTarget(tp,s.xyzfilter,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
+	Duel.SelectTarget(tp,s.xyzmatfilter,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
 end
 function s.xyzsumop(e,tp,eg,ep,ev,re,r,rp)
@@ -51,14 +52,13 @@ function s.xyzsumop(e,tp,eg,ep,ev,re,r,rp)
 	local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(tc),tp,nil,nil,REASON_XYZ)
 	if tc:IsFacedown() or not tc:IsRelateToEffect(e) or tc:IsControler(1-tp) or tc:IsImmuneToEffect(e) or #pg>1 or (#pg==1 and not pg:IsContains(tc)) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,tc,pg)
-	local sc=g:GetFirst()
+	local sc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,tc,pg):GetFirst()
 	if sc then
 		sc:SetMaterial(tc)
 		Duel.Overlay(sc,tc)
 		Duel.SpecialSummon(sc,SUMMON_TYPE_XYZ,tp,tp,false,false,POS_FACEUP)
 		sc:CompleteProcedure()
-		--Attach this card to the Xyz monster
+		--Attach this card to the Xyz Monster
 		local c=e:GetHandler()
 		if c:IsRelateToEffect(e) then
 			c:CancelToGrave()
@@ -77,7 +77,7 @@ function s.mattg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return Duel.IsExistingTarget(s.xyzfilter,tp,LOCATION_MZONE,0,1,nil)
 		and Duel.IsExistingTarget(s.atchfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,e:GetHandler(),tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	local xyzc=Duel.SelectTarget(tp,s.xyzfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,tp):GetFirst()
+	local xyzc=Duel.SelectTarget(tp,s.xyzfilter,tp,LOCATION_MZONE,0,1,1,nil,tp):GetFirst()
 	e:SetLabelObject(xyzc)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATTACH)
 	local tc=Duel.SelectTarget(tp,s.atchfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,tp)
@@ -85,7 +85,7 @@ function s.mattg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 end
 function s.matop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetTargetCards(e)
-	if #g==0 then return end
+	if #g~=2 then return end
 	local tc=g:GetFirst()
 	local xyzc=g:GetNext()
 	if tc==e:GetLabelObject() then tc,xyzc=xyzc,tc end

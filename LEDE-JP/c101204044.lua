@@ -20,7 +20,7 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_POSITION)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
+	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET,EFFECT_FLAG2_CHECK_SIMULTANEOUS)
 	e2:SetCode(EVENT_SUMMON_SUCCESS)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetCountLimit(1)
@@ -39,8 +39,8 @@ function s.initial_effect(c)
 	e4:SetRange(LOCATION_MZONE)
 	e4:SetCountLimit(1)
 	e4:SetCondition(function(_,tp) return Duel.GetAttacker():IsControler(1-tp) end)
-	e4:SetTarget(s.negattg)
-	e4:SetOperation(s.negatop)
+	e4:SetTarget(s.negatktg)
+	e4:SetOperation(s.negatkop)
 	c:RegisterEffect(e4)
 end
 s.listed_series={SET_GOBLIN}
@@ -48,7 +48,7 @@ function s.cfilter(c,e)
 	return c:IsCanChangePosition() and c:IsLocation(LOCATION_MZONE) and c:IsCanBeEffectTarget(e)
 end
 function s.poscond(e,tp,eg,ep,ev,re,r,rp)
-	return eg:IsExists(s.cfilter,1,e) and not eg:IsContains(e:GetHandler())
+	return eg:IsExists(s.cfilter,1,nil,e) and not eg:IsContains(e:GetHandler())
 end
 function s.postg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return eg:IsContains(chkc) and s.cfilter(chkc,e) end
@@ -70,10 +70,10 @@ function s.posop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.ChangePosition(tc,POS_FACEUP_DEFENSE,POS_FACEDOWN_DEFENSE,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK)
 	end
 end
-function s.negattg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.negatktg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.CheckRemoveOverlayCard(tp,1,1,1,REASON_EFFECT) end
 end
-function s.negatop(e,tp,eg,ep,ev,re,r,rp)
+function s.negatkop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.RemoveOverlayCard(tp,1,1,1,1,REASON_EFFECT)>0 then
 		Duel.NegateAttack()
 	end
