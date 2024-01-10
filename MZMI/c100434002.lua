@@ -1,9 +1,9 @@
---japanese name
+--Japanese name
 --Salamandra, the Flying Flame Dragon
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
-	--"Flame Swordsman" or a monster that mentions it equipped with this card gains 700 aTK
+	--"Flame Swordsman" or a monster that mentions it equipped with this card gains 700 ATK
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_EQUIP)
 	e1:SetCode(EFFECT_UPDATE_ATTACK)
@@ -13,11 +13,11 @@ function s.initial_effect(c)
 	--Equip itself to a Warrior monster
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
+	e2:SetCategory(CATEGORY_EQUIP)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e2:SetCategory(CATEGORY_EQUIP)
-	e2:SetCountLimit(1,id)
 	e2:SetRange(LOCATION_HAND|LOCATION_GRAVE)
+	e2:SetCountLimit(1,id)
 	e2:SetTarget(s.eqtg)
 	e2:SetOperation(s.eqop)
 	c:RegisterEffect(e2)
@@ -51,13 +51,15 @@ function s.eqop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
 	local tc=Duel.GetFirstTarget()
-	if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and tc:IsRelateToEffect(e) and tc:IsControler(tp) and not tc:IsFacedown() then
-		Duel.Equip(tp,c,tc,true)
+	if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and tc:IsRelateToEffect(e) and tc:IsControler(tp) and tc:IsFaceup()
+		and Duel.Equip(tp,c,tc) then
+		--Wquip limit
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
 		e1:SetCode(EFFECT_EQUIP_LIMIT)
-		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 		e1:SetValue(function(e,ec) return ec==tc end)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 		c:RegisterEffect(e1)
 	end
 end

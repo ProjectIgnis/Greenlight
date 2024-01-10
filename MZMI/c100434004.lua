@@ -1,4 +1,4 @@
---japanese name
+--Japanese name
 --Ultimate Flame Swordsman
 --scripted by Naim
 local s,id=GetID()
@@ -28,13 +28,14 @@ function s.initial_effect(c)
 	--Double its ATK but destroy it during the End Phase
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
+	e3:SetCategory(CATEGORY_ATKCHANGE)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetCode(EVENT_BATTLE_START)
 	e3:SetCountLimit(1,{id,1})
-	e3:SetTarget(s.atktg)
 	e3:SetOperation(s.atkop)
 	c:RegisterEffect(e3)
 end
+s.listed_names={CARD_FLAME_SWORDSMAN,100434005}
 function s.quickcon(e,tp,eg,ep,ev,re,r,rp)
 	return #e:GetHandler():GetEquipGroup()>0
 end
@@ -52,20 +53,17 @@ function s.desop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.Damage(1-tp,500,REASON_EFFECT)
 	end
 end
-function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local atk=e:GetHandler():GetAttack()
-	if chk==0 then return atk>0 end
-	Duel.SetOperationInfo(0,CATEGORY_ATKCHANGE,e:GetHandler(),1,tp,atk)
-end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsFaceup() and c:IsRelateToEffect(e) then
+		--Double its ATK until the end of this turn
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_SET_ATTACK)
+		e1:SetCode(EFFECT_SET_ATTACK_FINAL)
 		e1:SetValue(c:GetAttack()*2)
 		e1:SetReset(RESET_EVENT|RESETS_STANDARD_DISABLE|RESET_PHASE|PHASE_END)
 		c:RegisterEffect(e1)
+		--Destroy it during the End Phase of this turn
 		aux.DelayedOperation(c,PHASE_END,id,e,tp,function(cc) Duel.Destroy(cc,REASON_EFFECT) end)
 	end
 end

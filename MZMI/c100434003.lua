@@ -1,4 +1,4 @@
---japanese name
+--Japanese name
 --Mirage Swordsman
 --scripted by Naim
 local s,id=GetID()
@@ -8,7 +8,7 @@ function s.initial_effect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
+	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY,EFFECT_FLAG2_CHECK_SIMULTANEOUS)
 	e1:SetRange(LOCATION_HAND|LOCATION_GRAVE)
 	e1:SetCode(EVENT_DESTROYED)
 	e1:SetCountLimit(1,id)
@@ -54,7 +54,7 @@ function s.selfsptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 		and ((c:IsLocation(LOCATION_GRAVE) and not eg:IsContains(c)) 
-		or (c:IsLocation(LOCATION_HAND))) end
+		or c:IsLocation(LOCATION_HAND)) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
 end
 function s.selfspop(e,tp,eg,ep,ev,re,r,rp)
@@ -77,9 +77,7 @@ function s.bttldesop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-	return (r&REASON_EFFECT|REASON_BATTLE)>0
-		and re:GetHandler()~=e:GetHandler()
-		--and e:GetHandler():GetReasonCard()~=e:GetHandler() --maybe this would be better instead of the re's handler
+	return (r&REASON_EFFECT|REASON_BATTLE)>0 and (not re or re:GetHandler()~=e:GetHandler())
 end
 function s.spfilter(c,e,tp)
 	if c:IsLocation(LOCATION_DECK) and Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return false end
@@ -88,8 +86,7 @@ function s.spfilter(c,e,tp)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_DECK|LOCATION_EXTRA,0,1,nil,e,tp) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_DECK|LOCATION_EXTRA,0,1,nil,e,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK|LOCATION_EXTRA)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)

@@ -1,4 +1,4 @@
---japanese name
+--Japanese name
 --Salamandra Fusion
 --scripted by Naim
 local s,id=GetID()
@@ -13,7 +13,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Destruction replacement for the equipped monster
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_EQUIP)
+	e2:SetType(EFFECT_TYPE_EQUIP+EFFECT_TYPE_CONTINUOUS)
 	e2:SetCode(EFFECT_DESTROY_REPLACE)
 	e2:SetTarget(s.replacetg)
 	e2:SetOperation(s.replaceop)
@@ -53,7 +53,7 @@ function s.spcond(e,tp,eg,ep,ev,re,r,rp)
 	return ec and ec:IsType(TYPE_FUSION) and ec:IsControler(tp)
 end
 function s.spfilter(c,e,tp,mc)
-	return c:IsLevelBelow(7) and (c:IsCode(CARD_FLAME_SWORDSMAN) or c:ListsCode(CARD_FLAME_SWORDSMAN))
+	return (c:IsCode(CARD_FLAME_SWORDSMAN) or (c:IsType(TYPE_FUSION) and c:ListsCode(CARD_FLAME_SWORDSMAN)))
 		and Duel.GetLocationCountFromEx(tp,tp,mc,c)
 		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_FUSION,tp,false,false) and c:CheckFusionMaterial()
 end
@@ -69,16 +69,13 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local ec=c:GetEquipTarget()
 	if not (c:IsRelateToEffect(e) and ec) then return end
-	if Duel.SendtoGrave(Group.FromCards(c,ec),REASON_EFFECT)>0 then
-		local og=Duel.GetOperatedGroup()
-		if og:FilterCount(Card.IsLocation,nil,LOCATION_GRAVE)==#og then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-			local tc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,nil):GetFirst()
-			if tc then
-				tc:SetMaterial(nil)
-				Duel.SpecialSummon(tc,SUMMON_TYPE_FUSION,tp,tp,false,false,POS_FACEUP)
-				tc:CompleteProcedure()
-			end
-		end
+	local g=Group.FromCards(c,ec)
+	if Duel.SendtoGrave(g,REASON_EFFECT)==0 or g:FilterCount(Card.IsLocation,nil,LOCATION_GRAVE)==0 then return end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+	local sc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,nil):GetFirst()
+	if not sc then return end
+	sc:SetMaterial(nil)
+	if Duel.SpecialSummon(sc,SUMMON_TYPE_FUSION,tp,tp,false,false,POS_FACEUP)>0 then
+		sc:CompleteProcedure()
 	end
 end

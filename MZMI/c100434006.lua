@@ -1,4 +1,4 @@
---japanese name
+--Japanese name
 --Flame Swordsrealm
 --scripted by Naim
 local s,id=GetID()
@@ -63,12 +63,12 @@ function s.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SendtoGrave(g,REASON_COST)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_EXTRA,0,1,nil,e,tp) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local sc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,nil):GetFirst()
+	local sc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_EXTRA,0,1,1,nil,e,tp):GetFirst()
 	if not sc then return end
 	sc:SetMaterial(nil)
 	if Duel.SpecialSummon(sc,SUMMON_TYPE_FUSION,tp,tp,false,false,POS_FACEUP)>0 then
@@ -89,15 +89,14 @@ function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
+	if not (tc:IsRelateToEffect(e) and tc:IsFaceup()) then return end
 	local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,0,tc)
-	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
-		local c=e:GetHandler()
-		--It loses exactly 1000 ATK
-		if tc:UpdateAttack(-1000,RESET_PHASE|PHASE_END,c)==-1000 then
-			--All other monsters gain 1000 ATK
-			for sc in g:Iter() do
-				sc:UpdateAttack(1000,RESET_PHASE|PHASE_END,c)
-			end
+	local c=e:GetHandler()
+	--It loses exactly 1000 ATK
+	if tc:IsAttackAbove(1000) and tc:UpdateAttack(-1000,RESET_PHASE|PHASE_END,c)==-1000 then
+		--All other monsters gain 1000 ATK
+		for sc in g:Iter() do
+			sc:UpdateAttack(1000,RESET_PHASE|PHASE_END,c)
 		end
 	end
 end
