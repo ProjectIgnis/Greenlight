@@ -16,6 +16,7 @@ function s.initial_effect(c)
 	e2:SetOperation(s.operation)
 	c:RegisterEffect(e2)
 end
+s.listed_names={160016048}
 function s.otop(g,e,tp,eg,ep,ev,re,r,rp,c,minc,zone,relzone,exeff)
 	--change base attack
 	local e1=Effect.CreateEffect(c)
@@ -27,7 +28,6 @@ function s.otop(g,e,tp,eg,ep,ev,re,r,rp,c,minc,zone,relzone,exeff)
 	e1:SetValue(1000)
 	c:RegisterEffect(e1)
 end
-s.listed_names={160016048}
 function s.cfilter(c)
 	return c:IsMonster() and c:IsAbleToGraveAsCost()
 end
