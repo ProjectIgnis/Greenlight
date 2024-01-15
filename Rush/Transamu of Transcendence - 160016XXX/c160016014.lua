@@ -1,3 +1,4 @@
+--ダイスキー・キャラメイル
 --Dicekey Caramail
 local s,id=GetID()
 function s.initial_effect(c)
@@ -16,7 +17,7 @@ function s.confilter(c)
 	return c:IsFaceup() and c:IsLevelAbove(7) and c.roll_dice
 end
 function s.condition(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsExistingMatchingCard(s.confilter,tp,LOCATION_MZONE,0,1,nil)
+	return Duel.IsExistingMatchingCard(s.confilter,e:GetHandlerPlayer(),LOCATION_MZONE,0,1,nil) and Duel.IsBattlePhase()
 end
 function s.aclimit(e,re,tp)
 	return re:GetHandler():IsTrap() and re:IsHasType(EFFECT_TYPE_ACTIVATE)
