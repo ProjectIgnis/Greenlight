@@ -37,7 +37,7 @@ function s.sumcheck2(sg,e,tp,mg)
 		and sg:FilterCount(Card.IsType,nil,TYPE_FUSION)==1
 		and Duel.IsExistingMatchingCard(s.gyfilter2,tp,0,LOCATION_MZONE,1,nil,sg:GetSum(s.star))
 end
-function s.rmtg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then
 		local ct=Duel.GetFieldGroupCount(tp,LOCATION_ONFIELD|LOCATION_HAND,LOCATION_ONFIELD|LOCATION_HAND)
 		local g=Duel.GetMatchingGroup(s.rmfilter,tp,LOCATION_EXTRA,0,nil)
@@ -46,7 +46,7 @@ function s.rmtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,3,tp,LOCATION_EXTRA)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_REMOVE,nil,1,1-tp,LOCATION_ONFIELD)
 end
-function s.rmop(e,tp,eg,ep,ev,re,r,rp)
+function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local ct=Duel.GetFieldGroupCount(tp,LOCATION_ONFIELD|LOCATION_HAND,LOCATION_ONFIELD|LOCATION_HAND)
 	local g=Duel.GetMatchingGroup(s.rmfilter,tp,LOCATION_EXTRA,0,nil)
 	local rg=aux.SelectUnselectGroup(g,e,tp,3,3,s.sumcheck(ct),1,tp,HINTMSG_REMOVE)
