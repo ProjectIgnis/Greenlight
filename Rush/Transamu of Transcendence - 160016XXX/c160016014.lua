@@ -1,5 +1,5 @@
 --ダイスキー・キャラメイル
---Dicekey Caramail
+--Dice Key Caramail
 local s,id=GetID()
 function s.initial_effect(c)
 	--Opponent cannot activate Trap Cards during the Battle Phase
