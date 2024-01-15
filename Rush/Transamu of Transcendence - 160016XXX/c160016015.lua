@@ -1,9 +1,11 @@
 --ダイスキー・ミンナ
 --Dice Key Minna
+--Scripted by YoshiDuels
 local s,id=GetID()
 function s.initial_effect(c)
 	--ATK increase
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_ATKCHANGE)
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_MZONE)
