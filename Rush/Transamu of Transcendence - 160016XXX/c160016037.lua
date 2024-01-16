@@ -22,7 +22,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 function s.target(e,c)
-	return c:IsLevelAbove(7) and c:IsAttribute(ATTRIBUTE_LIGHT)
+	return c:IsLevelBelow(8) and c:IsAttribute(ATTRIBUTE_LIGHT)
 end
 function s.cond(e)
 	return Duel.IsTurnPlayer(1-e:GetHandlerPlayer())
