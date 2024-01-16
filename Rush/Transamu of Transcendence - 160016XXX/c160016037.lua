@@ -1,3 +1,4 @@
+-- プライム・ピアース・ジャイアント
 -- Praime Pierce Giant
 local s,id=GetID()
 function s.initial_effect(c)
