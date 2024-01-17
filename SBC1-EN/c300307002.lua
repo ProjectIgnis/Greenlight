@@ -19,7 +19,7 @@ function s.op(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SKILL_FLIP,tp,id|(1<<32))
 	Duel.Hint(HINT_CARD,tp,id)
 	 --"Gearfried the Iron Knight" you control unaffected by card effects
-	local e2=Effect.CreateEffect(e:GetHandler())
+	local e1=Effect.CreateEffect(e:GetHandler())
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_IMMUNE_EFFECT)
 	e1:SetRange(0x5f)
