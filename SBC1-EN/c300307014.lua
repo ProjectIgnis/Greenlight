@@ -16,6 +16,7 @@ function s.thfilter(c,type1,type2)
 end
 function s.flipcon(e,tp,eg,ep,ev,re,r,rp)
 	return aux.CanActivateSkill(tp) and Duel.GetFlagEffect(tp,id)==0
+		and Duel.GetFieldGroupCount(tp,0,LOCATION_MZONE)>0
 		and Duel.IsExistingMatchingCard(s.cfilter1,tp,LOCATION_HAND,0,1,nil,tp)
 end
 function s.flipop(e,tp,eg,ep,ev,re,r,rp)

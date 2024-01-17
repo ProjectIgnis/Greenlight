@@ -32,5 +32,7 @@ function s.rvcon(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.rvop(e,tp,eg,ep,ev,re,r,rp)
 	local hg=eg:Filter(Card.IsLocation,nil,LOCATION_HAND)
-	Duel.ConfirmCards()
+	if #hg>0 then
+		Duel.ConfirmCards(tp,hg)
+	end
 end

@@ -45,13 +45,13 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 		local b2=Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,0,LOCATION_HAND,1,nil) 
 		local op=Duel.SelectEffect(1-tp,{b1,aux.Stringid(id,1)},{b2,aux.Stringid(id,2)})
 		if op==1 then
-			Duel.Hint(HINTSELECTMSG,tp,HINTMSG_DESTROY)
+			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_DESTROY)
 			local dg=Duel.SelectMatchingCard(1-tp,Card.IsDestructable,1-tp,LOCATION_ONFIELD,0,1,1,nil)
 			if #dg>0 then
 				Duel.Destroy(dg,REASON_EFFECT)
 			end
 		else
-			Duel.Hint(HINTSELECTMSG,tp,HINTMSG_TOGRAVE)
+			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_TOGRAVE)
 			local gyg=Duel.SelectMatchingCard(1-tp,Card.IsAbleToGrave,1-tp,LOCATION_HAND,0,1,1,nil)
 			if #gyg>0 then
 				Duel.SendtoGrave(gyg,REASON_EFFECT)

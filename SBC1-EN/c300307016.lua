@@ -78,6 +78,7 @@ function s.flipop(e,tp,eg,ep,ev,re,r,rp)
 		--Fusion Summon "Humanoid Worm Drake"
 		Duel.RegisterFlagEffect(tp,id+100,RESET_PHASE|PHASE_END,0,1)
 		--OPT Register (Fusion Summon)
+		Fusion.SummonEffTG(params)(e,tp,eg,ep,ev,re,r,rp,1)
 		Fusion.SummonEffOP(params)(e,tp,eg,ep,ev,re,r,rp,1)
 	end
 end
