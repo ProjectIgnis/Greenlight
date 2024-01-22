@@ -12,7 +12,7 @@ function s.initial_effect(c)
 	e1:SetCondition(s.con)
 	e1:SetValue(aux.imval2)
 	c:RegisterEffect(e1)
-	--Search 1 "Vaalmonica" monster
+	--Search 1 "Vaalmonica" card
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
@@ -39,6 +39,7 @@ function s.initial_effect(c)
 	e4:SetOperation(s.selfthop)
 	c:RegisterEffect(e4)
 end
+s.listed_names={id}
 s.listed_series={SET_VALMONICA}
 function s.cfilter(c)
 	return c:IsFaceup() and not c:IsCode(id)
@@ -63,8 +64,8 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.selfthtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsAbleToHand() and
-		Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_PZONE,0,2,nil,SET_VALMONICA) end
+	if chk==0 then return c:IsAbleToHand()
+		and Duel.IsExistingMatchingCard(Card.IsSetCard,tp,LOCATION_PZONE,0,2,nil,SET_VALMONICA) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,c,1,tp,0)
 end
 function s.selfthop(e,tp,eg,ep,ev,re,r,rp)
