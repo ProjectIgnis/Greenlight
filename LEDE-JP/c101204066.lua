@@ -27,19 +27,16 @@ end
 function s.thfilter(c)
 	return c:IsSetCard(SET_VALMONICA) and not c:IsCode(id) and c:IsFaceup() and c:IsAbleToHand()
 end
-function s.activate(e,tp,eg,ep,ev,re,r,rp,angello_or_dimonno)
-	--Alegedly, Angello/Dimonno shouldn't do this part
-	if not angello_or_dimonno then
+function s.activate(e,tp,eg,ep,ev,re,r,rp,angle_or_delvin)
+	local op=nil
+	if angle_or_delvin then
+		op=angle_or_delvin
+	else
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_COUNTER)
 		local tc=Duel.SelectMatchingCard(tp,Card.IsCanAddCounter,tp,LOCATION_PZONE,0,1,1,nil,COUNTER_RESONANCE,1):GetFirst()
 		if tc then
 			tc:AddCounter(COUNTER_RESONANCE,1)
 		end
-	end
-	local op=nil
-	if angello_or_dimonno then
-		op=angello_or_dimonno
-	else
 		op=Duel.SelectEffect(tp,
 			{true,aux.Stringid(id,1)},
 			{true,aux.Stringid(id,2)})

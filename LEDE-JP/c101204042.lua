@@ -11,8 +11,7 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetTargetRange(LOCATION_SZONE,0)
-	e1:SetTarget(aux.TargetBoolFunction(Card.IsFaceup)) --might not be necessary
+	e1:SetTargetRange(LOCATION_STZONE,0)
 	e1:SetValue(1)
 	c:RegisterEffect(e1)
 	--Search 1 "Centur-Ion" card
@@ -20,8 +19,8 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
+	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e2:SetCountLimit(1,id)
 	e2:SetTarget(s.thtg)
 	e2:SetOperation(s.thop)
@@ -30,11 +29,11 @@ function s.initial_effect(c)
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e3:SetRange(LOCATION_MZONE)
 	e3:SetCode(EVENT_PHASE+PHASE_END)
+	e3:SetRange(LOCATION_MZONE)
 	e3:SetCountLimit(1,{id,1})
-	e3:SetTarget(s.tftg)
-	e3:SetOperation(s.tfop)
+	e3:SetTarget(s.pltg)
+	e3:SetOperation(s.plop)
 	c:RegisterEffect(e3)
 end
 s.listed_series={SET_CENTURION}
@@ -57,17 +56,17 @@ function s.plfilter(c,tp)
 	return c:IsSetCard(SET_CENTURION) and c:IsMonster() and not c:IsType(TYPE_SYNCHRO)
 		and c:IsFaceup() and not c:IsForbidden() and c:CheckUniqueOnField(tp)
 end
-function s.tftg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.pltg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
 		and Duel.IsExistingMatchingCard(s.plfilter,tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,nil,tp) end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_LEAVE_GRAVE,nil,1,tp,0)
 end
-function s.tfop(e,tp,eg,ep,ev,re,r,rp)
+function s.plop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
 	local tc=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.plfilter),tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,1,nil,tp):GetFirst()
 	if tc and Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true) then
-		--Treated as a Continuous Spell
+		--Treated as a Continuous Trap
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)

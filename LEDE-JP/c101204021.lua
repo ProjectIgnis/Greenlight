@@ -95,8 +95,7 @@ end
 function s.splvop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0
-		and c:IsLevelAbove(4)
-		and Duel.SelectYesNo(tp,aux.Stringid(id,4)) then
+		and c:IsLevelAbove(5) and Duel.SelectYesNo(tp,aux.Stringid(id,4)) then
 		Duel.BreakEffect()
 		--Decrease its Level by 4
 		local e1=Effect.CreateEffect(c)

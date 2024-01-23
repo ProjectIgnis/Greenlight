@@ -4,13 +4,15 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
-	Xyz.AddProcedure(c,nil,9,2,nil,nil,99)
+	--Xyz Summon procedure
+	Xyz.AddProcedure(c,nil,10,2,nil,nil,99)
 	--Negate the activation of a card or effect, then destroy 1 card on the field
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_NEGATE+CATEGORY_DESTROY)
 	e1:SetType(EFFECT_TYPE_QUICK_O)
-	e1:SetCode(EVENT_CHAINING)
 	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL)
+	e1:SetCode(EVENT_CHAINING)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetCountLimit(1,id)
 	e1:SetCondition(s.negcon)
@@ -57,14 +59,13 @@ function s.negop(e,tp,eg,ep,ev,re,r,rp)
 	if c:IsRelateToEffect(e) and c:CheckRemoveOverlayCard(tp,1,REASON_EFFECT)
 		and #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,3)) then
 		Duel.BreakEffect()
-		if c:RemoveOverlayCard(tp,1,1,REASON_EFFECT)>0 then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-			local dg=Duel.SelectMatchingCard(tp,nil,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
-			if #dg>0 then
-				Duel.HintSelection(dg,true)
-				Duel.BreakEffect()
-				Duel.Destroy(dg,REASON_EFFECT)
-			end
+		if c:RemoveOverlayCard(tp,1,1,REASON_EFFECT)==0 then return end
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
+		local dg=Duel.SelectMatchingCard(tp,nil,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
+		if #dg>0 then
+			Duel.HintSelection(dg,true)
+			Duel.BreakEffect()
+			Duel.Destroy(dg,REASON_EFFECT)
 		end
 	end
 end

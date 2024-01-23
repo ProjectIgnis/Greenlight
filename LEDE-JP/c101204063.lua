@@ -20,7 +20,7 @@ function s.initial_effect(c)
 	e2:SetTarget(s.thtg)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
-	-- Register destruction of monsters in your possession
+	--Register destruction of monsters
 	aux.GlobalCheck(s,function()
 		local ge1=Effect.CreateEffect(c)
 		ge1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
@@ -30,6 +30,19 @@ function s.initial_effect(c)
 	end)
 end
 s.listed_series={SET_MEMENTO}
+function s.checkfilter(c)
+	return c:IsPreviousLocation(LOCATION_MZONE) or (c:IsMonster() and not c:IsPreviousLocation(LOCATION_ONFIELD))
+end
+function s.checkop(e,tp,eg,ep,ev,re,r,rp)
+	local g=eg:Filter(s.checkfilter,nil)
+	if #g==0 then return end
+	for p=0,1 do
+		if g:IsExists(Card.IsPreviousControler,1,nil,p)
+			and not Duel.HasFlagEffect(p,id) then
+			Duel.RegisterFlagEffect(p,id,RESET_PHASE|PHASE_END,0,1)
+		end
+	end
+end
 function s.extramatfilter(c)
 	return c:IsSetCard(SET_MEMENTO) and c:IsAbleToDeck()
 end
@@ -37,13 +50,11 @@ function s.checkmat(tp,sg,fc)
 	return sg:IsExists(Card.IsSetCard,1,nil,SET_MEMENTO)
 end
 function s.fextra(e,tp,mg)
+	local sg=nil
 	if Duel.HasFlagEffect(tp,id) then
-		local sg=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.extramatfilter),tp,LOCATION_GRAVE,0,nil)
-		if #sg>0 then
-			return sg,s.checkmat
-		end
+		sg=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.extramatfilter),tp,LOCATION_GRAVE,0,nil)
 	end
-	return nil,s.checkmat
+	return sg,s.checkmat
 end
 function s.extratg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
@@ -52,15 +63,9 @@ end
 function s.extraop(e,tc,tp,sg)
 	local rg=sg:Filter(Card.IsLocation,nil,LOCATION_GRAVE)
 	if #rg>0 then
+		Duel.HintSelection(rg,true)
 		Duel.SendtoDeck(rg,nil,SEQ_DECKSHUFFLE,REASON_EFFECT|REASON_MATERIAL|REASON_FUSION)
 		sg:RemoveCard(rg)
-	end
-end
-function s.checkop(e,tp,eg,ep,ev,re,r,rp)
-	for tc in eg:Iter() do
-		if tc:IsMonster() then
-			Duel.RegisterFlagEffect(tc:GetControler(),id,RESET_PHASE|PHASE_END,0,1)
-		end
 	end
 end
 function s.thfilter(c)
@@ -74,13 +79,12 @@ function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local tc=Duel.SelectMatchingCard(tp,nil,tp,LOCATION_MZONE,0,1,1,nil)
-	if Duel.Destroy(tc,REASON_EFFECT)>0 then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local g=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil)
-		if #g>0 then
-			Duel.SendtoHand(g,nil,REASON_EFFECT)
-			Duel.ConfirmCards(1-tp,g)
-		end
+	local desg=Duel.SelectMatchingCard(tp,nil,tp,LOCATION_MZONE,0,1,1,nil)
+	if Duel.Destroy(desg,REASON_EFFECT)==0 then return end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+	local hg=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil)
+	if #hg>0 then
+		Duel.SendtoHand(hg,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,hg)
 	end
 end

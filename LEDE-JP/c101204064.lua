@@ -9,7 +9,7 @@ function s.initial_effect(c)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_TOKEN)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetHintTiming(0,TIMING_END_PHASE)
+	e1:SetHintTiming(0,TIMING_MAIN_END|TIMINGS_CHECK_MONSTER_E)
 	e1:SetCountLimit(1,id)
 	e1:SetCondition(s.tokencond)
 	e1:SetTarget(s.tokentg)
@@ -53,19 +53,29 @@ function s.tokenop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
 		or not Duel.IsPlayerCanSpecialSummonMonster(tp,TOKEN_CENTURION,SET_CENTURION,TYPES_TOKEN,0,0,lvl,RACE_PYRO,ATTRIBUTE_DARK,POS_FACEUP) then return end
 	local token=Duel.CreateToken(tp,TOKEN_CENTURION)
+	--Set the Token's Level
+	local e1=Effect.CreateEffect(e:GetHandler())
+	e1:SetType(EFFECT_TYPE_SINGLE)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e1:SetCode(EFFECT_CHANGE_LEVEL_FINAL)
+	e1:SetValue(lvl)
+	e1:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TOFIELD)
+	token:RegisterEffect(e1)
 	if Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP) then
 		--Cannot be used as Fusion material
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_CANNOT_BE_FUSION_MATERIAL)
-		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
-		e1:SetValue(1)
-		token:RegisterEffect(e1,true)
-		--Cannot be used as Link material
 		local e2=e1:Clone()
-		e2:SetCode(EFFECT_CANNOT_BE_LINK_MATERIAL)
+		e2:SetDescription(3309)
+		e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+		e2:SetCode(EFFECT_CANNOT_BE_FUSION_MATERIAL)
+		e2:SetValue(1)
 		token:RegisterEffect(e2,true)
+		--Cannot be used as Link material
+		local e3=e2:Clone()
+		e3:SetDescription(3312)
+		e3:SetCode(EFFECT_CANNOT_BE_LINK_MATERIAL)
+		token:RegisterEffect(e3,true)
 	end
+	Duel.SpecialSummonComplete()
 end
 function s.tgyfilter(c)
 	return c:IsSetCard(SET_CENTURION) and not c:IsCode(id) and c:IsAbleToGrave()
