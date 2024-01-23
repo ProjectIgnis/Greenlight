@@ -16,6 +16,7 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_VALMONICA}
 s.listed_names={id}
+s.counter_place_list={COUNTER_RESONANCE}
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsCanAddCounter,tp,LOCATION_PZONE,0,1,nil,COUNTER_RESONANCE,1) end
 	Duel.SetOperationInfo(0,CATEGORY_COUNTER,nil,1,0,COUNTER_RESONANCE)
