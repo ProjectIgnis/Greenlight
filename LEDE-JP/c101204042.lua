@@ -58,7 +58,7 @@ function s.plfilter(c,tp)
 		and c:IsFaceup() and not c:IsForbidden() and c:CheckUniqueOnField(tp)
 end
 function s.tftg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
 		and Duel.IsExistingMatchingCard(s.plfilter,tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,nil,tp) end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_LEAVE_GRAVE,nil,1,tp,0)
 end
