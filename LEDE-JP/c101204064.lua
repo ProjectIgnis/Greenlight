@@ -53,7 +53,7 @@ function s.tokenop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
 		or not Duel.IsPlayerCanSpecialSummonMonster(tp,TOKEN_CENTURION,SET_CENTURION,TYPES_TOKEN,0,0,lvl,RACE_PYRO,ATTRIBUTE_DARK,POS_FACEUP) then return end
 	local token=Duel.CreateToken(tp,TOKEN_CENTURION)
-	if Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP_DEFENSE) then
+	if Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP) then
 		--Cannot be used as Fusion material
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
