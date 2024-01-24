@@ -48,6 +48,7 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	if #cg>0 then
 		Duel.SendtoHand(cg,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,cg)
+		local c=e:GetHandler()
 		--Name becomes "Jointech Nesstrydar Tank"
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
