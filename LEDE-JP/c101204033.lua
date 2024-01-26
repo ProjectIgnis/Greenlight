@@ -17,7 +17,7 @@ function s.initial_effect(c)
 	--Make a player gain 1000 LP
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
-	e2:SetCategory(CATEGORY_DAMAGE)
+	e2:SetCategory(CATEGORY_RECOVER)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_RECOVER)
@@ -45,6 +45,6 @@ function s.lptg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.lpop(e,tp,eg,ep,ev,re,r,rp)
 	local op=Duel.SelectOption(tp,aux.Stringid(id,2),aux.Stringid(id,3))
-	if tp==1 then op= 1-op end
+	if tp==1 then op=1-op end
 	Duel.Recover(op,1000,REASON_EFFECT)
 end
