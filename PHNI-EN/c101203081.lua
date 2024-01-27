@@ -41,7 +41,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<2 or Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local g=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_HAND,0,2,2,nil,e,tp)
-	if #g==2 and Duel.SpecialSummon(g,0,tp,tp,true,false,POS_FACEUP_DEFENSE)>0
+	if #g==2 and Duel.SpecialSummon(g,0,tp,tp,true,false,POS_FACEUP_DEFENSE)>0 then
 		for tc in g:Iter() do
 			--They can attack directly this turn
 			local e1=Effect.CreateEffect(e:GetHandler())
