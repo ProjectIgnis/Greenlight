@@ -76,10 +76,10 @@ function s.detachop(e,tp,eg,ep,ev,re,r,rp)
 		local sc=Duel.GetOperatedGroup():GetFirst()
 		if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and sc:IsControler(tp) and sc:IsMonster()
 			and sc:IsType(TYPE_XYZ) and sc:IsLocation(LOCATION_REMOVED|LOCATION_GRAVE)
-			and sc:IsCanBeSpecialSummoned(e,0,tp,false,false)
+			and sc:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE)
 			and Duel.SelectYesNo(tp,aux.Stringid(id,4)) then
 				Duel.BreakEffect()
-				Duel.SpecialSummon(sc,0,tp,tp,false,false,POS_FACEUP)
+				Duel.SpecialSummon(sc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
 			end
 	end
 end
