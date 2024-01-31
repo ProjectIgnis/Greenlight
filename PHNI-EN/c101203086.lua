@@ -1,4 +1,4 @@
---japanese name
+--Japanese name
 --Sunset Beat
 --scripted by Naim
 local s,id=GetID()
@@ -13,8 +13,8 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_DESTROY)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e2:SetCode(EVENT_CHANGE_POS)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetCode(EVENT_CHANGE_POS)
 	e2:SetRange(LOCATION_SZONE)
 	e2:SetCountLimit(1,id)
 	e2:SetCondition(s.descon)
@@ -26,7 +26,7 @@ function s.initial_effect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_DAMAGE)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e3:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
+	e3:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL)
 	e3:SetCode(EVENT_FLIP)
 	e3:SetRange(LOCATION_SZONE)
 	e3:SetCountLimit(1,{id,1})
@@ -37,7 +37,7 @@ function s.initial_effect(c)
 end
 function s.cfilter(c,tp)
 	return c:IsControler(tp) and not c:IsStatus(STATUS_CONTINUOUS_POS)
-		and (c:GetPosition()&POS_FACEDOWN)>0 and (c:GetPreviousPosition()&POS_FACEUP)>0
+		and c:IsPosition(POS_FACEDOWN_DEFENSE) and c:IsPreviousPosition(POS_FACEUP)
 end
 function s.descon(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(s.cfilter,1,nil,tp)
@@ -56,7 +56,8 @@ function s.desop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.damfilter(c,tp,e)
-	return c:IsControler(tp) and c:HasLevel() and c:IsLocation(LOCATION_MZONE) and c:IsCanBeEffectTarget(e)
+	return c:IsControler(tp) and c:HasLevel() and c:IsLocation(LOCATION_MZONE) and c:IsType(TYPE_FLIP)
+		and c:IsCanBeEffectTarget(e)
 end
 function s.damcond(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(s.damfilter,1,nil,tp,e)
@@ -77,6 +78,6 @@ end
 function s.damop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
-		Duel.Damage(tp,tc:GetLevel()*200,REASON_EFFECT)
+		Duel.Damage(1-tp,tc:GetLevel()*200,REASON_EFFECT)
 	end
 end

@@ -1,4 +1,4 @@
---japanese name
+--Japanese name
 --Swallow's Cowrie
 --scripted by Naim
 local s,id=GetID()
@@ -10,6 +10,7 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
+	e1:SetHintTiming(0,TIMING_MAIN_END|TIMINGS_CHECK_MONSTER_E)
 	e1:SetCost(s.cost)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
@@ -24,9 +25,9 @@ function s.thfilter(c,lv)
 end
 function s.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	e:SetLabel(100)
-	if chk==0 then return Duel.CheckReleaseGroupCost(tp,s.costfilter,1,false,nil,nil,tp) end
+	if chk==0 then return Duel.CheckReleaseGroupCost(tp,s.costfilter,1,true,nil,nil,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
-	local tc=Duel.SelectReleaseGroupCost(tp,s.costfilter,1,1,false,nil,nil,tp):GetFirst()
+	local tc=Duel.SelectReleaseGroupCost(tp,s.costfilter,1,1,true,nil,nil,tp):GetFirst()
 	e:SetLabel(tc:GetLevel())
 	Duel.Release(tc,REASON_COST)
 end

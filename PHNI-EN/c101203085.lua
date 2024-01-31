@@ -1,4 +1,4 @@
---japanese name
+--Japanese name
 --Swarm of Centipedes
 --scripted by Naim
 local s,id=GetID()
@@ -8,7 +8,7 @@ function s.initial_effect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_POSITION)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e1:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
+	e1:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e1:SetCode(EVENT_FLIP)
 	e1:SetCountLimit(1,id)
 	e1:SetTarget(s.postg)
@@ -20,7 +20,7 @@ function s.initial_effect(c)
 	e2:SetCategory(CATEGORY_POSITION)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
-	e2:SetCountLimit(1,{id,1})
+	e2:SetCountLimit(1)
 	e2:SetTarget(s.selfpostg)
 	e2:SetOperation(s.selfposop)
 	c:RegisterEffect(e2)
@@ -54,7 +54,8 @@ function s.posop(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.selfpostg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsCanTurnSet() end
+	if chk==0 then return c:IsCanTurnSet() and not c:HasFlagEffect(id) end
+	c:RegisterFlagEffect(id,RESET_EVENT|(RESETS_STANDARD&~RESET_TURN_SET)|RESET_PHASE|PHASE_END,0,1)
 	Duel.SetOperationInfo(0,CATEGORY_POSITION,c,1,tp,0)
 end
 function s.selfposop(e,tp,eg,ep,ev,re,r,rp)
