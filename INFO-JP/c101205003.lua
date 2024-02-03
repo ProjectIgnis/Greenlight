@@ -2,16 +2,16 @@
 --Shield of the Millennium Dynasty
 --Scripted by Eerie Code
 local s,id=GetID()
-function s.initial_effect(c)	
-	--Cannot be destroyed
+function s.initial_effect(c)
+	--Cannot be destroyed by Spell/Trap effects
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetValue(s.indval)
+	e1:SetValue(function(e,re,rp) return re:IsSpellTrapEffect() end)
 	c:RegisterEffect(e1)
-	--place as spell
+	--Place this card in the S/T zone as a Continuous Spell
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetType(EFFECT_TYPE_IGNITION)
@@ -20,24 +20,21 @@ function s.initial_effect(c)
 	e2:SetTarget(s.sttg)
 	e2:SetOperation(s.stop)
 	c:RegisterEffect(e2)
-	--spsummon
+	--Special Summon this card and search 1 "Millenium Cross"
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
-	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e3:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_SEARCH+CATEGORY_TOHAND)
 	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetRange(LOCATION_SZONE)
 	e3:SetCountLimit(1,{id,1})
-	e3:SetCondition(s.spcon)
+	e3:SetCondition(function(e) return e:GetHandler():IsContinuousSpell() end)
 	e3:SetCost(s.spcost)
 	e3:SetTarget(s.sptg)
 	e3:SetOperation(s.spop)
 	c:RegisterEffect(e3)
 end
-s.listed_names={CARD_MILLENNIUM_CROSS }
-s.listed_series={SET_MILLENNIUM }
-function s.indval(e,re,rp)
-	return re:IsActiveType(TYPE_SPELL|TYPE_TRAP)
-end
+s.listed_names={CARD_MILLENNIUM_CROSS}
+s.listed_series={SET_MILLENNIUM}
 function s.sttg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 end
 end
@@ -49,13 +46,9 @@ function s.stop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetCode(EFFECT_CHANGE_TYPE)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e1:SetReset(RESET_EVENT+RESETS_STANDARD-RESET_TURN_SET)
-	e1:SetValue(TYPE_SPELL+TYPE_CONTINUOUS)
+	e1:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TURN_SET)
+	e1:SetValue(TYPE_SPELL|TYPE_CONTINUOUS)
 	c:RegisterEffect(e1)
-	c:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD-RESET_TURN_SET,0,1)
-end
-function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():GetFlagEffect(id)~=0
 end
 function s.spcfilter(c)
 	return c:IsCode(CARD_MILLENNIUM_CROSS) and not c:IsPublic()
@@ -74,9 +67,10 @@ function s.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local c=e:GetHandler()
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and e:GetHandler():IsCanBeSpecialSummoned(e,0,tp,false,false) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,e:GetHandler(),1,0,0)
+		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
 function s.thfilter(c)
@@ -84,7 +78,7 @@ function s.thfilter(c)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)~=0 then
+	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
 		local g=Duel.GetMatchingGroup(s.thfilter,tp,LOCATION_DECK,0,nil)
 		if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,4)) then
 			Duel.BreakEffect()
