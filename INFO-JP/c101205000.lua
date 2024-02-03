@@ -30,7 +30,6 @@ function s.initial_effect(c)
 	e4:SetCode(EFFECT_UPDATE_DEFENSE)
 	c:RegisterEffect(e4)
 end
-local 
 function s.spcon(e,c)
 	if c==nil then return true end
 	local tp=c:GetControler()
