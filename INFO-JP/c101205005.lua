@@ -56,7 +56,7 @@ function s.stop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.spcon(e,tp,eg,ep,ev,re,r,rp)
-	return rp==1-tp and e:GetHandler();IsContinuousSpell()
+	return rp==1-tp and e:GetHandler():IsContinuousSpell()
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
