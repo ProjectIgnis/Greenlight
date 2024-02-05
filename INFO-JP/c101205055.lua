@@ -57,25 +57,25 @@ function s.eqfilter(c,tp)
 end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(nil,tp,LOCATION_STZONE,LOCATION_STZONE,1,nil)
-		and Duel.IsExistingMatchingCard(s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,2,nil,tp) end
+		and Duel.IsExistingMatchingCard(s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,5,nil,tp) end
 	local sg=Duel.GetMatchingGroup(nil,tp,LOCATION_STZONE,LOCATION_STZONE,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,sg,#sg,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,2,tp,LOCATION_HAND|LOCATION_DECK)
+	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,5,tp,LOCATION_HAND|LOCATION_DECK)
 end
 function s.desop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local sg=Duel.GetMatchingGroup(nil,tp,LOCATION_STZONE,LOCATION_STZONE,nil)
 	if Duel.Destroy(sg,REASON_EFFECT)>0 and c:IsFaceup()
-		and c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_SZONE)>1
+		and c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_SZONE)>=5
 		and Duel.IsExistingMatchingCard(s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,2,nil,tp) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-		local eqg=Duel.SelectMatchingCard(tp,s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,2,2,nil,tp)
+		local eqg=Duel.SelectMatchingCard(tp,s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,5,5,nil,tp)
 		for ec in eqg:Iter() do
 			s.equipop(e,tp,ec,c)
 		end
 	end
 	--You cannot activate cards and effects for the rest of this turn
-	local e1=Effect.CreateEffect(e:GetHandler())
+	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,1))
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_CANNOT_ACTIVATE)
