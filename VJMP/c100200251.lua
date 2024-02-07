@@ -45,13 +45,6 @@ end
 function s.tpnsop(e,tp,eg,ep,ev,re,r,rp)
 	s.tributesummon(e,tp)
 end
-function s.tpnstg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_HAND,0,1,nil,e:GetHandler(),tp) end
-	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,tp,LOCATION_HAND)
-end
-function s.tpnsop(e,tp,eg,ep,ev,re,r,rp)
-	s.tributesummon(e,tp)
-end
 function s.opnstg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,1-tp,LOCATION_HAND)
