@@ -1,5 +1,5 @@
---ミレニアム・アブソリューター
---Millennium Fiend Reflection
+--ミレニアムーン・メイデン
+--Millenniumoon Maiden
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
@@ -62,14 +62,17 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0
-		and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsAttackAbove,1),tp,LOCATION_MZONE,LOCATION_MZONE,1,nil)
-		and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SELECT)
-		local sc=Duel.SelectMatchingCard(tp,aux.FaceupFilter(Card.IsAttackAbove,1),tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil):GetFirst()
-		if not sc then return end
-		Duel.HintSelection(sc,true)
-		Duel.BreakEffect()
-		Duel.Recover(tp,sc:GetAttack()//2,REASON_EFFECT)
+	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
+		--Your opponent cannot target Level 5 or higher Illusion and Spellcaster monsters you control with card effects this turn
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_FIELD)
+		e1:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+		e1:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
+		e1:SetTargetRange(LOCATION_MZONE,0)
+		e1:SetTarget(function(e,c) return c:IsLevelAbove(5) and c:IsRace(RACE_ILLUSION|RACE_SPELLCASTER) end)
+		e1:SetValue(aux.tgoval)
+		e1:SetReset(RESET_PHASE|PHASE_END)
+		Duel.RegisterEffect(e1,tp)
+		aux.RegisterClientHint(c,nil,tp,1,0,aux.Stringid(id,2))
 	end
 end
