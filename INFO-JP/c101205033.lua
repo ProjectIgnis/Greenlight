@@ -6,7 +6,7 @@ function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Fusion Summon Procedure
 	Fusion.AddProcMixN(c,true,true,aux.FilterBoolFunctionEx(Card.IsSetCard,SET_FORBIDDEN_ONE),5)
-	--Cannot be destroyed by the opponent's card effects
+	--Cannot be destroyed by your opponent's card effects
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
@@ -22,11 +22,11 @@ function s.initial_effect(c)
 	e2:SetCode(EVENT_PRE_DAMAGE_CALCULATE)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetCountLimit(1)
-	e2:SetCondition(function(e) return e:GetHandler():GetBattleTarget() end)
+	e2:SetCondition(function(e) return e:GetHandler():IsRelateToBattle() end)
 	e2:SetTarget(s.atktg)
 	e2:SetOperation(s.atkop)
 	c:RegisterEffect(e2)
-	--Negate the activation of a Spell/Trap card or effect
+	--Negate the activation of a Spell/Trap Card or effect
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_NEGATE)
@@ -35,9 +35,9 @@ function s.initial_effect(c)
 	e3:SetCode(EVENT_CHAINING)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCountLimit(1)
-	e3:SetCondition(s.negcon)
+	e3:SetCondition(function(e,tp,eg,ep,ev,re) return re:IsSpellTrapEffect() and not e:GetHandler():IsStatus(STATUS_BATTLE_DESTROYED) and Duel.IsChainNegatable(ev) end)
 	e3:SetTarget(s.negtg)
-	e3:SetOperation(s.negop)
+	e3:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) Duel.NegateActivation(ev) end)
 	c:RegisterEffect(e3)
 	aux.DoubleSnareValidity(c,LOCATION_MZONE)
 	--Set 1 "Exodo" Spell/Trap or 1 "Obliterate!!!" from your Deck
@@ -63,8 +63,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e5)
 end
 s.material_setcode=SET_FORBIDDEN_ONE
-s.listed_series={SET_EXODIA,SET_EXODO}
-s.listed_names={64043465} --Obliterate!!!
+s.listed_series={SET_FORBIDDEN_ONE,SET_EXODO}
 function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_ATKCHANGE,e:GetHandler(),1,tp,Duel.GetLP(tp))
@@ -72,7 +71,7 @@ end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) and c:IsFaceup() then
-		--Gain ATK equal to your LP
+		--Gains ATK equal to your LP
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_UPDATE_ATTACK)
@@ -81,18 +80,12 @@ function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 		c:RegisterEffect(e1)
 	end
 end
-function s.negcon(e,tp,eg,ep,ev,re,r,rp)
-	return re:IsSpellTrapEffect() and Duel.IsChainNegatable(ev)
-end
 function s.negtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,tp,0)
 end
-function s.negop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.NegateActivation(ev)
-end
 function s.setfilter(c)
-	return c:IsSSetable() and (c:IsCode(64043465) or (c:IsSetCard(SET_EXODO) and c:IsSpellTrap()))
+	return c:IsSetCard(SET_EXODO) and c:IsSpellTrap() and c:IsSSetable()
 end
 function s.settg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.setfilter,tp,LOCATION_DECK,0,1,nil) end

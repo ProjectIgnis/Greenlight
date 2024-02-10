@@ -8,7 +8,7 @@ function s.initial_effect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetHintTiming(TIMING_BATTLE_START)
+	e1:SetHintTiming(0,TIMING_END_PHASE)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
@@ -23,11 +23,11 @@ end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_APPLYTO)
 	local tc=Duel.SelectMatchingCard(tp,s.cfilter,tp,LOCATION_MZONE,0,1,1,nil):GetFirst()
-	if tc then
+	if tc and tc:IsFaceup() and not tc:IsImmuneToEffect(e) then
 		Duel.HintSelection(tc,true)
 		local c=e:GetHandler()
 		tc:RegisterFlagEffect(id,RESET_EVENT|RESETS_STANDARD,EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(id,1))
-		--Destroy cards in the Spell/Trap Zone and equip 2 "Forbidden One" monsters to this card
+		--Destroy cards in the Spell/Trap Zone and equip 5 "Forbidden One" monsters to this card
 		local e1=Effect.CreateEffect(tc)
 		e1:SetDescription(aux.Stringid(id,2))
 		e1:SetCategory(CATEGORY_DESTROY+CATEGORY_EQUIP)
@@ -39,9 +39,7 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 		tc:RegisterEffect(e1)
 		--Inflict piercing damage
-		local e2=Effect.CreateEffect(c)
-		e2:SetDescription(3208)
-		e2:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+		local e2=Effect.CreateEffect(tc)
 		e2:SetType(EFFECT_TYPE_SINGLE)
 		e2:SetCode(EFFECT_PIERCE)
 		e2:SetReset(RESET_EVENT|RESETS_STANDARD)
@@ -59,29 +57,33 @@ function s.destg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(nil,tp,LOCATION_STZONE,LOCATION_STZONE,1,nil)
 		and Duel.IsExistingMatchingCard(s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,5,nil,tp) end
 	local sg=Duel.GetMatchingGroup(nil,tp,LOCATION_STZONE,LOCATION_STZONE,nil)
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,sg,#sg,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,sg,#sg,tp,0)
 	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,5,tp,LOCATION_HAND|LOCATION_DECK)
 end
 function s.desop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local sg=Duel.GetMatchingGroup(nil,tp,LOCATION_STZONE,LOCATION_STZONE,nil)
-	if Duel.Destroy(sg,REASON_EFFECT)>0 and c:IsFaceup()
-		and c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_SZONE)>=5
-		and Duel.IsExistingMatchingCard(s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,2,nil,tp) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-		local eqg=Duel.SelectMatchingCard(tp,s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,5,5,nil,tp)
+	if Duel.Destroy(sg,REASON_EFFECT)>0 and c:IsFaceup() and c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_SZONE)>=5
+		and Duel.IsExistingMatchingCard(s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,5,nil,tp) then
+		local eqg=Duel.GetMatchingGroup(s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,nil,tp)
+		if #eqg>5 then
+			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+			eqg=Duel.SelectMatchingCard(tp,s.eqfilter,tp,LOCATION_HAND|LOCATION_DECK,0,5,5,nil,tp)
+		end
+		Duel.BreakEffect()
 		for ec in eqg:Iter() do
 			s.equipop(e,tp,ec,c)
 		end
 	end
+	local fid=c:GetFieldID()
 	--You cannot activate cards and effects for the rest of this turn
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(id,1))
+	e1:SetDescription(aux.Stringid(id,3))
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_CANNOT_ACTIVATE)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
+	e1:SetCode(EFFECT_CANNOT_ACTIVATE)
 	e1:SetTargetRange(1,0)
-	e1:SetValue(1)
+	e1:SetValue(function(_,re) return re:GetHandler()~=c or re:GetHandler():GetFieldID()~=fid end)
 	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
 end
@@ -97,8 +99,8 @@ function s.equipop(e,tp,ec,tc)
 	--Equip limit
 	local e2=Effect.CreateEffect(ec)
 	e2:SetType(EFFECT_TYPE_SINGLE)
-	e2:SetCode(EFFECT_EQUIP_LIMIT)
 	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e2:SetCode(EFFECT_EQUIP_LIMIT)
 	e2:SetValue(1)
 	e2:SetReset(RESET_EVENT|RESETS_STANDARD)
 	ec:RegisterEffect(e2)

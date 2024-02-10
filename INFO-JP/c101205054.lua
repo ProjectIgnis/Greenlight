@@ -1,7 +1,6 @@
 --石板の神殿
---Temple of the Stone Slabs
+--Shrine of Wedju
 --Scripted by Eerie Code
-local CARD_SENGENJIN=76232340
 local s,id=GetID()
 function s.initial_effect(c)
 	--Activate
@@ -15,71 +14,82 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_FZONE)
 	e2:SetCountLimit(1,id)
-	e2:SetTarget(s.sttg)
-	e2:SetOperation(s.stop)
+	e2:SetTarget(s.pltg)
+	e2:SetOperation(s.plop)
 	c:RegisterEffect(e2)
-	--Place monsters in the S/T Zone when they are destroyed
+	--Destruction replacement for "Millennium" monsters
 	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_SINGLE)
-	e3:SetCode(EFFECT_TO_GRAVE_REDIRECT_CB)
-	e3:SetProperty(EFFECT_FLAG_UNCOPYABLE)
-	e3:SetCondition(s.repcon)
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e3:SetCode(EFFECT_DESTROY_REPLACE)
+	e3:SetRange(LOCATION_FZONE)
+	e3:SetTarget(s.reptg)
 	e3:SetOperation(s.repop)
-	local e4=Effect.CreateEffect(c)
-	e4:SetType(EFFECT_TYPE_FIELD|EFFECT_TYPE_GRANT)
-	e4:SetRange(LOCATION_FZONE)
-	e4:SetTargetRange(LOCATION_MZONE,0)
-	e4:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,SET_MILLENNIUM))
-	e4:SetLabelObject(e3)
-	c:RegisterEffect(e4)
+	e3:SetValue(function(e,c) return s.repfilter(c,e:GetHandlerPlayer()) end)
+	c:RegisterEffect(e3)
 end
 s.listed_series={SET_MILLENNIUM}
-s.listed_names={CARD_SENGENJIN}
-function s.place(c,hc,tp)
+function s.hplfilter(c,tp)
+	return c:IsMonster() and not c:IsForbidden() and c:CheckUniqueOnField(tp)
+end
+function s.dplfilter(c,tp)
+	return c:IsSetCard(SET_MILLENNIUM) and s.hplfilter(c,tp)
+end
+function s.pltg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>1
+		and Duel.IsExistingMatchingCard(s.hplfilter,tp,LOCATION_HAND,0,1,nil,tp)
+		and Duel.IsExistingMatchingCard(s.dplfilter,tp,LOCATION_DECK,0,1,nil,tp) end
+end
+function s.plop(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
+	local hc=Duel.SelectMatchingCard(tp,s.hplfilter,tp,LOCATION_HAND,0,1,1,nil,tp):GetFirst()
+	if hc and s.place(hc,c,tp) then
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
+		local dc=Duel.SelectMatchingCard(tp,s.dplfilter,tp,LOCATION_DECK,0,1,1,nil,tp):GetFirst()
+		if not dc then return end
+		Duel.BreakEffect()
+		s.place(dc,c,tp)
+	end
+end
+function s.place(c,rc,tp)
 	if not Duel.MoveToField(c,tp,tp,LOCATION_SZONE,POS_FACEUP,true) then return false end
-	local e1=Effect.CreateEffect(hc)
-	e1:SetCode(EFFECT_CHANGE_TYPE)
+	--Treated as a Continuous Spell
+	local e1=Effect.CreateEffect(rc)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e1:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TURN_SET)
+	e1:SetCode(EFFECT_CHANGE_TYPE)
 	e1:SetValue(TYPE_SPELL|TYPE_CONTINUOUS)
+	e1:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TURN_SET)
 	c:RegisterEffect(e1)
 	return true
 end
-function s.stfilter(c)
-	return c:IsMonster() and not c:IsForbidden()
+function s.repfilter(c,tp)
+	return c:IsSetCard(SET_MILLENNIUM) and c:IsFaceup() and c:IsLocation(LOCATION_MZONE) and c:IsControler(tp) 
+		and not c:IsReason(REASON_REPLACE) and c:IsReason(REASON_EFFECT|REASON_BATTLE)
 end
-function s.stfilter2(c)
-	return s.stfilter(c) and (c:IsSetCard(SET_MILLENNIUM) or c:IsCode(CARD_SENGENJIN))
-end
-function s.sttg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>1
-		and Duel.IsExistingMatchingCard(s.stfilter,tp,LOCATION_HAND,0,1,nil)
-		and Duel.IsExistingMatchingCard(s.stfilter2,tp,LOCATION_DECK,0,1,nil) end
-end
-function s.stop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-	local g1=Duel.SelectMatchingCard(tp,s.stfilter,tp,LOCATION_HAND,0,1,1,nil)
-	if #g1>0 and s.place(g1:GetFirst(),c,tp) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-		local g2=Duel.SelectMatchingCard(tp,s.stfilter2,tp,LOCATION_DECK,0,1,1,nil)
-		if #g2>0 then
-			Duel.BreakEffect()
-			s.place(g2:GetFirst(),c,tp)
-		end
+function s.reptg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local g=eg:Filter(s.repfilter,nil,tp)
+	if chk==0 then return #g>0 and Duel.GetLocationCount(tp,LOCATION_SZONE)>=#g end
+	if Duel.SelectEffectYesNo(tp,e:GetHandler(),96) then
+		e:SetLabelObject(g)
+		g:KeepAlive()
+		return true
 	end
-end
-function s.repcon(e)
-	local c=e:GetHandler()
-	return c:IsFaceup() and c:IsLocation(LOCATION_MZONE) and c:IsReason(REASON_DESTROY)
+	return false
 end
 function s.repop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetCode(EFFECT_CHANGE_TYPE)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e1:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TURN_SET)
-	e1:SetValue(TYPE_SPELL|TYPE_CONTINUOUS)
-	c:RegisterEffect(e1)
+	local g=e:GetLabelObject()
+	for tc in g:Iter() do
+		if Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true) then
+			--Treated as a Continuous Spell
+			local e1=Effect.CreateEffect(c)
+			e1:SetType(EFFECT_TYPE_SINGLE)
+			e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+			e1:SetCode(EFFECT_CHANGE_TYPE)
+			e1:SetValue(TYPE_SPELL|TYPE_CONTINUOUS)
+			e1:SetReset(RESET_EVENT|RESETS_STANDARD&~RESET_TURN_SET)
+			tc:RegisterEffect(e1)
+		end
+	end
 end
