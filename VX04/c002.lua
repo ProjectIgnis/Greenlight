@@ -17,13 +17,13 @@ function s.initial_effect(c)
 	--Cannot be destroyed by battle
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE)
-	e2:SetCode(EFFECT_AVOID_BATTLE_DAMAGE)
+	e2:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
 	e2:SetValue(1)
 	c:RegisterEffect(e2)
 	--You take no battle damage from battles involving this card
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE)
-	e3:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
+	e3:SetCode(EFFECT_AVOID_BATTLE_DAMAGE)
 	e3:SetValue(1)
 	c:RegisterEffect(e3)
 	--Change a monster effect activated by the opponent
