@@ -33,7 +33,7 @@ function s.initial_effect(c)
 	e4:SetCode(EVENT_CHAINING)
 	e4:SetRange(LOCATION_MZONE)
 	e4:SetCountLimit(1,id)
-	e4:SetCondition(s.chngcon)
+	e4:SetCondition(function(e,tp,eg,ep,ev,re,r,rp) return rp==1-tp and re:IsMonsterEffect() end)
 	e4:SetCost(aux.selfreleasecost)
 	e4:SetTarget(s.chngtg)
 	e4:SetOperation(s.chngop)
@@ -48,17 +48,16 @@ function s.contactfil(tp)
 	return Duel.GetMatchingGroup(Card.IsAbleToDeckOrExtraAsCost,tp,LOCATION_MZONE|LOCATION_HAND|LOCATION_GRAVE,0,nil)
 end
 function s.contactop(g,tp)
-	Duel.ConfirmCards(1-tp,g)
+	local fu,fd=g:Split(Card.IsFaceup,nil)
+	if #fu>0 then Duel.HintSelection(fu,true) end
+	if #fd>0 then Duel.ConfirmCards(1-tp,fd) end
 	Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_COST|REASON_MATERIAL)
-end
-function s.chngcon(e,tp,eg,ep,ev,re,r,rp)
-	return rp==1-tp and re:IsMonsterEffect()
 end
 function s.yubelfilter(c)
 	return c:IsSetCard(SET_YUBEL) and c:IsMonster() and (c:IsFaceup() or not c:IsOnField())
 end
 function s.chngtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.yubelfilter,tp,LOCATION_HAND|LOCATION_MZONE|LOCATION_DECK,0,e:GetHandler()) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.yubelfilter,tp,LOCATION_HAND|LOCATION_MZONE|LOCATION_DECK,0,1,e:GetHandler()) end
 end
 function s.chngop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Group.CreateGroup()
@@ -66,10 +65,9 @@ function s.chngop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.ChangeChainOperation(ev,s.repop)
 end
 function s.repop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectMatchingCard(tp,s.yubelfilter,tp,LOCATION_HAND|LOCATION_MZONE|LOCATION_DECK,0,1,1,nil)
+	Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_DESTROY)
+	local g=Duel.SelectMatchingCard(1-tp,s.yubelfilter,1-tp,LOCATION_HAND|LOCATION_MZONE|LOCATION_DECK,0,1,1,nil)
 	if #g>0 then
-		Duel.HintSelection(g,true)
-		Duel.Destroy(g,REASON_EFFECT)
+		Duel.Destroy(g,REASON_EFFECT,LOCATION_GRAVE,1-tp)
 	end
 end
