@@ -3,7 +3,7 @@
 --Scripted by YoshiDuels
 local s,id=GetID()
 function s.initial_effect(c)
-	--Fusion Summon 1 DARK monster
+	--Add 2 Rock Type Normal monsters
 	local params = {nil,s.matfilter}
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
