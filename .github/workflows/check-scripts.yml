@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Check line endings
+      run: |
+        git add . --renormalize
+        git diff-index --quiet HEAD
     - name: Clone main scripts repo
       run: |
         git clone --depth=1 --no-checkout https://github.com/ProjectIgnis/CardScripts.git BaseUtils
