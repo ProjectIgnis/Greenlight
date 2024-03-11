@@ -36,7 +36,7 @@ function s.matfilter(c,lc,sumtype,tp)
 	return c:IsRace(RACE_FIEND,lc,sumtype,tp) and c:IsAttribute(ATTRIBUTE_LIGHT,lc,sumtype,tp)
 end
 function s.spfilter(c,e,tp)
-	return c:IsSetCard(SET_FABLED) and c:IsCanBeSpecialSummoned(e,0,tp,true,false)
+	return c:IsSetCard(SET_FIENDSMITH) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetMZoneCount(tp,e:GetHandler())>0 and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,nil,e,tp) end
@@ -47,7 +47,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local g=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,1,nil,e,tp)
 	if #g>0 then
-		Duel.SpecialSummon(g,0,tp,tp,true,false,POS_FACEUP)
+		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
 function s.equipfilter(c)
@@ -62,11 +62,6 @@ function s.equiptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.SelectTarget(tp,s.equipfilter,tp,LOCATION_MZONE,0,1,1,c)
 	local c=e:GetHandler()
 	Duel.SetOperationInfo(0,CATEGORY_EQUIP,c,1,tp,0)
-	--[[
-	if c:IsLocation(LOCATION_GRAVE) then
-		Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,c,1,tp,0)
-	end
-	--]]
 end
 function s.equipop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
