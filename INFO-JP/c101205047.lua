@@ -1,25 +1,22 @@
---刻まれし魔の鎮魂棺
---Fiendsmith Requiem
---Scripted by Naim
+--刻まれし魔の大聖棺
+--Fiendsmith Sequentia
+--scripted by pyrQ
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
-	--Link Summon Procedure
-	Link.AddProcedure(c,s.matfilter,1,1)
-	--You can only Special Summon "Fiendsmith Requiem(s)" once per turn
-	c:SetSPSummonOnce(id)
-	--Special Summon 1 "Fiendsmith" monster from your hand or Deck
+	--Link Summon procedure
+	Link.AddProcedure(c,nil,2,2,s.lcheck)
+	-- "fusfilter","matfilter","extrafil","extraop"
+	--Fusion Summon 1 Fiend Fusion Monster by shuffling its materials from your GY into the Deck
+	local params={aux.FilterBoolFunction(Card.IsRace,RACE_FIEND),aux.FALSE,s.fextra,Fusion.ShuffleMaterial}
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e1:SetType(EFFECT_TYPE_QUICK_O)
-	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
+	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetHintTiming(0,TIMING_MAIN_END)
-	e1:SetCondition(function() return Duel.IsMainPhase() end)
-	e1:SetCost(aux.selfreleasecost)
-	e1:SetTarget(s.sptg)
-	e1:SetOperation(s.spop)
+	e1:SetCountLimit(1,id)
+	e1:SetTarget(Fusion.SummonEffTG(table.unpack(params)))
+	e1:SetOperation(Fusion.SummonEffOP(table.unpack(params)))
 	c:RegisterEffect(e1)
 	--Equip this card to 1 non-Link LIGHT Fiend monster you control
 	local e2=Effect.CreateEffect(c)
@@ -28,31 +25,19 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetRange(LOCATION_MZONE|LOCATION_GRAVE)
-	e2:SetCountLimit(1,id)
+	e2:SetCountLimit(1,{id,1})
 	e2:SetTarget(s.eqtg)
 	e2:SetOperation(s.eqop)
 	c:RegisterEffect(e2)
 end
-s.listed_names={id}
-s.listed_series={SET_FIENDSMITH}
 function s.matfilter(c,lc,sumtype,tp)
 	return c:IsAttribute(ATTRIBUTE_LIGHT,lc,sumtype,tp) and c:IsRace(RACE_FIEND,lc,sumtype,tp)
 end
-function s.spfilter(c,e,tp)
-	return c:IsSetCard(SET_FIENDSMITH) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+function s.lcheck(g,lc,sumtype,tp)
+	return g:IsExists(s.matfilter,1,nil,lc,sumtype,tp)
 end
-function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetMZoneCount(tp,e:GetHandler())>0
-		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,nil,e,tp) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND|LOCATION_DECK)
-end
-function s.spop(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,1,nil,e,tp)
-	if #g>0 then
-		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
-	end
+function s.fextra(e,tp,mg)
+	return Duel.GetMatchingGroup(aux.NecroValleyFilter(Fusion.IsMonsterFilter(Card.IsFaceup,Card.IsAbleToDeck)),tp,LOCATION_GRAVE,0,nil)
 end
 function s.eqfilter(c)
 	return not c:IsLinkMonster() and c:IsAttribute(ATTRIBUTE_LIGHT) and c:IsRace(RACE_FIEND) and c:IsFaceup()
@@ -84,11 +69,12 @@ function s.eqop(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetValue(function(e,c) return c==tc end)
 		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 		c:RegisterEffect(e1)
-		--The equipped monster gains 600 ATK
+		--Your opponent cannot target the equipped monster with card effects
 		local e2=Effect.CreateEffect(c)
 		e2:SetType(EFFECT_TYPE_EQUIP)
-		e2:SetCode(EFFECT_UPDATE_ATTACK)
-		e2:SetValue(600)
+		e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+		e2:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
+		e2:SetValue(aux.tgoval)
 		e2:SetReset(RESET_EVENT|RESETS_STANDARD)
 		c:RegisterEffect(e2)
 	elseif c:IsLocation(LOCATION_MZONE) then
