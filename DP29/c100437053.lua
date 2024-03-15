@@ -44,7 +44,7 @@ function s.damtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return eg:IsExists(s.damtgfilter,1,nil,e) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
 	local tc=nil
-	if #eg==2 then
+	if #eg>1 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
 		tc=eg:FilterSelect(tp,s.damtgfilter,1,1,nil,e):GetFirst()
 	else

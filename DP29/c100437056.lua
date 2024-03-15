@@ -14,7 +14,7 @@ function s.initial_effect(c)
 	e1:SetTarget(s.destg)
 	e1:SetOperation(s.desop)
 	c:RegisterEffect(e1)
-	--Keep track of all the monsters that are Special Summoned
+	--Keep track of all monsters that are Special Summoned
 	aux.GlobalCheck(s,function()
 		s.sumgroup=Group.CreateGroup()
 		s.sumgroup:KeepAlive()
