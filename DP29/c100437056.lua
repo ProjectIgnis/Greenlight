@@ -68,9 +68,9 @@ function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	end
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,tc,1,tp,0)
 	if tc:IsFaceup() and tc:GetBaseAttack()>0 then
-		Duel.SetOperationInfo(0,CATEGORY_DAMAGE,tc,1,1-tp,tc:GetBaseAttack()//2)
+		Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,1,1-tp,tc:GetBaseAttack()//2)
 	else
-		Duel.SetPossibleOperationInfo(0,CATEGORY_DAMAGE,tc,1,1-tp,0)
+		Duel.SetPossibleOperationInfo(0,CATEGORY_DAMAGE,nil,1,1-tp,0)
 	end
 end
 function s.desop(e,tp,eg,ep,ev,re,r,rp)
