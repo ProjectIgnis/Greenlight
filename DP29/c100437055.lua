@@ -13,7 +13,7 @@ function s.initial_effect(c)
 	e1:SetTarget(s.sptg)
 	e1:SetOperation(s.spop)
 	c:RegisterEffect(e1)
-	--Your opponent's monsters can only attack the targeted monster for atatcks
+	--This turn, your opponent's monsters can only attack the targeted monster while it is face-up
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_QUICK_O)
@@ -76,8 +76,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	elseif op==2 then
 		--Link Summon 1 "Trickstar" monster
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local g=Duel.SelectMatchingCard(tp,s.linkfilter,tp,LOCATION_EXTRA,0,1,1,nil)
-		local tc=g:GetFirst()
+		local tc=Duel.SelectMatchingCard(tp,s.linkfilter,tp,LOCATION_EXTRA,0,1,1,nil):GetFirst()
 		if tc then
 			Duel.LinkSummon(tp,tc)
 		end
