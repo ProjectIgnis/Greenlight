@@ -6,18 +6,18 @@ function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Xyz Summon procedure
 	Xyz.AddProcedure(c,nil,9,3)
-	--Search 1 "Puppet" Trap card
+	--Add 1 "Puppet" Trap card from your Deck to your hand
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
+	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetCountLimit(1,id)
 	e1:SetTarget(s.thtg)
 	e1:SetOperation(s.thop)
 	c:RegisterEffect(e1)
-	--Special Summon 1 monster to your opponent's field
+	--Special Summon 1 monster from either GY to your opponent's field in Defense Position
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
@@ -37,6 +37,7 @@ function s.initial_effect(c)
 	e3:SetCode(EVENT_CUSTOM+id)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCountLimit(1,{id,2})
+	e3:SetCondition(function() return not Duel.IsPhase(PHASE_DAMAGE) end)
 	e3:SetTarget(s.destg)
 	e3:SetOperation(s.desop)
 	c:RegisterEffect(e3)
@@ -46,8 +47,8 @@ function s.initial_effect(c)
 	--Register monsters summoned to the opponent's field
 	local e3a=Effect.CreateEffect(c)
 	e3a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e3a:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e3a:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e3a:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e3a:SetRange(LOCATION_MZONE)
 	e3a:SetLabelObject(e3)
 	e3a:SetOperation(s.regop)
@@ -80,10 +81,9 @@ end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(1-tp,LOCATION_MZONE,tp)<=0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local tc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,e,tp):GetFirst()
-	if tc then
-		Duel.HintSelection(tc)
-		Duel.SpecialSummon(tc,0,tp,1-tp,false,false,POS_FACEUP_DEFENSE) 
+	local g=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,e,tp)
+	if #g>0 then
+		Duel.SpecialSummon(g,0,tp,1-tp,false,false,POS_FACEUP_DEFENSE) 
 	end
 end
 function s.desfilter1(c,e,tp)
