@@ -3,7 +3,7 @@
 --Scripted by The Razgriz
 local s,id=GetID()
 function s.initial_effect(c)
-	--Your opponent's monsters loses 600 ATK if this card is destroyed and sent to the GY
+	--1 monster your opponent controls loses 400 ATK if this card is destroyed and sent to the GY
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_ATKCHANGE)
@@ -25,7 +25,7 @@ function s.initial_effect(c)
 	e2:SetTarget(s.sptg)
 	e2:SetOperation(s.spop)
 	c:RegisterEffect(e2)
-	--1 monster your opponent controls loses 400 ATK if this card is Special Summoned
+	--1 monster your opponent controls loses 600 ATK if this card is Special Summoned
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,0))
 	e3:SetCategory(CATEGORY_ATKCHANGE)
