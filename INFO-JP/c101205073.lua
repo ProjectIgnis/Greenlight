@@ -9,11 +9,11 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER)
-	e1:SetCountLimit(1)
+	e1:SetCountLimit(1,id)
 	e1:SetCondition(s.phcon)
 	e1:SetOperation(s.phop)
 	c:RegisterEffect(e1)
-	--Special Summon any number of "Tenpai Dragon" monsters
+	--Special Summon any number of "Tenpai Dragon" monsters from your hand
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_DRAW+CATEGORY_SPECIAL_SUMMON)
@@ -21,9 +21,9 @@ function s.initial_effect(c)
 	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetRange(LOCATION_GRAVE)
 	e2:SetCountLimit(1,{id,1})
-	e2:SetHintTiming(0,TIMINGS_CHECK_MONSTER_E+TIMING_MAIN_END)
-	e2:SetCondition(s.drcon)
-	e2:SetCost(aux.bfgcost)
+	e2:SetHintTiming(0,TIMING_MAIN_END|TIMING_BATTLE_END|TIMINGS_CHECK_MONSTER_E)
+	e2:SetCondition(function() return Duel.GetFlagEffect(0,id)+Duel.GetFlagEffect(1,id)>=3 end)
+	e2:SetCost(aux.selfbanishcost)
 	e2:SetTarget(s.drtg)
 	e2:SetOperation(s.drop)
 	c:RegisterEffect(e2)
@@ -36,6 +36,7 @@ function s.initial_effect(c)
 		Duel.RegisterEffect(ge1,0)
 	end)
 end
+s.listed_series={SET_TENPAI_DRAGON}
 function s.phconfilter(c)
 	return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_DRAGON)
 end
@@ -45,10 +46,7 @@ function s.phcon(e,tp,eg,ep,ev,re,r,rp)
 	return #g>0 and g:FilterCount(s.phconfilter,nil)==#g and Duel.GetFieldGroupCount(tp,0,LOCATION_MZONE)>#g
 end
 function s.phop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.SkipPhase(1-tp,Duel.GetCurrentPhase(),RESET_PHASE+PHASE_END,1)
-end
-function s.drcon(e,tp,eg,ep,ev,re,r,rp)
-	return aux.exccon(e) and Duel.GetFlagEffect(0,id)+Duel.GetFlagEffect(1,id)>=3
+	Duel.SkipPhase(1-tp,Duel.GetCurrentPhase(),RESET_PHASE|PHASE_END,1)
 end
 function s.drtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
@@ -64,8 +62,11 @@ function s.drop(e,tp,eg,ep,ev,re,r,rp)
 	local ct=math.min(#g,Duel.GetLocationCount(tp,LOCATION_MZONE))
 	if ct<=0 or not Duel.SelectYesNo(tp,aux.Stringid(id,2)) then return end
 	if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ct=1 end
+	Duel.ShuffleHand(tp)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local sg=g:Select(tp,1,ct,nil)
 	if #sg>0 then
+		Duel.BreakEffect()
 		Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
