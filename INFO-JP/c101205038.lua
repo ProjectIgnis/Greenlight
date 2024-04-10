@@ -1,5 +1,5 @@
 --白き森の魔狼シルウィア
---Silvera, Witchwolf of the White Woods
+--Silvera, Witchwolf of the White Forest
 --Scripted by Hatter
 local s,id=GetID()
 function s.initial_effect(c)
@@ -22,7 +22,7 @@ function s.initial_effect(c)
 	e2:SetCode(EFFECT_UPDATE_ATTACK)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetTargetRange(LOCATION_MZONE,0)
-	e2:SetTarget(function(_,c) return c:IsRace(RACE_ILLUSION|RACE_SPELLCASTER) and c:IsType(TYPE_SYNCHRO) end)
+	e2:SetTarget(function(e,c) return c:IsRace(RACE_ILLUSION|RACE_SPELLCASTER) and c:IsType(TYPE_SYNCHRO) end)
 	e2:SetValue(500)
 	c:RegisterEffect(e2)
 	--Illusion and Spellcaster Synchro Monsters inflict double piercing damage

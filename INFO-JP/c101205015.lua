@@ -1,9 +1,9 @@
 --白き森のシルヴィ
---Silve of the White Woods
+--Silve of the White Forest
 --Scripted by Hatter
 local s,id=GetID()
 function s.initial_effect(c)
-	--Search 1 "White Woods" Spell/Trap 
+	--Search 1 "White Forest" Spell/Trap 
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
@@ -17,7 +17,7 @@ function s.initial_effect(c)
 	local e2=e1:Clone()
 	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
 	c:RegisterEffect(e2)
-	--Return 1 "White Woods" Synchro Monster to the Extra Deck
+	--Return 1 "White Forest" Synchro Monster to the Extra Deck
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_TOEXTRA+CATEGORY_SPECIAL_SUMMON)
@@ -31,9 +31,9 @@ function s.initial_effect(c)
 	e3:SetOperation(s.tdop)
 	c:RegisterEffect(e3)
 end
-s.listed_series={SET_WHITE_WOODS}
+s.listed_series={SET_WHITE_FOREST}
 function s.thfilter(c)
-	return c:IsSetCard(SET_WHITE_WOODS) and c:IsSpellTrap() and c:IsAbleToHand()
+	return c:IsSetCard(SET_WHITE_FOREST) and c:IsSpellTrap() and c:IsAbleToHand()
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
@@ -48,8 +48,8 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.tdfilter(c,tp)
-	return c:IsFaceup() and c:IsSetCard(SET_WHITE_WOODS) and c:IsType(TYPE_SYNCHRO)
-		and c:IsAbleToExtra() and Duel.GetMZoneCount(tp,c)>0
+	return c:IsSetCard(SET_WHITE_FOREST) and c:IsType(TYPE_SYNCHRO) and c:IsAbleToExtra() and c:IsFaceup()
+		and Duel.GetMZoneCount(tp,c)>0
 end
 function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_MZONE|LOCATION_GRAVE) and chkc:IsControler(tp) and s.tdfilter(chkc,tp) end
@@ -57,9 +57,9 @@ function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return Duel.IsExistingTarget(s.tdfilter,tp,LOCATION_MZONE|LOCATION_GRAVE,0,1,nil,tp)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-	local g=Duel.SelectTarget(tp,s.tdfilter,tp,LOCATION_MZONE,0,1,1,nil,tp)
-	Duel.SetOperationInfo(0,CATEGORY_TOEXTRA,g,#g,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,LOCATION_GRAVE)
+	local g=Duel.SelectTarget(tp,s.tdfilter,tp,LOCATION_MZONE|LOCATION_GRAVE,0,1,1,nil,tp)
+	Duel.SetOperationInfo(0,CATEGORY_TOEXTRA,g,1,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
 end
 function s.tdop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
