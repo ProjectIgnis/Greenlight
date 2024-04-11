@@ -43,32 +43,35 @@ function s.ctop(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetCode(EFFECT_CANNOT_BE_MATERIAL)
 		e1:SetCondition(function(_e) return _e:GetHandler():HasCounter(COUNTER_DERANGED) end)
 		e1:SetValue(aux.cannotmatfilter(SUMMON_TYPE_FUSION,SUMMON_TYPE_SYNCHRO,SUMMON_TYPE_XYZ,SUMMON_TYPE_LINK))
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 		tc:RegisterEffect(e1)
 	end
 end
 function s.descon(e,tp,eg,ep,ev,re,r,rp)
 	local bc=e:GetHandler():GetBattleTarget()
-	return bc and bc:HasCounter(COUNTER_DERANGED)
+	return bc and bc:HasCounter(COUNTER_DERANGED) and bc:IsControler(1-tp)
 end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local bc=e:GetHandler():GetBattleTarget()
-	local dam=bc:GetBaseAttack()
-	if chk==0 then return dam>0 end
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,bc,1,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,1,PLAYER_ALL,dam)
+	local c=e:GetHandler()
+	local bc=c:GetBattleTarget()
+	if chk==0 then return bc:IsRelateToBattle() end
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,bc,1,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,1,PLAYER_ALL,bc:GetBaseAttack())
+	Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,c,1,tp,0)
 end
 function s.desop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local bc=e:GetHandler():GetBattleTarget()
-	if not bc:IsRelateToBattle() or Duel.Destroy(bc,REASON_EFFECT)==0 then return end
-	local dam=bc:GetBaseAttack()
-	if dam>0 then
-		Duel.Damage(tp,dam,REASON_EFFECT,true)
-		Duel.Damage(1-tp,dam,REASON_EFFECT,true)
-		Duel.RDComplete()
+	local bc=c:GetBattleTarget()
+	if bc:IsRelateToBattle() and bc:IsControler(1-tp) and Duel.Destroy(bc,REASON_EFFECT)>0 then
+		local dam=bc:GetBaseAttack()
+		if dam>0 then
+			Duel.Damage(tp,dam,REASON_EFFECT,true)
+			Duel.Damage(1-tp,dam,REASON_EFFECT,true)
+			Duel.RDComplete()
+		end
 	end
 	if c:IsRelateToBattle() then
-		--Destroy it at the end of the Battle Phase
-		aux.DelayedOperation(c,PHASE_BATTLE,id,e,tp,function(ag) Duel.Destroy(ag,REASON_EFFECT) end,nil,0)
+		--Destroy this card at the end of this Battle Phase
+		aux.DelayedOperation(c,PHASE_BATTLE,id,e,tp,function(ag) Duel.Destroy(ag,REASON_EFFECT) end,nil,nil,1,aux.Stringid(id,3))
 	end
 end
