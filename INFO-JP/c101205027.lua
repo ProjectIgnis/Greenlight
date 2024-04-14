@@ -3,127 +3,114 @@
 --Scripted by Eerie Code
 local s,id=GetID()
 function s.initial_effect(c)
-	--draw
+	--Apply effects for the rest of the turn
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_DRAW)
+	e1:SetCategory(CATEGORY_DRAW+CATEGORY_TODECK)
 	e1:SetType(EFFECT_TYPE_QUICK_O)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetHintTiming(0,TIMINGS_CHECK_MONSTER)
 	e1:SetRange(LOCATION_HAND)
-	e1:SetCondition(s.condition)
-	e1:SetCost(s.cost)
-	e1:SetOperation(s.operation)
+	e1:SetHintTiming(0,TIMING_STANDBY_PHASE|TIMING_MAIN_END|TIMINGS_CHECK_MONSTER)
+	e1:SetCondition(function(e,tp) return Duel.GetFieldGroupCount(tp,LOCATION_ONFIELD,0)==0 end)
+	e1:SetCost(s.effcost)
+	e1:SetTarget(s.efftg)
+	e1:SetOperation(s.effop)
 	c:RegisterEffect(e1)
+	--Keep track of the activations of a "Multchummy" monster's effect
+	Duel.AddCustomActivityCounter(id,ACTIVITY_CHAIN,function(re) return not (re:GetHandler():IsSetCard(SET_MULTCHUMMY) and re:IsMonsterEffect()) end)
 end
-s.listed_series={SET_MULTCHUMMY }
-function s.condition(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetFieldGroupCount(tp,LOCATION_ONFIELD,0)==0
-end
-function s.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsAbleToGraveAsCost() end
-	Duel.SendtoGrave(e:GetHandler(),REASON_COST)
+s.listed_series={SET_MULTCHUMMY}
+function s.effcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	--activate check
+	if chk==0 then return c:IsDiscardable() and Duel.GetCustomActivityCount(id,tp,ACTIVITY_CHAIN)<2 end
+	Duel.SendtoGrave(c,REASON_COST|REASON_DISCARD)
+	--You can only activate the effects of other "Multchummy" monsters once the turn you activate this effect
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-	e1:SetCode(EVENT_CHAINING)
-	e1:SetReset(RESET_PHASE+PHASE_END)
-	e1:SetOperation(s.aclimit)
+	e1:SetDescription(aux.Stringid(id,1))
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT+EFFECT_FLAG_OATH)
+	e1:SetCode(EFFECT_CANNOT_ACTIVATE)
+	e1:SetTargetRange(1,0)
+	e1:SetCondition(function(e) return Duel.GetCustomActivityCount(id,e:GetHandlerPlayer(),ACTIVITY_CHAIN)>=2 end)
+	e1:SetValue(function(e,re,tp) return re:GetHandler():IsSetCard(SET_MULTCHUMMY) and re:IsMonsterEffect() end)
+	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
-	--activate limit
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_CANNOT_ACTIVATE)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
-	e2:SetDescription(aux.Stringid(id,1))
-	e2:SetTargetRange(1,0)
-	e2:SetReset(RESET_PHASE+PHASE_END)
-	e2:SetCondition(s.econ)
-	e2:SetValue(s.elimit)
-	Duel.RegisterEffect(e2,tp)
 end
-function s.aclimit(e,tp,eg,ep,ev,re,r,rp)
-	local rc=re:GetHandler()
-	if ep~=tp or not (re:IsActiveType(TYPE_MONSTER) and rc and rc:IsSetCard(SET_MULTCHUMMY) and not rc:IsCode(id)) then return end
-	Duel.RegisterFlagEffect(tp,id,RESET_PHASE+PHASE_END,0,1)
+function s.efftg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return true end
+	Duel.SetPossibleOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_HAND)
 end
-function s.econ(e)
-	return Duel.GetFlagEffect(e:GetHandlerPlayer(),id)~=0
-end
-function s.elimit(e,te,tp)
-	local tc=te:GetHandler()
-	return te:IsActiveType(TYPE_MONSTER) and tc:IsSetCard(SET_MULTCHUMMY) and not tc:IsCode(id)
-end
-function s.operation(e,tp,eg,ep,ev,re,r,rp)
+function s.effop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
+	--Draw 1 card each time your opponent Normal or Special Summons a monster(s) from the hand
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-	e1:SetProperty(EFFECT_FLAG_DELAY)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e1:SetCode(EVENT_SUMMON_SUCCESS)
-	e1:SetOperation(s.drop1)
-	e1:SetReset(RESET_PHASE+PHASE_END)
+	e1:SetCondition(s.drcon)
+	e1:SetOperation(s.drop)
+	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
 	local e2=e1:Clone()
 	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e2:SetCondition(s.drcon1)
 	Duel.RegisterEffect(e2,tp)
-	--sp_summon effect
+	--Shuffle random cards from your hand to the Deck during the End Phase
 	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-	e3:SetCode(EVENT_SUMMON_SUCCESS)
-	e3:SetOperation(s.regop)
-	e3:SetReset(RESET_PHASE+PHASE_END)
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e3:SetCode(EVENT_PHASE+PHASE_END)
+	e3:SetCountLimit(1)
+	e3:SetOperation(s.tdop)
+	e3:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e3,tp)
-	local e4=e3:Clone()
-	e4:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e4:SetCondition(s.regcon)
-	Duel.RegisterEffect(e4,tp)
-	local e5=Effect.CreateEffect(c)
-	e5:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-	e5:SetCode(EVENT_CHAIN_SOLVED)
-	e5:SetCondition(s.drcon2)
-	e5:SetOperation(s.drop2)
-	e5:SetReset(RESET_PHASE+PHASE_END)
-	Duel.RegisterEffect(e5,tp)
-	--shuffle
-	local e6=Effect.CreateEffect(c)
-	e6:SetType(EFFECT_TYPE_FIELD|EFFECT_TYPE_CONTINUOUS)
-	e6:SetCode(EVENT_PHASE|PHASE_END)
-	e6:SetCountLimit(1)
-	e6:SetOperation(s.tdop)
-	e6:SetReset(RESET_PHASE+PHASE_END)
-	Duel.RegisterEffect(e6,tp)
 end
-function s.filter(c,sp)
-	return c:GetSummonPlayer()==sp and c:IsPreviousLocation(LOCATION_HAND)
+function s.drconfilter(c,tp)
+	return c:IsSummonPlayer(1-tp) and c:IsSummonLocation(LOCATION_HAND)
 end
-function s.drcon1(e,tp,eg,ep,ev,re,r,rp)
-	return eg:IsExists(s.filter,1,nil,1-tp) 
-		and (not re:IsHasType(EFFECT_TYPE_ACTIONS) or re:IsHasType(EFFECT_TYPE_CONTINUOUS))
+function s.drcon(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(s.drconfilter,1,nil,tp)
 end
-function s.drop1(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Draw(tp,1,REASON_EFFECT)
+function s.drop(e,tp,eg,ep,ev,re,r,rp)
+	if not Duel.IsChainSolving() then
+		Duel.Hint(HINT_CARD,1-tp,id)
+		Duel.Draw(tp,1,REASON_EFFECT)
+	else
+		local eff=e:GetLabelObject()
+		if eff and not eff:IsDeleted() then
+			eff:SetLabel(eff:GetLabel()+1)
+		else
+			local c=e:GetHandler()
+			--Draw cards when the current Chain Link finishes resolving
+			local e1=Effect.CreateEffect(c)
+			e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+			e1:SetCode(EVENT_CHAIN_SOLVED)
+			e1:SetOperation(s.chainsolvedop)
+			e1:SetLabel(1)
+			e1:SetLabelObject(e)
+			e1:SetReset(RESET_CHAIN)
+			Duel.RegisterEffect(e1,tp)
+			e:SetLabelObject(e1)
+			--Reset "e1" and the label object of "e" at the end of the Chain Link
+			local e2=Effect.CreateEffect(c)
+			e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+			e2:SetCode(EVENT_CHAIN_SOLVED)
+			e2:SetOperation(function() e:SetLabelObject(nil) e1:Reset() end)
+			e2:SetReset(RESET_CHAIN)
+			Duel.RegisterEffect(e2,tp)
+		end
+	end
 end
-function s.regcon(e,tp,eg,ep,ev,re,r,rp)
-	return eg:IsExists(s.filter,1,nil,1-tp) 
-		and re:IsHasType(EFFECT_TYPE_ACTIONS) and not re:IsHasType(EFFECT_TYPE_CONTINUOUS)
-end
-function s.regop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.RegisterFlagEffect(tp,id,RESET_CHAIN,0,1)
-end
-function s.drcon2(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetFlagEffect(tp,id)>0
-end
-function s.drop2(e,tp,eg,ep,ev,re,r,rp)
-	local n=Duel.GetFlagEffect(tp,id)
-	Duel.ResetFlagEffect(tp,id)
-	Duel.Draw(tp,n,REASON_EFFECT)
+function s.chainsolvedop(e,tp,eg,ep,ev,re,r,rp)
+	Duel.Hint(HINT_CARD,1-tp,id)
+	Duel.Draw(tp,e:GetLabel(),REASON_EFFECT)
+	e:Reset()
+	e:GetLabelObject():SetLabelObject(nil)
 end
 function s.tdop(e,tp,eg,ep,ev,re,r,rp)
-	local dif=Duel.GetFieldGroupCount(tp,LOCATION_HAND,0)-Duel.GetFieldGroupCount(tp,0,LOCATION_ONFIELD)
-	if dif>6 then
-		local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0):RandomSelect(tp,dif)
-		Duel.SendtoDeck(g,nil,2,REASON_EFFECT)
+	local dif=Duel.GetFieldGroupCount(tp,LOCATION_HAND,0)-(Duel.GetFieldGroupCount(tp,0,LOCATION_ONFIELD)+6)
+	if dif>0 then
+		local g=Duel.GetFieldGroup(tp,LOCATION_HAND,0):Match(Card.IsAbleToDeck,nil):RandomSelect(tp,dif)
+		if #g==0 then return end
+		Duel.Hint(HINT_CARD,1-tp,id)
+		Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
 	end
 end
