@@ -60,26 +60,30 @@ end
 function s.tdcon(e,tp,eg,ep,ev,re,r,rp)
 	return re:GetHandler():IsOnField() and re:IsActiveType(TYPE_FIELD) and not re:IsHasType(EFFECT_TYPE_ACTIVATE)
 end
-function s.spfilter(c,e,tp)
-	if not c:IsCanBeSpecialSummoned(e,0,tp,false,false) then return false end
+function s.spfilter(c,ft,e,tp)
+	if ft<=0 or not c:IsCanBeSpecialSummoned(e,0,tp,false,false) then return false end
 	for _,code in ipairs(c.listed_names) do
 		if TYPE_FIELD&Duel.GetCardTypeFromCode(code)==TYPE_FIELD then return true end
 	end
 	return false
 end
-function s.tdfilter(c,e,tp)
-	return c:IsFaceup() and c:IsMonster() and (c:IsAbleToDeck() or s.spfilter(c,e,tp))
+function s.tdfilter(c,ft,e,tp)
+	return c:IsFaceup() and c:IsMonster() and (c:IsAbleToDeck() or s.spfilter(c,ft,e,tp))
 end
 function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.tdfilter,tp,LOCATION_REMOVED|LOCATION_GRAVE,0,1,nil,e,tp) end
+	if chk==0 then
+		local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
+		return Duel.IsExistingMatchingCard(s.tdfilter,tp,LOCATION_REMOVED|LOCATION_GRAVE,0,1,nil,ft,e,tp)
+	end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_REMOVED|LOCATION_GRAVE)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_REMOVED|LOCATION_GRAVE)
 end
 function s.tdop(e,tp,eg,ep,ev,re,r,rp)
+	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-	local tc=Duel.SelectMatchingCard(tp,s.tdfilter,tp,LOCATION_REMOVED|LOCATION_GRAVE,0,1,1,nil,e,tp):GetFirst()
+	local tc=Duel.SelectMatchingCard(tp,s.tdfilter,tp,LOCATION_REMOVED|LOCATION_GRAVE,0,1,1,nil,ft,e,tp):GetFirst()
 	if not tc then return end
-	if s.spfilter(tc,e,tp) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+	if s.spfilter(tc,ft,e,tp) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
 	else
 		Duel.SendtoDeck(tc,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
