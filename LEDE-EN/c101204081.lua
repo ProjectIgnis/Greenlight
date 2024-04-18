@@ -1,4 +1,4 @@
---
+--JP name
 --Pyrite Knight
 --Scripted by Hatter
 local s,id=GetID()
@@ -29,7 +29,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 local TOKEN_PYRITE=id+100
-s.listed_series={TOKEN_PYRITE}
+s.listed_series={id,TOKEN_PYRITE}
 function s.thfilter(c,tp)
 	return c:IsAttribute(ATTRIBUTE_EARTH|ATTRIBUTE_FIRE) and c:IsRace(RACE_WARRIOR)
 		and c:IsFaceup() and c:IsAbleToHand() and Duel.GetMZoneCount(tp,c)>0
@@ -38,14 +38,13 @@ function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.thfilter(chkc,tp) end
 	if chk==0 then return Duel.IsExistingTarget(s.thfilter,tp,LOCATION_MZONE,0,1,nil,tp)
-		and not Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 		and Duel.GetLocationCount(1-tp,LOCATION_MZONE)>0
 		and Duel.IsPlayerCanSpecialSummonMonster(tp,TOKEN_PYRITE,0,TYPES_TOKEN,0,2000,4,RACE_WARRIOR,ATTRIBUTE_FIRE,POS_FACEUP_DEFENSE,1-tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RTOHAND)
 	local g=Duel.SelectTarget(tp,s.thfilter,tp,LOCATION_MZONE,0,1,1,nil,tp)
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
 end
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
@@ -53,10 +52,10 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	if tc:IsRelateToEffect(e) and Duel.SendtoHand(tc,nil,REASON_EFFECT)>0
 		and tc:IsLocation(LOCATION_HAND) and c:IsRelateToEffect(e)
 		and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 
-		and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and Duel.GetLocationCount(1-tp,LOCATION_MZONE)>0
 		and Duel.IsPlayerCanSpecialSummonMonster(tp,TOKEN_PYRITE,0,TYPES_TOKEN,0,2000,4,RACE_WARRIOR,ATTRIBUTE_FIRE,POS_FACEUP_DEFENSE,1-tp) then
-		Duel.BreakEffect()
 		local token=Duel.CreateToken(tp,TOKEN_PYRITE)
+		Duel.BreakEffect()
 		Duel.SpecialSummon(token,0,tp,1-tp,false,false,POS_FACEUP_DEFENSE)
 	end
 end

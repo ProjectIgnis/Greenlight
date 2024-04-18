@@ -1,4 +1,4 @@
---
+--JP name
 --Jungle Dweller
 --Scripted by Hatter
 local s,id=GetID()
@@ -14,7 +14,7 @@ function s.initial_effect(c)
 	e1:SetCondition(function() return Duel.GetFieldGroupCount(0,LOCATION_FZONE,LOCATION_FZONE)==2 end)
 	e1:SetValue(aux.tgoval)
 	c:RegisterEffect(e1)
-	--Special Summon this card
+	--Special Summon this card from your hand
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
@@ -38,9 +38,6 @@ function s.initial_effect(c)
 	e3:SetOperation(s.tdop)
 	c:RegisterEffect(e3)
 end
-function s.tgcond(e)
-	return Duel.IsExistingMatchingCard(Card.IsFacedown,e:GetHandlerPlayer(),LOCATION_ONFIELD,0,1,nil)
-end
 function s.spcostfilter(c,tp)
 	return c:IsAttribute(ATTRIBUTE_LIGHT|ATTRIBUTE_DARK) and c:IsAbleToRemoveAsCost()
 		and Duel.GetMZoneCount(tp,c)>0 and aux.SpElimFilter(c,true)
@@ -63,24 +60,27 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.tdfilter(c)
-	return c:IsFaceup() and c:IsFieldSpell() and c:IsAbleToDeck()
+	return c:IsFieldSpell() and c:IsFaceup() and c:IsAbleToDeck()
 end
 function s.tdtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.tdfilter,tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_GRAVE)
+	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_GRAVE|LOCATION_REMOVED)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,1-tp,LOCATION_ONFIELD)
 end
 function s.tdop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.tdfilter),tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,2,nil)
-	if #g==0 or Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)==0 then return end
+	if #g==0 then return end
+	Duel.HintSelection(g)
+	if Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)==0 then return end
 	local ct=g:FilterCount(Card.IsLocation,nil,LOCATION_DECK)
 	if ct==0 then return end
 	local dg=Duel.GetFieldGroup(tp,0,LOCATION_ONFIELD)
 	if #dg==0 or not Duel.SelectYesNo(tp,aux.Stringid(id,2)) then return end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local sg=dg:Select(tp,1,ct,nil)
 	if #sg>0 then
+		Duel.HintSelection(sg)
 		Duel.BreakEffect()
 		Duel.Destroy(sg,REASON_EFFECT)
 	end
