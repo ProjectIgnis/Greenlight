@@ -1,5 +1,5 @@
---光と昇華の竜
---Light End Sublimation Dragon
+--闇と消滅の竜
+--Dark End Evaporation Dragon
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
@@ -24,17 +24,16 @@ function s.initial_effect(c)
 	e2:SetTarget(Fusion.SummonEffTG())
 	e2:SetOperation(Fusion.SummonEffOP())
 	c:RegisterEffect(e2)
-	--Make an opponent's monster that declares an attack lose 1500 ATK
+	--Make this card lose 500 ATK/DEF and destroy 1 face-up monster in Attack position
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,2))
-	e3:SetCategory(CATEGORY_ATKCHANGE)
-	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e3:SetCode(EVENT_ATTACK_ANNOUNCE)
+	e3:SetCategory(CATEGORY_DESTROY)
+	e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetRange(LOCATION_MZONE)
-	e3:SetCountLimit(1,{id,3})
-	e3:SetCondition(function(_,tp) return Duel.GetAttacker():IsControler(1-tp) end)
-	e3:SetTarget(s.atktg)
-	e3:SetOperation(s.atkop)
+	e3:SetCountLimit(1,{id,2})
+	e3:SetTarget(s.destg)
+	e3:SetOperation(s.desop)
 	c:RegisterEffect(e3)
 end
 function s.hspcostfilter(c)
@@ -68,26 +67,24 @@ function s.hspop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetTarget(function(_,cc) return not cc:IsRace(RACE_DRAGON) end)
 	Duel.RegisterEffect(e1,tp)
 end
-function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsAttackAbove(500) and c:IsDefenseAbove(500) end
-	local g=Group.FromCards(c,Duel.GetAttacker())
-	Duel.SetOperationInfo(0,CATEGORY_ATKCHANGE,g,#g,0,0)
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsAttackPos() and chkc~=c end
+	if chk==0 then return c:IsAttackAbove(500) and c:IsDefenseAbove(500)
+		and Duel.IsExistingTarget(Card.IsAttackPos,tp,LOCATION_MZONE,LOCATION_MZONE,1,c) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
+	local g=Duel.SelectTarget(tp,Card.IsAttackPos,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c)
+	Duel.SetOperationInfo(0,CATEGORY_ATKCHANGE,c,1,tp,-500)
 	Duel.SetOperationInfo(0,CATEGORY_DEFCHANGE,c,1,tp,-500)
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,tp,0)
 end
-function s.atkop(e,tp,eg,ep,ev,re,r,rp)
+function s.desop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not (c:IsRelateToEffect(e) and c:IsAttackAbove(500) and c:IsDefenseAbove(500)) then return end
 	if c:UpdateAttack(-500)==-500 and c:UpdateDefense(-500)==-500 then
-		local at=Duel.GetAttacker()
-		if at:IsFaceup() and at:IsControler(1-tp) and at:IsRelateToBattle() then
-			--Make the attacker lose 1500 ATK
-			local e1=Effect.CreateEffect(c)
-			e1:SetType(EFFECT_TYPE_SINGLE)
-			e1:SetCode(EFFECT_UPDATE_ATTACK)
-			e1:SetValue(-1500)
-			e1:SetReset(RESET_EVENT|RESETS_STANDARD)
-			at:RegisterEffect(e1)
+		local tc=Duel.GetFirstTarget()
+		if tc:IsRelateToEffect(e) then
+			Duel.Destroy(tc,REASON_EFFECT)
 		end
 	end
 end
