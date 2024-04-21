@@ -3,7 +3,7 @@
 --Scripted by Hatter
 local s,id=GetID()
 function s.initial_effect(c)
-	--Special Summon this card
+	--Special Summon this card from your hand
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
@@ -16,7 +16,7 @@ function s.initial_effect(c)
 	e1:SetTarget(s.sptg)
 	e1:SetOperation(s.spop)
 	c:RegisterEffect(e1)
-	--Fusion Summon 1 "Memento" Fusion Monster
+	--Fusion Summon 1 "Memento" Fusion Monster from your Extra Deck, using monsters from your hand or field as material
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
@@ -30,7 +30,7 @@ function s.initial_effect(c)
 	local e3=e2:Clone()
 	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
 	c:RegisterEffect(e3)
-	--Send 1 "Memento" card from the Deck to the GY
+	--Send 1 "Memento" card from your Deck to the GY
 	local e4=Effect.CreateEffect(c)
 	e4:SetDescription(aux.Stringid(id,2))
 	e4:SetCategory(CATEGORY_TOGRAVE)
@@ -59,9 +59,11 @@ end
 function s.checkop(e,tp,eg,ep,ev,re,r,rp)
 	local g=eg:Filter(s.checkfilter,nil)
 	if #g==0 then return end
-	local ct=g:FilterCount(Card.IsPreviousControler,nil,tp)
-	if ct>0 then Duel.RegisterFlagEffect(tp,id,RESET_PHASE|PHASE_END,0,1) end
-	if ct<#g then Duel.RegisterFlagEffect(1-tp,id,RESET_PHASE|PHASE_END,0,1) end
+	for p=0,1 do
+		if g:IsExists(Card.IsPreviousControler,1,nil,p) and not Duel.HasFlagEffect(p,id) then
+			Duel.RegisterFlagEffect(p,id,RESET_PHASE|PHASE_END,0,1)
+		end
+	end
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()

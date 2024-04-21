@@ -3,7 +3,7 @@
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
-	--Special Summon this card from the hand
+	--Special Summon this card from your hand
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
@@ -14,7 +14,7 @@ function s.initial_effect(c)
 	e1:SetTarget(s.hsptg)
 	e1:SetOperation(s.hspop)
 	c:RegisterEffect(e1)
-	--Fusion Summon 1 Fusion monster from the Extra Deck
+	--Fusion Summon 1 Fusion Monster from your Extra Deck, using monsters from your hand or field as material
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
@@ -31,8 +31,8 @@ function s.initial_effect(c)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e3:SetCode(EVENT_ATTACK_ANNOUNCE)
 	e3:SetRange(LOCATION_MZONE)
-	e3:SetCountLimit(1,{id,3})
-	e3:SetCondition(function(_,tp) return Duel.GetAttacker():IsControler(1-tp) end)
+	e3:SetCountLimit(1,{id,2})
+	e3:SetCondition(function(e,tp) return Duel.GetAttacker():IsControler(1-tp) end)
 	e3:SetTarget(s.atktg)
 	e3:SetOperation(s.atkop)
 	c:RegisterEffect(e3)
@@ -50,7 +50,7 @@ function s.hsptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,LOCATION_HAND)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
 end
 function s.hspop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -63,9 +63,9 @@ function s.hspop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
 	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
-	e1:SetReset(RESET_PHASE|PHASE_END)
 	e1:SetTargetRange(1,0)
-	e1:SetTarget(function(_,cc) return not cc:IsRace(RACE_DRAGON) end)
+	e1:SetTarget(function(e,c) return not c:IsRace(RACE_DRAGON) end)
+	e1:SetReset(RESET_PHASE|PHASE_END)
 	Duel.RegisterEffect(e1,tp)
 end
 function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -77,7 +77,7 @@ function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if not (c:IsRelateToEffect(e) and c:IsAttackAbove(500) and c:IsDefenseAbove(500)) then return end
+	if not (c:IsRelateToEffect(e) and c:IsFaceup() and c:IsAttackAbove(500) and c:IsDefenseAbove(500)) then return end
 	if c:UpdateAttack(-500)==-500 and c:UpdateDefense(-500)==-500 then
 		local at=Duel.GetAttacker()
 		if at:IsFaceup() and at:IsControler(1-tp) and at:IsRelateToBattle() then
