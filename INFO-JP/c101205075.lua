@@ -27,7 +27,7 @@ function s.initial_effect(c)
 	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e2:SetRange(LOCATION_SZONE)
 	e2:SetCountLimit(1,id)
-	e2:SetCondition(function(e,tp,eg) return eg and eg:IsExists(Card.IsSummonPlayer,1,nil,1-tp) end)
+	e2:SetCondition(function(e,tp,eg) return eg:IsExists(Card.IsSummonPlayer,1,nil,1-tp) end)
 	e2:SetTarget(s.lktg)
 	e2:SetOperation(s.lkop)
 	c:RegisterEffect(e2)
@@ -65,12 +65,12 @@ function s.ctfilter(c)
 	return ct<3 and c:IsCanAddCounter(COUNTER_RESONANCE,3-ct)
 end
 function s.cttg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.pzfilter,tp,LOCATION_PZONE,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.ctfilter,tp,LOCATION_PZONE,0,1,nil) end
 end
 function s.ctop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
 	local tc=Duel.SelectMatchingCard(tp,s.ctfilter,tp,LOCATION_PZONE,0,1,1,nil):GetFirst()
-	if tc then
-		tc:AddCounter(COUNTER_RESONANCE,3-tc:GetCounter(COUNTER_RESONANCE),true)
+	if tc and tc:AddCounter(COUNTER_RESONANCE,3-tc:GetCounter(COUNTER_RESONANCE),true) then
+		Duel.RaiseEvent(tc,EVENT_CUSTOM+39210885,e,0,tp,tp,1)
 	end
 end

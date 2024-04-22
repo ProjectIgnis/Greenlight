@@ -3,7 +3,7 @@
 --Scripted by Hatter
 local s,id=GetID()
 function s.initial_effect(c)
-	--Banish 1 opponent card
+	--Banish 1 card your opponent controls
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_REMOVE)
@@ -33,20 +33,20 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_CENTURION}
 function s.rmcostfilter(c)
-	return c:IsFaceup() and c:IsSetCard(SET_CENTURION) and c:IsMonsterCard() and c:IsAbleToRemoveAsCost()
+	return c:IsSetCard(SET_CENTURION) and c:IsMonsterCard() and c:IsFaceup() and c:IsAbleToRemoveAsCost()
 end
 function s.rmcost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.rmcostfilter,tp,LOCATION_SZONE,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.rmcostfilter,tp,LOCATION_STZONE,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local cg=Duel.SelectMatchingCard(tp,s.rmcostfilter,tp,LOCATION_SZONE,0,1,1,nil)
-	Duel.Remove(cg,POS_FACEUP,REASON_COST)
+	local g=Duel.SelectMatchingCard(tp,s.rmcostfilter,tp,LOCATION_STZONE,0,1,1,nil)
+	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.rmtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsControler(1-tp) and chkc:IsOnField() and chkc:IsAbleToRemove() end
 	if chk==0 then return Duel.IsExistingTarget(Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
 	local g=Duel.SelectTarget(tp,Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,1,tp,0)
 end
 function s.rmop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
@@ -60,15 +60,14 @@ function s.plcon(e,tp,eg,ep,ev,re,r,rp)
 		and c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEDOWN)
 end
 function s.plfilter(c)
-	return c:IsSetCard(SET_CENTURION) and c:IsMonsterCard() and not c:IsForbidden()
+	return c:IsSetCard(SET_CENTURION) and c:IsMonster() and not c:IsForbidden()
 		and (c:IsFaceup() or c:IsLocation(LOCATION_HAND|LOCATION_DECK))
 end
 function s.pltg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then
-		local ft=Duel.GetLocationCount(tp,LOCATION_SZONE)
-		if e:GetHandler():IsLocation(LOCATION_HAND) then ft=ft-1 end
+		if Duel.GetLocationCount(tp,LOCATION_SZONE)<2 then return false end
 		local g=Duel.GetMatchingGroup(s.plfilter,tp,LOCATION_HAND|LOCATION_DECK|LOCATION_GRAVE|LOCATION_REMOVED,0,nil)
-		return ft>=2 and aux.SelectUnselectGroup(g,e,tp,2,2,aux.dncheck,0)
+		return aux.SelectUnselectGroup(g,e,tp,2,2,aux.dncheck,0)
 	end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_LEAVE_GRAVE,nil,1,tp,LOCATION_GRAVE)
 end
