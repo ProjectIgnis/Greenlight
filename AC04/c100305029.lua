@@ -61,6 +61,7 @@ function s.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.costfilter,tp,LOCATION_ONFIELD,0,1,c,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
 	local g=Duel.SelectMatchingCard(tp,s.costfilter,tp,LOCATION_ONFIELD,0,1,1,c,tp)
+	Duel.SendtoGrave(g,REASON_COST)
 end
 function s.spfilter(c,e,tp)
 	return c:IsSetCard(SET_ALLURE_QUEEN) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
@@ -75,8 +76,8 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(s.spfilter,tp,LOCATION_GRAVE,0,nil,e,tp)
 	if #g==0 then return end
 	if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
-	if #ft>=#g and g:GetClassCount(Card.GetCode)==#g then --If there are enough zones and they all have different names, skip the selection
-		Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
+	if #ft>=#g and g:GetClassCount(Card.GetCode)==#g then --If there are enough zones and all the monsters have different names, skip the selection
+		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
 	else
 		local ct=math.min(ft,#g)
 		local sg=aux.SelectUnselectGroup(g,e,tp,ct,ct,aux.dncheck,1,tp,HINTMSG_SPSUMMON)
