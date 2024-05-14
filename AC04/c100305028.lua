@@ -1,5 +1,5 @@
 --魅惑の宮殿
---Allure Pallace
+--Allure Palace
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
@@ -11,15 +11,14 @@ function s.initial_effect(c)
 	--Spellcaster monsters you control gain 500 ATK/DEF
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetRange(LOCATION_FZONE)
 	e1:SetTargetRange(LOCATION_MZONE,0)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetTarget(aux.TargetBoolFunction(Card.IsRace,RACE_SPELLCASTER))
 	e1:SetValue(500)
 	c:RegisterEffect(e1)
 	local e2=e1:Clone()
 	e2:SetCode(EFFECT_UPDATE_DEFENSE)
-	e2:SetValue(500)
 	c:RegisterEffect(e2)
 	--Take 1 "Allure Queen" monster from your Deck, and either add it to your hand or Special Summon it to your opponent's field
 	local e3=Effect.CreateEffect(c)
@@ -29,7 +28,7 @@ function s.initial_effect(c)
 	e3:SetRange(LOCATION_FZONE)
 	e3:SetCountLimit(3,id)
 	e3:SetCost(s.thspcost)
-	e3:SetTarget(s.thspop)
+	e3:SetTarget(s.thsptg)
 	e3:SetOperation(s.thspop)
 	c:RegisterEffect(e3)
 	--"You can send this card equipped with a card(s) by its own effect to the GY; Special Summon 1 Spellcaster monster with 1500 or less ATK from your hand/Deck"
@@ -46,7 +45,7 @@ function s.initial_effect(c)
 	e5:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
 	e5:SetRange(LOCATION_FZONE)
 	e5:SetTargetRange(LOCATION_MZONE,0)
-	e5:SetTarget(s.eftg)
+	e5:SetTarget(function(e,c) return c:IsSetCard(SET_ALLURE_QUEEN) and c:IsType(TYPE_EFFECT) end)
 	e5:SetLabelObject(e4)
 	c:RegisterEffect(e5)
 end
@@ -70,7 +69,7 @@ function s.thsptg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.thspop(e,tp,eg,ep,ev,re,r,rp)
 	local ft=Duel.GetLocationCount(1-tp,LOCATION_MZONE)
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(id,2)) --"Select a card to add to the hand or special summon to the opponent's field" or maybe HINTMSG_SELF("Select your card")
+	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(id,2))
 	local sc=Duel.SelectMatchingCard(tp,s.thspfilter,tp,LOCATION_DECK,0,1,1,nil,e,tp,ft):GetFirst()
 	if not sc then return end
 	aux.ToHandOrElse(sc,tp,
@@ -80,19 +79,13 @@ function s.thspop(e,tp,eg,ep,ev,re,r,rp)
 		function()
 			Duel.SpecialSummon(sc,0,tp,1-tp,false,false,POS_FACEUP)
 		end,
-		aux.Stringid(id,3) --"Special Summon it to the opponent's field"
+		aux.Stringid(id,3)
 	)
-end
-function s.eftg(e,c)
-	return c:IsType(TYPE_EFFECT) and c:IsSetCard(SET_ALLURE_QUEEN)
-end
-function s.eqpfilter(c,flag_id)
-	return c:HasFlagEffect(flag_id) and c:IsFaceup() and c:IsMonsterCard()
 end
 function s.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return c:IsAbleToGraveAsCost() and Duel.GetMZoneCount(tp,c)>0
-		and c:GetEquipGroup():FilterCount(s.eqpfilter,nil,c:GetCode())>0 end
+		and c:GetEquipGroup():FilterCount(Card.HasFlagEffect,nil,c:GetCode())>0 end
 	Duel.SendtoGrave(c,REASON_COST)
 end
 function s.spfilter(c,e,tp)
@@ -105,8 +98,8 @@ end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local tc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,1,nil,e,tp):GetFirst()
-	if tc then
-		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
+	local sc=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_HAND|LOCATION_DECK,0,1,1,nil,e,tp):GetFirst()
+	if sc then
+		Duel.SpecialSummon(sc,0,tp,tp,false,false,POS_FACEUP)
 	end
 end

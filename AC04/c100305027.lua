@@ -4,7 +4,7 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
-	--Link Summon Procedure
+	--Link Summon Procedure: 3 Spellcaster monsters
 	Link.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsRace,RACE_SPELLCASTER),3,3)
 	--Special Summon 1 "Allure Queen" monster from your GY or Deck
 	local e1=Effect.CreateEffect(c)
@@ -21,13 +21,13 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
 	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetCode(id)
+	e2:SetCode(EFFECT_GOLDEN_ALLURE_QUEEN)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetTargetRange(1,0)
 	c:RegisterEffect(e2)
 	--Destroy 1 card on the field and make your "Allure Queen" monsters unable to be destroyed by effects this turn
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,2))
+	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetCategory(CATEGORY_DESTROY)
 	e3:SetType(EFFECT_TYPE_QUICK_O)
 	e3:SetCode(EVENT_CHAINING)
@@ -76,8 +76,8 @@ function s.desop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.HintSelection(dg)
 		Duel.Destroy(dg,REASON_EFFECT)
 	end
-	--"Allure Queen" monsters you control cannot be destroyed by card effects for the rest of this turn
 	local c=e:GetHandler()
+	--"Allure Queen" monsters you control cannot be destroyed by card effects for the rest of this turn
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
