@@ -20,22 +20,42 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE)
 	e2:SetCode(EFFECT_DOUBLE_XYZ_MATERIAL)
-	e2:SetValue(1) --the number of 'extra' materials it will count as
-	e2:SetOperation(function(e,c) return c.minxyzct and c.minxyzct>=3 and c:IsAttribute(ATTRIBUTE_WATER) end)
-	--e2:SetCountLimit(1,{id,1}) --no support at the moment
+	e2:SetValue(1)
+	e2:SetCondition(function(e) return not Duel.HasFlagEffect(e:GetHandlerPlayer(),id) end)
+	e2:SetOperation(function(e,c,matg) return c:IsAttribute(ATTRIBUTE_WATER) and c.minxyzct and c.minxyzct>=3 and matg:FilterCount(s.drakesharkhoptfilter,nil)<2 end)
 	c:RegisterEffect(e2)
 	--Provide an effect to a "Shark Drake" Xyz Monster that this card as Xyz material
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,1))
 	e3:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_IGNITION)
+	e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e3:SetCountLimit(1)
 	e3:SetCondition(function(e) return e:GetHandler():IsSetCard(SET_SHARK_DRAKE) end)
 	e3:SetCost(aux.dxmcostgen(2,2,nil))
-	e3:SetTarget(s.atchtg)
-	e3:SetOperation(s.atchop)
+	e3:SetTarget(s.attachtg)
+	e3:SetOperation(s.attachop)
 	c:RegisterEffect(e3)
+	--HOPT workaround for having already used the double material effect earlier in that turn
+	aux.GlobalCheck(s,function()
+		local ge1=Effect.CreateEffect(c)
+		ge1:SetType(EFFECT_TYPE_FIELD)
+		ge1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_RANGE)
+		ge1:SetCode(EFFECT_MATERIAL_CHECK)
+		ge1:SetValue(s.valcheck)
+		Duel.RegisterEffect(ge1,0)
+	end)
 end
 s.listed_series={SET_SHARK_DRAKE}
+function s.drakesharkhoptfilter(c)
+	return c:IsCode(id) and c:IsHasEffect(EFFECT_DOUBLE_XYZ_MATERIAL)
+end
+function s.valcheck(e,c)
+	if not (c:IsType(TYPE_XYZ) and c:IsAttribute(ATTRIBUTE_WATER) and c.minxyzct and c.minxyzct>=3) then return end
+	local g=c:GetMaterial()
+	if #g<3 and g:IsExists(s.drakesharkhoptfilter,1,nil) then
+		Duel.RegisterFlagEffect(c:GetControler(),id,RESET_PHASE|PHASE_END,0,1)
+	end
+end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
@@ -48,17 +68,20 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
-function s.atchtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chkc then return chkc:IsLocation(LOCATION_ONFIELD) and chkc:IsSpellTrap() end
-	if chk==0 then return e:GetHandler():IsType(TYPE_XYZ)
-		and Duel.IsExistingTarget(Card.IsSpellTrap,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATTACH)
-	local sg=Duel.SelectTarget(tp,Card.IsSpellTrap,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
+function s.attachfilter(c,tp)
+	return c:IsSpellTrap() and (c:IsControler(tp) or c:IsAbleToChangeControler())
 end
-function s.atchop(e,tp,eg,ep,ev,re,r,rp)
+function s.attachtg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chkc then return chkc:IsOnField() and s.attachfilter(chkc,tp) end
+	if chk==0 then return e:GetHandler():IsType(TYPE_XYZ)
+		and Duel.IsExistingTarget(s.attachfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil,tp) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATTACH)
+	Duel.SelectTarget(tp,s.attachfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil,tp)
+end
+function s.attachop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if c:IsFaceup() and c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
+	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and c:IsType(TYPE_XYZ) then
 		Duel.Overlay(c,tc)
 	end
 end
