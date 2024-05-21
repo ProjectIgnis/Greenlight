@@ -3,7 +3,7 @@
 --Scripted by YoshiDuels
 local s,id=GetID()
 function s.initial_effect(c)
-	--Return 1 level 7 monster from GY to deck, draw 2
+	--Draw 2
 	local e1=Effect.CreateEffect(c)
 	e1:SetCategory(CATEGORY_DRAW+CATEGORY_TODECK)
 	e1:SetRange(LOCATION_MZONE)
