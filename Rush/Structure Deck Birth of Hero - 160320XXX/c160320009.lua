@@ -5,7 +5,7 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--Draw 2
 	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_DRAW+CATEGORY_TODECK)
+	e1:SetCategory(CATEGORY_DRAW)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetCountLimit(1)
