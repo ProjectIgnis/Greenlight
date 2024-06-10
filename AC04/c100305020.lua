@@ -47,7 +47,6 @@ function s.initial_effect(c)
 	e4:SetOperation(s.lvop)
 	c:RegisterEffect(e4)
 end
-s.listed_names={id}
 s.listed_series={SET_PERFORMAGE}
 function s.cfilter(c)
 	return c:IsSetCard(SET_PERFORMAGE) and c:IsType(TYPE_PENDULUM) and c:IsFaceup() and (c:HasLevel() or c:GetScale()>0)
@@ -59,8 +58,8 @@ function s.efftg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local tc=Duel.SelectTarget(tp,s.cfilter,tp,LOCATION_MZONE,0,1,1,nil):GetFirst()
 	local b1,b2=tc:HasLevel(),tc:GetScale()>0
 	local op=Duel.SelectEffect(tp,
-		{b1,aux.Stringid(id,1)},
-		{b2,aux.Stringid(id,2)})
+		{b1,aux.Stringid(id,4)},
+		{b2,aux.Stringid(id,5)})
 	if op==1 then
 		e:SetCategory(CATEGORY_LVCHANGE)
 		Duel.SetOperationInfo(0,CATEGORY_LVCHANGE,tc,1,tp,-1)
