@@ -42,6 +42,9 @@ function s.initial_effect(c)
 end
 s.listed_series={SET_SIX_SAMURAI,SET_SHI_EN}
 --Add 1 "Six Samurai" or "Shien" effect monster
+function s.thcon(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():IsSummonType(SUMMON_TYPE_SYNCHRO)
+end
 function s.thfilter(c)
 	return ((c:IsSetCard(SET_SIX_SAMURAI) and c:IsMonster()) or (c:IsSetCard(SET_SHI_EN) and c:IsType(TYPE_EFFECT) and c:IsMonster())) and c:IsSpellTrap() and c:IsAbleToHand()
 end
