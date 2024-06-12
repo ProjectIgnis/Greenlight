@@ -28,8 +28,10 @@ function s.initial_effect(c)
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
-	local code=Duel.AnnounceCard(tp,TYPE_NORMAL)
+	s.announce_filter={TYPE_NORMAL,OPCODE_ISTYPE}
+	local code=Duel.AnnounceCard(tp,s.announce_filter)
 	Duel.SetTargetParam(code)
+	Duel.SetOperationInfo(0,CATEGORY_ANNOUNCE,nil,0,tp,ANNOUNCE_CARD_FILTER)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK|LOCATION_GRAVE)
 end
 function s.spfilter(c,e,tp,code)
