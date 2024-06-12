@@ -1,5 +1,5 @@
---六武衆の指南番
---Instructor of the Six Samurai
+--六武衆の破戒僧
+--Anarchist Monk of the Six Samurai
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
@@ -12,7 +12,7 @@ function s.initial_effect(c)
 	e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
 	e1:SetCondition(s.spcon)
 	c:RegisterEffect(e1)
-	--Search 1 "Six Strike" Card
+	--Search 1 "Six Samurai" Quick-Play Spell Card
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
@@ -34,7 +34,7 @@ function s.initial_effect(c)
 	e3:SetOperation(s.effop)
 	c:RegisterEffect(e3)
 end
-s.listed_series={SET_SIX_SAMURAI,SET_SIX_STRIKE}
+s.listed_series={SET_SIX_SAMURAI}
 s.listed_names={id}
 function s.cfilter(c)
 	return c:IsFaceup() and c:IsSetCard(SET_SIX_SAMURAI) and not c:IsCode(id)
@@ -49,7 +49,7 @@ function s.thcon(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
 end
 function s.thfilter(c)
-	return c:IsSetCard(SET_SIX_STRIKE) and c:IsAbleToHand()
+	return c:IsSetCard(SET_SIX_SAMURAI) and c:IsQuickPlaySpell() and c:IsAbleToHand()
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
@@ -69,13 +69,13 @@ end
 function s.effop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local rc=c:GetReasonCard()
-	--Monsters your opponent controls lose 500 ATK
+	--Monsters your opponent controls have their levels reduced by 1
 	local e1=Effect.CreateEffect(rc)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetTargetRange(0,LOCATION_MZONE)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetValue(-500)
+	e1:SetCode(EFFECT_UPDATE_LEVEL)
+	e1:SetValue(-1)
 	e1:SetReset(RESET_EVENT|RESETS_STANDARD)
 	rc:RegisterEffect(e1,true)
 	if not rc:IsType(TYPE_EFFECT) then
