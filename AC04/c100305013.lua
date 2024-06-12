@@ -44,7 +44,7 @@ s.listed_series={SET_PRIMOREDIAL}
 function s.tributefilter(c,tp)
 	return c:IsType(TYPE_NORMAL) and (c:IsControler(tp) or c:IsFaceup())
 end
-function s.selfnsumcon(e,c)
+function s.selfnssumcon(e,c)
 	if c==nil then return true end
 	local tp=c:GetControler()
 	return aux.SelectUnselectGroup(Duel.GetReleaseGroup(tp),e,tp,1,1,s.rescon,0)
