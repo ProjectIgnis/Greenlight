@@ -63,8 +63,8 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if ((tc:IsFaceup() and not tc:IsDisabled()) or tc:IsType(TYPE_TRAPMONSTER)) and tc:IsRelateToEffect(e) then
-		--Negate its effects until the end of this turn
+	if tc:IsFaceup() and tc:IsRelateToEffect(e) and not tc:IsDisabled() then
+		--Negate its effects
 		tc:NegateEffects(e:GetHandler())
 		Duel.AdjustInstantly(tc)
 		if tc:IsDisabled() then
