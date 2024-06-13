@@ -1,5 +1,5 @@
---レッドアイズ・ブラックフルメタルドラゴン
---Red-Eyes Black Fullmetal Dragon
+--メタル・デビルゾアＸ
+--Metalzoa X
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
@@ -15,24 +15,24 @@ function s.initial_effect(c)
 	e1:SetTarget(s.settg)
 	e1:SetOperation(s.setop)
 	c:RegisterEffect(e1)
-	--Negate activation of a card or effect your opponent activates and inflict damage
+	--Destroy 1 card on the field and make your "Allure Queen" monsters unable to be destroyed by effects this turn
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
-	e2:SetCategory(CATEGORY_NEGATE+CATEGORY_DAMAGE)
+	e2:SetCategory(CATEGORY_DESTROY)
 	e2:SetType(EFFECT_TYPE_QUICK_O)
 	e2:SetCode(EVENT_CHAINING)
-	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetRange(LOCATION_MZONE)
-	e2:SetCountLimit(1,{id,1})
-	e2:SetCondition(s.negcon)
-	e2:SetTarget(s.negtg)
-	e2:SetOperation(s.negop)
+	e2:SetCountLimit(2)
+	e2:SetCondition(s.descon)
+	e2:SetTarget(s.destg)
+	e2:SetOperation(s.desop)
 	c:RegisterEffect(e2)
 end
 s.listed_names={CARD_ENHANCED_METALMORPH}
 s.listed_series={SET_METALMORPH}
 function s.enhacement_metalmorph_filter(c)
-	return c:IsLevelAbove(5) and c:IsRace(RACE_DRAGON)
+	return c:IsLevelAbove(5) and c:IsRace(RACE_FIEND)
 end
 function s.setcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return not e:GetHandler():IsPublic() end
@@ -53,26 +53,19 @@ function s.setop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SendtoDeck(c,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
 	end
 end
-function s.negcon(e,tp,eg,ep,ev,re,r,rp)
-	return rp==1-tp and not e:GetHandler():IsStatus(STATUS_BATTLE_DESTROYED) and Duel.IsChainNegatable(ev)
+function s.descon(e,tp,eg,ep,ev,re,r,rp)
+	return rp==1-tp and (re:IsMonsterEffect() or re:IsSpellEffect())
 end
-function s.negtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
-	Duel.SetPossibleOperationInfo(0,CATEGORY_DAMAGE,nil,1,1-tp,0)
+function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) and c:IsFaceup() end
+	if chk==0 then return Duel.IsExistingTarget(Card.IsFaceup.TRUE,tp,0,LOCATION_MZONE,1,nil) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
+	local g=Duel.SelectTarget(tp,Card.IsFaceup,tp,0,LOCATION_MZONE,1,1,nil)
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,tp,0)
 end
-function s.damfilter(c)
-	return c:IsFaceup() and c:IsAttackPos() and c:GetBaseAttack()>0
-end
-function s.negop(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.NegateActivation(ev) then
-		local g=Duel.GetMatchingGroup(s.damfilter,tp,0,LOCATION_MZONE,nil)
-		if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_OPPO)
-			local tc=g:Select(tp,1,1,nil):GetFirst()
-			Duel.HintSelection(tc)
-			Duel.BreakEffect()
-			Duel.Damage(tp,tc:GetBaseAttack()//2,REASON_EFFECT)
-		end
+function s.desop(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) then
+		Duel.Destroy(tc,REASON_EFFECT)
 	end
 end
