@@ -47,6 +47,9 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
 	local c=e:GetHandler()
 	local mc=e:GetLabelObject()
+	--Might be necessary to work with Metal Copycat:
+	--mc:AssumeProperty(ASSUME_LEVEL,mc:GetPreviousLevelOnField())
+	--mc:AssumeProperty(ASSUME_RACE,mc:GetPreviousRaceOnField())
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local tc=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.spfilter),tp,LOCATION_HAND|LOCATION_DECK|LOCATION_GRAVE,0,1,1,nil,e,tp,mc):GetFirst()
 	if tc and Duel.SpecialSummon(tc,0,tp,tp,true,false,POS_FACEUP)>0 and c:IsRelateToEffect(e)
