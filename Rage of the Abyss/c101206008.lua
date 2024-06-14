@@ -27,13 +27,13 @@ function s.initial_effect(c)
 	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
 	c:RegisterEffect(e3)
 	--Declare 1 Type to make this card that Type
-    local e4=Effect.CreateEffect(c)
-    e4:SetDescription(aux.Stringid(id,2))
-    e4:SetType(EFFECT_TYPE_IGNITION)
-    e4:SetRange(LOCATION_MZONE)
-    e4:SetCountLimit(1,{id,1})
-    e4:SetOperation(s.typedeclareop)
-    c:RegisterEffect(e4)
+	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(id,2))
+	e4:SetType(EFFECT_TYPE_IGNITION)
+	e4:SetRange(LOCATION_MZONE)
+	e4:SetCountLimit(1,{id,1})
+	e4:SetOperation(s.typedeclareop)
+	c:RegisterEffect(e4)
 end
 s.listed_series={SET_METALMORPH}
 s.listed_names={CARD_ENHANCED_METALMORPH}
@@ -61,14 +61,14 @@ function s.setop(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.typedeclareop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-    if c:IsFaceup() and c:IsRelateToEffect(e) then
-        local race=c:AnnounceAnotherRace(tp)
-        local e1=Effect.CreateEffect(c)
-        e1:SetType(EFFECT_TYPE_SINGLE)
-        e1:SetProperty(EFFECT_FLAG_COPY_INHERIT)
-        e1:SetCode(EFFECT_CHANGE_RACE)
-        e1:SetValue(race)
-        e1:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END|RESET_OPPO_TURN)
-        c:RegisterEffect(e1)
-    end
+	if c:IsFaceup() and c:IsRelateToEffect(e) then
+		local race=c:AnnounceAnotherRace(tp)
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_COPY_INHERIT)
+		e1:SetCode(EFFECT_CHANGE_RACE)
+		e1:SetValue(race)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END|RESET_OPPO_TURN)
+		c:RegisterEffect(e1)
+	end
 end
