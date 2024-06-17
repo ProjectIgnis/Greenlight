@@ -25,7 +25,7 @@ function s.initial_effect(c)
 	e2:SetTargetRange(LOCATION_MZONE,0)
 	e2:SetCode(EFFECT_UPDATE_ATTACK)
 	e2:SetTarget(aux.TargetBoolFunction(Card.IsRace,RACE_WARRIOR))
-	e2:SetCondition(s.con)
+	e2:SetCondition(function(e) return Duel.IsBattlePhase() end)
 	e2:SetValue(500)
 	c:RegisterEffect(e2)
 	--special summon
@@ -41,31 +41,24 @@ function s.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 s.listed_series={SET_SIX_SAMURAI}
---atk boost
-function s.con(e)
-	local ph=Duel.GetCurrentPhase()
-	local tp=Duel.GetTurnPlayer()
-	return tp==e:GetHandlerPlayer() and ph>=PHASE_BATTLE_START and ph<=PHASE_BATTLE
-end
 --Special summon
-function s.spfilter1(c,e,tp)
-	return c:IsSetCard(SET_SIX_SAMURAI) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+function s.spfilter(c,e,tp)
+	return c:IsSetCard(SET_SIX_SAMURAI) and c:IsFaceup() and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(s.spfilter1,tp,LOCATION_HAND,0,1,nil,e,tp) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
+		and Duel.IsExistingMatchingCard(s.spfilter,tp,LOCATION_REMOVED,0,1,nil,e,tp) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_REMOVED)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,s.spfilter1,tp,LOCATION_HAND,0,1,1,nil,e,tp)
+	local g=Duel.SelectMatchingCard(tp,s.spfilter,tp,LOCATION_REMOVED,0,1,1,nil,e,tp)
 	if #g>0 then
 		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
 -- to hand
-
 function s.thcfilter(c)
 	return c:IsSetCard(SET_SIX_SAMURAI) and c:IsMonster() and c:IsAbleToRemoveAsCost()
 end

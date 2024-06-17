@@ -29,7 +29,8 @@ end
 s.listed_names={CARD_ENHANCED_METALMORPH}
 s.listed_series={SET_METALMORPH}
 function s.thfilter(c)
-	return c:IsAbleToHand() and (c:ListsCode(CARD_ENHANCED_METALMORPH) or (c:IsSetCard(SET_METALMORPH) and c:IsTrap()))
+	return c:IsAbleToHand() and ((c:IsMonster() and c:ListsCode(CARD_ENHANCED_METALMORPH))
+		or (c:IsTrap() and c:IsSetCard(SET_METALMORPH)))
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK|LOCATION_GRAVE,0,1,nil,tp) end

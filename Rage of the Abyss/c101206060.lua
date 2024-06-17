@@ -41,7 +41,7 @@ function s.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local nocost=Duel.IsExistingMatchingCard(s.nocostfilter,tp,LOCATION_MZONE,0,1,nil)
 	local canpaycost=Duel.IsExistingMatchingCard(s.costfilter,tp,LOCATION_HAND,0,1,e:GetHandler())
 	if chk==0 then return nocost or canpaycost end
-	if nocost and not (Duel.SelectYesNo(tp,aux.Stringid(id,0)) and canpaycost ) then--"reveal a card"?
+	if nocost and not (Duel.SelectYesNo(tp,aux.Stringid(id,2)) and canpaycost ) then--"reveal a card"?
 		return
 	else
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
