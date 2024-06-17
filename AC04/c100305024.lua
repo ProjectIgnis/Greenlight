@@ -4,13 +4,13 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
-	--Xyz Summon Procedure
+	--Xyz Summon procedure: 2 Level 5 Spellcaster monsters
 	Xyz.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsRace,RACE_SPELLCASTER),5,2)
-	--Cannot be destroyed by battle or effects while it has Xyz materials
+	--Cannot be destroyed by battle or card effects while it has material
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetCondition(function(e) return e:GetHandler():GetOverlayCount()>0 end)
 	e1:SetValue(1)
@@ -18,12 +18,12 @@ function s.initial_effect(c)
 	local e2=e1:Clone()
 	e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	c:RegisterEffect(e2)
-	--Reflect damage
+	--Your opponent takes any effect damage you would have taken instead
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e3:SetCode(EFFECT_REFLECT_DAMAGE)
 	e3:SetRange(LOCATION_MZONE)
-	e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e3:SetTargetRange(1,0)
 	e3:SetCondition(s.reflectcond)
 	e3:SetValue(s.reflectvalue)
@@ -35,7 +35,6 @@ function s.initial_effect(c)
 	e4:SetRange(LOCATION_MZONE)
 	e4:SetCondition(s.atkcon)
 	e4:SetCost(aux.dxmcostgen(1,1,nil))
-	e4:SetTarget(s.atktg)
 	e4:SetOperation(s.atkop)
 	c:RegisterEffect(e4,false,REGISTER_FLAG_DETACH_XMAT)
 end
@@ -46,8 +45,8 @@ function s.reflectcond(e)
 end
 function s.reflectvalue(e,re,val,r,rp,rc)
 	local c=e:GetHandler()
-	if (r&REASON_EFFECT)~=0 and rp==1-c:GetControler() then
-		c:RegisterFlagEffect(id,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,0,1)
+	if (r&REASON_EFFECT)>0 and rp==1-c:GetControler() then
+		c:RegisterFlagEffect(id,RESETS_STANDARD_PHASE_END,0,1)
 		return 1
 	else
 		return 0
@@ -55,16 +54,16 @@ function s.reflectvalue(e,re,val,r,rp,rc)
 end
 function s.atkcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return Duel.IsAbleToEnterBP() and c:GetOverlayGroup():IsExists(Card.IsCode,1,nil,17016362)
-end
-function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():GetEffectCount(EFFECT_EXTRA_ATTACK)<2 end
+	return Duel.IsAbleToEnterBP() and c:CanAttack() and c:GetEffectCount(EFFECT_EXTRA_ATTACK)<2
+		and c:GetOverlayGroup():IsExists(Card.IsCode,1,nil,17016362)
 end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) then
+		--Can make up to 3 attacks during each Battle Phase this turn
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
 		e1:SetCode(EFFECT_EXTRA_ATTACK)
 		e1:SetValue(2)
 		e1:SetReset(RESET_EVENT|RESETS_STANDARD_DISABLE|RESET_PHASE|PHASE_END)

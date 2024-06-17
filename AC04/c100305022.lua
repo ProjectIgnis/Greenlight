@@ -4,13 +4,13 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
-	--Fusiom Summon procedure
+	--Fusiom Materials: 2 "Performage" monsters
 	Fusion.AddProcMixN(c,true,true,aux.FilterBoolFunctionEx(Card.IsSetCard,SET_PERFORMAGE),2)
 	--Your "Performage" monsters cannot be targted by opponent's card effects
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
 	e1:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+	e1:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetTargetRange(LOCATION_MZONE,0)
 	e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,SET_PERFORMAGE))
@@ -18,6 +18,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Your "Performage" monsters cannot be destroyed by your card effects
 	local e2=e1:Clone()
+	e2:SetProperty(0)
 	e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e2:SetValue(aux.indsval)
 	c:RegisterEffect(e2)
@@ -25,10 +26,10 @@ function s.initial_effect(c)
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE)
 	e3:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e3:SetRange(LOCATION_MZONE)
 	e3:SetCode(EFFECT_CANNOT_BE_BATTLE_TARGET)
-	e3:SetCondition(s.imcon)
-	e3:SetValue(aux.imval1)
+	e3:SetRange(LOCATION_MZONE)
+	e3:SetCondition(s.cannotatkcon)
+	e3:SetValue(aux.imval2)
 	c:RegisterEffect(e3)
 	--Decrease the ATK of an opponent's monster by 600
 	local e4=Effect.CreateEffect(c)
@@ -37,18 +38,17 @@ function s.initial_effect(c)
 	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e4:SetCode(EVENT_ATTACK_ANNOUNCE)
 	e4:SetRange(LOCATION_MZONE)
-	e4:SetCountLimit(1)
 	e4:SetTarget(s.atktg)
 	e4:SetOperation(s.atkop)
 	c:RegisterEffect(e4)
 end
 s.listed_names={id}
 s.listed_series={SET_PERFORMAGE}
-function s.imfilter(c)
-	return c:IsFaceup() and c:IsSetCard(SET_PERFORMAGE) and not c:IsCode(id)
+function s.cannotatkfilter(c)
+	return c:IsSetCard(SET_PERFORMAGE) and c:IsFaceup() and not c:IsCode(id)
 end
-function s.imcon(e)
-	return Duel.IsExistingMatchingCard(s.imfilter,e:GetHandlerPlayer(),LOCATION_MZONE,0,1,nil)
+function s.cannotatkcon(e)
+	return Duel.IsExistingMatchingCard(s.cannotatkfilter,e:GetHandlerPlayer(),LOCATION_MZONE,0,1,nil)
 end
 function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local bc0,bc1=Duel.GetBattleMonster(tp)
@@ -59,9 +59,10 @@ end
 function s.atkop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
 	if tc and tc:IsRelateToBattle() and tc:IsFaceup() and tc:IsControler(1-tp) then
-		--Decrease ATK by 6000
+		--That opponent's monster loses 600 ATK
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
 		e1:SetCode(EFFECT_UPDATE_ATTACK)
 		e1:SetValue(-600)
 		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
