@@ -52,8 +52,6 @@ function s.imcon(e)
 end
 function s.atktg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local bc0,bc1=Duel.GetBattleMonster(tp)
-	Debug.Message("bc0: "..tostring(bc0))
-	Debug.Message("bc1: "..tostring(bc1))
 	if chk==0 then return bc0 and bc1 and bc0:IsFaceup() and bc1:IsFaceup() and bc0:IsSetCard(SET_PERFORMAGE) end
 	e:SetLabelObject(bc1)
 	Duel.SetOperationInfo(0,CATEGORY_ATKCHANGE,bc1,1,tp,-600)
