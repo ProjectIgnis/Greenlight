@@ -9,6 +9,7 @@ function s.initial_effect(c)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetHintTiming(0,TIMING_MAIN_END|TIMING_BATTLE_START|TIMINGS_CHECK_MONSTER_E)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
@@ -17,9 +18,10 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_CONTROL)
 	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetRange(LOCATION_GRAVE)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetCode(EVENT_FREE_CHAIN)
+	e2:SetRange(LOCATION_GRAVE)
+	e2:SetHintTiming(0,TIMING_MAIN_END|TIMING_BATTLE_START|TIMINGS_CHECK_MONSTER)
 	e2:SetCondition(function(e,tp) return Duel.IsTurnPlayer(1-tp) end)
 	e2:SetCost(aux.selfbanishcost)
 	e2:SetTarget(s.controltg)
@@ -39,12 +41,12 @@ function s.spfilter(c,e,tp,code)
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local code=Duel.GetChainInfo(0,CHAININFO_TARGET_PARAM)
-	--You take no damage from battles with Normal Monsters with declared name or "Primoredial" monsters
+	--You take no damage from battles involving your Normal Monsters with the declared name or "Primoredial" monsters this turn
 	local e1=Effect.CreateEffect(e:GetHandler())
 	e1:SetDescription(aux.Stringid(id,2))
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_AVOID_BATTLE_DAMAGE)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
+	e1:SetCode(EFFECT_AVOID_BATTLE_DAMAGE)
 	e1:SetTargetRange(1,0)
 	e1:SetTarget(function(e,c) return c:IsSetCard(SET_PRIMOREDIAL) or (c:IsCode(code) and c:IsType(TYPE_NORMAL)) end)
 	e1:SetValue(1)
@@ -55,23 +57,23 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.spfilter),tp,LOCATION_DECK|LOCATION_GRAVE,0,nil,e,tp,code)
 	if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,3)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local sc=g:Select(tp,1,1,nil)
+		local sg=g:Select(tp,1,1,nil)
 		Duel.BreakEffect()
-		Duel.SpecialSummon(sc,0,tp,tp,false,false,POS_FACEUP)
+		Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
-function s.cfilter(c,tp)
+function s.tgfilter(c,tp)
 	return c:IsType(TYPE_NORMAL) and c:IsFaceup()
 		and Duel.IsExistingMatchingCard(s.controlfilter,tp,0,LOCATION_MZONE,1,nil,c:GetAttack())
 end
 function s.controlfilter(c,atk)
-	return c:IsControlerCanBeChanged(false) and c:IsFaceup() and c:GetAttack()>atk
+	return c:IsControlerCanBeChanged() and c:IsFaceup() and c:GetAttack()>atk
 end
 function s.controltg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE|LOCATION_GRAVE) and chkc:IsControler(tp) and s.cfilter(chkc,tp) end
-	if chk==0 then return Duel.IsExistingTarget(s.cfilter,tp,LOCATION_MZONE|LOCATION_GRAVE,0,1,nil,tp) end
+	if chkc then return chkc:IsLocation(LOCATION_MZONE|LOCATION_GRAVE) and chkc:IsControler(tp) and s.tgfilter(chkc,tp) end
+	if chk==0 then return Duel.IsExistingTarget(s.tgfilter,tp,LOCATION_MZONE|LOCATION_GRAVE,0,1,nil,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	Duel.SelectTarget(tp,s.cfilter,tp,LOCATION_MZONE|LOCATION_GRAVE,0,1,1,nil,tp)
+	Duel.SelectTarget(tp,s.tgfilter,tp,LOCATION_MZONE|LOCATION_GRAVE,0,1,1,nil,tp)
 	Duel.SetOperationInfo(0,CATEGORY_CONTROL,nil,1,tp,0)
 end
 function s.controlop(e,tp,eg,ep,ev,re,r,rp)
@@ -79,8 +81,9 @@ function s.controlop(e,tp,eg,ep,ev,re,r,rp)
 	if not (tc:IsRelateToEffect(e) and tc:IsFaceup()) then return end
 	local atk=tc:GetAttack()
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONTROL)
-	local tc=Duel.SelectMatchingCard(tp,s.controlfilter,tp,0,LOCATION_MZONE,1,1,nil,atk):GetFirst()
-	if tc then
-		Duel.GetControl(tc,tp,PHASE_END,1)
+	local g=Duel.SelectMatchingCard(tp,s.controlfilter,tp,0,LOCATION_MZONE,1,1,nil,atk)
+	if #g>0 then
+		Duel.HintSelection(g)
+		Duel.GetControl(g,tp,PHASE_END,1)
 	end
 end
