@@ -11,12 +11,13 @@ function s.initial_effect(c)
 	e1:SetTarget(s.target)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
-	--Search 1 "Morganite" card then place 1 card from your hand on the bottom of the Deck
+	--Add 1 "Morganite" card from your Deck to your hand, then place 1 card from your hand on the bottom of the Deck
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_TODECK)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_GRAVE)
+	e2:SetCost(aux.selfbanishcost)
 	e2:SetTarget(s.thtg)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
@@ -26,9 +27,10 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return not Duel.HasFlagEffect(tp,id) end
 end
 function s.activate(e,tp,eg,ep,ev,re,r,rp)
+	if Duel.HasFlagEffect(tp,id) then return end
 	Duel.RegisterFlagEffect(tp,id,0,0,1)
 	local c=e:GetHandler()
-	--Cannot activate monsters effects from the hand
+	--You cannot activate monster effects in the hand
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,2))
 	e1:SetType(EFFECT_TYPE_FIELD)
@@ -37,26 +39,30 @@ function s.activate(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetTargetRange(1,0)
 	e1:SetValue(s.aclimit)
 	Duel.RegisterEffect(e1,tp)
-	--Your monsters can make 2 attacks on monsters
+	--Your monsters can make up to 2 attacks on monsters during each Battle Phase
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
 	e2:SetCode(EFFECT_EXTRA_ATTACK_MONSTER)
-	e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
 	e2:SetTargetRange(LOCATION_MZONE,0)
 	e2:SetValue(1)
 	Duel.RegisterEffect(e2,tp)
-	--Battle damage your monsters inflict is doubled
+	--If your monster battles an opponent's monster, any battle damage it inflicts to your opponent is doubled
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
 	e3:SetCode(EFFECT_CHANGE_BATTLE_DAMAGE)
 	e3:SetTargetRange(LOCATION_MZONE,0)
-	e3:SetTarget(function(e,c) return c:GetBattleTarget()~=nil end)
+	e3:SetTarget(s.doubledmgtg)
 	e3:SetValue(aux.ChangeBattleDamage(1,DOUBLE_DAMAGE))
 	Duel.RegisterEffect(e3,tp)
 end
 function s.aclimit(e,re,tp)
 	local rc=re:GetHandler()
 	return rc and rc:IsLocation(LOCATION_HAND) and re:IsMonsterEffect()
+end
+function s.doubledmgtg(e,c)
+	local bc=c:GetBattleTarget()
+	return bc and bc:IsControler(1-e:GetHandlerPlayer())
 end
 function s.thfilter(c)
 	return c:IsSetCard(SET_MORGANITE) and c:IsAbleToHand()

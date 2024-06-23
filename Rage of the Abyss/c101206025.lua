@@ -16,23 +16,23 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 function s.spfilter(c,tp)
-	return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_WATER) and c:IsInMainMZone()
-		 and Duel.GetMZoneCount(tp,c,tp,LOCATION_REASON_TOFIELD,1<<c:GetSequence())
+	return c:IsAttribute(ATTRIBUTE_WATER) and c:IsFaceup()
+		and Duel.GetMZoneCount(tp,c,tp,LOCATION_REASON_TOFIELD,1<<c:GetSequence())>0
 end
 function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.spfilter(chkc,tp) end
+	if chkc then return chkc:IsLocation(LOCATION_MMZONE) and chkc:IsControler(tp) and s.spfilter(chkc,tp) end
 	local c=e:GetHandler()
-	if chk==0 then return Duel.IsExistingTarget(s.spfilter,tp,LOCATION_MZONE,0,1,nil,tp)
+	if chk==0 then return Duel.IsExistingTarget(s.spfilter,tp,LOCATION_MMZONE,0,1,nil,tp)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectTarget(tp,s.spfilter,tp,LOCATION_MZONE,0,1,1,nil,tp)
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
-	Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,1-tp,LOCATION_MZONE)
+	local g=Duel.SelectTarget(tp,s.spfilter,tp,LOCATION_MMZONE,0,1,1,nil,tp)
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,tp,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,tp,0)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,1-tp,LOCATION_ONFIELD)
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if not tc:IsRelateToEffect(e) or not tc:IsControler(tp) then return end
+	if not (tc:IsRelateToEffect(e) and tc:IsControler(tp)) then return end
 	local seq=tc:GetSequence()
 	local c=e:GetHandler()
 	if Duel.Destroy(tc,REASON_EFFECT)>0 and c:IsRelateToEffect(e)
