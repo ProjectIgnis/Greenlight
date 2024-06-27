@@ -3,7 +3,7 @@
 --scripted by Naim
 local s,id=GetID()
 function s.initial_effect(c)
-	--Special Summon this card
+	--Special Summon this card as a Normal Monster
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_REMOVE)
@@ -35,17 +35,16 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_REMOVE,nil,1,1-tp,LOCATION_GRAVE)
 end
 function s.raikafilter(c)
-	return c:IsFaceup() and c:IsSetCard(SET_RAIKA) and c:IsLinkMonster()
+	return c:IsSetCard(SET_RAIKA) and c:IsLinkMonster() and c:IsFaceup()
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if not c:IsRelateToEffect(e) then return end
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
-		or not Duel.IsPlayerCanSpecialSummonMonster(tp,id,SET_RAIKA,TYPE_MONSTER|TYPE_NORMAL,1600,0,4,RACE_PLANT,ATTRIBUTE_DARK) then return end
+	if not (c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and Duel.IsPlayerCanSpecialSummonMonster(tp,id,SET_RAIKA,TYPE_MONSTER|TYPE_NORMAL,1600,0,4,RACE_PLANT,ATTRIBUTE_DARK)) then return end
 	c:AddMonsterAttribute(TYPE_NORMAL|TYPE_TRAP)
 	Duel.SpecialSummonStep(c,1,tp,tp,true,false,POS_FACEUP)
 	c:AddMonsterAttributeComplete()
-	Duel.SpecialSummonComplete()
+	if Duel.SpecialSummonComplete()==0 then return end
 	if Duel.IsExistingMatchingCard(s.raikafilter,tp,LOCATION_MZONE,0,1,nil)
 		and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,1,nil)
 		and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
@@ -57,7 +56,7 @@ function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.tdfilter(c)
-	return c:IsFaceup() and c:IsRace(RACE_PLANT|RACE_INSECT|RACE_REPTILE) and c:IsAbleToDeck()
+	return c:IsRace(RACE_INSECT|RACE_PLANT|RACE_REPTILE) and c:IsAbleToDeck() and c:IsFaceup()
 end
 function s.settg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
@@ -68,7 +67,7 @@ end
 function s.setop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.tdfilter),tp,LOCATION_GRAVE|LOCATION_REMOVED,0,2,2,nil)
-	if #g==0 then return end
+	if #g~=2 then return end
 	Duel.HintSelection(g)
 	local c=e:GetHandler()
 	if Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)>0 and g:IsExists(Card.IsLocation,1,nil,LOCATION_DECK|LOCATION_EXTRA)
